@@ -2,7 +2,15 @@
 
 namespace CodeBlaze.Voxel.Core {
 
-    public struct Block {
+    public interface IBlock {
+
+        bool IsSolid();
+
+        bool IsEmpty();
+
+    }
+    
+    public struct Block : IBlock {
 
         public Color32 Color { get; }
 

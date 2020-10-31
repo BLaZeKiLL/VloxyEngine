@@ -21,7 +21,7 @@ namespace CodeBlaze.Voxel.Core.Mesh {
             normals = new List<Vector3>();
         }
 
-        public MeshData GenerateMesh(Chunk chunk) {
+        public MeshData GenerateMesh<T>(Chunk<T> chunk) where T : IBlock {
             // Sweep over each axis (X, Y and Z)
             for (int direction = 0; direction < 3; direction++) {
                 int i, // loop var

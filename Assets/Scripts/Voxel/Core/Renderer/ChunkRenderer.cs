@@ -24,7 +24,7 @@ namespace CodeBlaze.Voxel.Core.Renderer {
             _renderer.material = material;
         }
 
-        public async void Render(Chunk chunk) {
+        public async void Render<T>(Chunk<T> chunk) where T : IBlock {
             var mesh = _filter.mesh;
             Clear();
             
