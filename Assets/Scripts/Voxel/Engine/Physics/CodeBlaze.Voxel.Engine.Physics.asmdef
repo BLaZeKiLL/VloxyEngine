@@ -1,5 +1,5 @@
 {
-    "name": "CodeBlaze.Voxel.Core",
+    "name": "CodeBlaze.Voxel.Engine.Physics",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

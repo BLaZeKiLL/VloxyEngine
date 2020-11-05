@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace CodeBlaze.Voxel.Core {
+namespace CodeBlaze.Voxel.Engine.Core {
 
     public abstract class Chunk<T> where T : IBlock  {
 
