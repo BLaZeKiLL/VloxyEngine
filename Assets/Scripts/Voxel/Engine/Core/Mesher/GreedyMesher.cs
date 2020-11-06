@@ -18,7 +18,7 @@ namespace CodeBlaze.Voxel.Engine.Core.Mesher {
 
         protected abstract T NullBlock();
         
-        public MeshData GenerateMesh(Chunk<T> chunk)  {
+        public MeshData GenerateMesh(Chunk<T> chunk, NeighborChunks<T> neighbors)  {
             // Sweep over each axis (X, Y and Z)
             for (int direction = 0; direction < 3; direction++) {
                 int i, // loop var
@@ -57,8 +57,33 @@ namespace CodeBlaze.Voxel.Engine.Core.Mesher {
                                     chunkItr[1],
                                     chunkItr[2]
                                 );
-                            } else { // check neighbour in -ve axis
-                                currentBlock = EmptyBlock();
+                            } else {
+                                switch (direction) { // check neighbour in -ve axis
+                                    case 0 when neighbors.ChunkNX != null:
+                                        currentBlock = neighbors.ChunkNX.GetBlock(
+                                            chunkItr[0] + mainAxisLimit,
+                                            chunkItr[1],
+                                            chunkItr[2]
+                                        );
+                                        break;
+                                    case 1 when neighbors.ChunkNY != null:
+                                        currentBlock = neighbors.ChunkNY.GetBlock(
+                                            chunkItr[0],
+                                            chunkItr[1] + mainAxisLimit,
+                                            chunkItr[2]
+                                        );
+                                        break;
+                                    case 2 when neighbors.ChunkNZ != null:
+                                        currentBlock = neighbors.ChunkNZ.GetBlock(
+                                            chunkItr[0],
+                                            chunkItr[1],
+                                            chunkItr[2] + mainAxisLimit
+                                        );
+                                        break;
+                                    default:
+                                        currentBlock = EmptyBlock();
+                                        break;
+                                }
                             }
                             
                             if (chunkItr[direction] < mainAxisLimit - 1) {
@@ -67,8 +92,33 @@ namespace CodeBlaze.Voxel.Engine.Core.Mesher {
                                     chunkItr[1] + directionMask[1],
                                     chunkItr[2] + directionMask[2]
                                 );
-                            } else { // check neighbour in +ve axis
-                                compareBlock = EmptyBlock();
+                            } else {
+                                switch (direction) { // check neighbour in +ve axis
+                                    case 0 when neighbors.ChunkPX != null:
+                                        compareBlock = neighbors.ChunkPX.GetBlock(
+                                            chunkItr[0] - (mainAxisLimit - 1),
+                                            chunkItr[1],
+                                            chunkItr[2]
+                                        );
+                                        break;
+                                    case 1 when neighbors.ChunkPY != null:
+                                        compareBlock = neighbors.ChunkPY.GetBlock(
+                                            chunkItr[0],
+                                            chunkItr[1] - (mainAxisLimit - 1),
+                                            chunkItr[2]
+                                        );
+                                        break;
+                                    case 2 when neighbors.ChunkPZ != null:
+                                        compareBlock = neighbors.ChunkPZ.GetBlock(
+                                            chunkItr[0],
+                                            chunkItr[1],
+                                            chunkItr[2] - (mainAxisLimit - 1)
+                                        );
+                                        break;
+                                    default:
+                                        compareBlock = EmptyBlock();
+                                        break;
+                                }
                             }
                             
                             var blockCurrent = currentBlock.IsOpaque();

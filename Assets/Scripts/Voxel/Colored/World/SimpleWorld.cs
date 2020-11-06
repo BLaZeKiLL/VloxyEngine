@@ -6,6 +6,7 @@ using System.Diagnostics;
 using CodeBlaze.Voxel.Colored.Block;
 using CodeBlaze.Voxel.Colored.Chunk;
 using CodeBlaze.Voxel.Colored.Mesher;
+using CodeBlaze.Voxel.Engine.Core;
 using CodeBlaze.Voxel.Engine.Core.Renderer;
 
 using UnityEngine;
@@ -23,14 +24,15 @@ namespace CodeBlaze.Voxel.Colored.World {
         [SerializeField] private Material _material;
         [SerializeField] private bool _chunkShadows;
 
-        //private Dictionary<Vector3Int, ColoredChunk> _chunks;
+        private Dictionary<Vector3Int, ColoredChunk> _chunks;
         private Queue<ColoredChunk> _buildQueue;
         private ColoredGreedyMesher _mesher;
 
         private Stopwatch _stopwatch;
+        private Vector3Int chunkSizeInt;
         
         private void Awake() {
-            //_chunks = new Dictionary<Vector3Int, ColoredChunk>();
+            _chunks = new Dictionary<Vector3Int, ColoredChunk>();
             _buildQueue = new Queue<ColoredChunk>();
             _mesher = new ColoredGreedyMesher();
             
@@ -38,14 +40,14 @@ namespace CodeBlaze.Voxel.Colored.World {
         }
 
         private void Start() {
-            var chunkSizeInt = Vector3Int.FloorToInt(_chunkSize);
+            chunkSizeInt = Vector3Int.FloorToInt(_chunkSize);
             var id = 0;
             
             for (int x = -_drawSize; x <= _drawSize; x++) {
                 for (int z = -_drawSize; z <= _drawSize; z++) {
                     var chunk = CreateChunk(chunkSizeInt, new Vector3Int(chunkSizeInt.x * x, 0, chunkSizeInt.z * z),
                         ++id);
-                    //_chunks.Add(chunk.Position, chunk);
+                    _chunks.Add(chunk.Position, chunk);
                     _buildQueue.Enqueue(chunk);
                 }
             }
@@ -74,7 +76,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             chunkRenderer.SetRenderSettings(_material, _chunkShadows);
             
             _stopwatch.Start();
-            var data = _mesher.GenerateMesh(chunk);
+            var data = _mesher.GenerateMesh(chunk, GetNeighbor(chunk));
             _stopwatch.Stop();
             
             Debug.Log($"CHUNK-{chunk.ID} MESH BUILD TIME : {_stopwatch.ElapsedMilliseconds}");
@@ -84,7 +86,27 @@ namespace CodeBlaze.Voxel.Colored.World {
             chunkRenderer.Render(data);
             _mesher.Clear();
         }
-        
+
+        private NeighborChunks<ColoredBlock> GetNeighbor(ColoredChunk chunk) {
+            var position = chunk.Position;
+
+            var px = position + Vector3Int.right * chunkSizeInt;
+            var py = position + Vector3Int.up * chunkSizeInt;
+            var pz = position + new Vector3Int(0, 0, 1) * chunkSizeInt;
+            var nx = position + Vector3Int.left * chunkSizeInt;
+            var ny = position + Vector3Int.down * chunkSizeInt;
+            var nz = position + new Vector3Int(0, 0, -1) * chunkSizeInt;
+            
+            return new NeighborChunks<ColoredBlock> {
+                ChunkPX = _chunks.ContainsKey(px) ? _chunks[px] : null,
+                ChunkPY = _chunks.ContainsKey(py) ? _chunks[py] : null,
+                ChunkPZ = _chunks.ContainsKey(pz) ? _chunks[pz] : null,
+                ChunkNX = _chunks.ContainsKey(nx) ? _chunks[nx] : null,
+                ChunkNY = _chunks.ContainsKey(ny) ? _chunks[ny] : null,
+                ChunkNZ = _chunks.ContainsKey(nz) ? _chunks[nz] : null
+            };
+        }
+
         private ColoredChunk CreateChunk(Vector3Int size, Vector3Int position, int id) {
             var chunk = new ColoredChunk(size, position, id);
             
