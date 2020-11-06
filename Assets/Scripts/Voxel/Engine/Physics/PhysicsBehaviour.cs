@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CodeBlaze.Voxel.Physics {
+namespace CodeBlaze.Voxel.Engine.Physics {
 
     public class PhysicsBehaviour : MonoBehaviour {
 

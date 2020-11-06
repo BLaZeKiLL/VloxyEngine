@@ -1,0 +1,15 @@
+{
+    "name": "CodeBlaze.Voxel.Colored",
+    "references": [
+        "GUID:a139ce013ffe85e44b8166d92e5f86bb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

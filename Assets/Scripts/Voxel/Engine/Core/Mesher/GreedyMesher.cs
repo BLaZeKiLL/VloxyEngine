@@ -2,26 +2,23 @@
 
 using UnityEngine;
 
-namespace CodeBlaze.Voxel.Core.Mesh {
+namespace CodeBlaze.Voxel.Engine.Core.Mesher {
 
-    public class MeshBuilder {
+    public abstract class GreedyMesher<T> : IMesher<T> where T : IBlock {
 
-        private readonly List<Color32> colors;
-        private readonly List<Vector3> normals;
-        private readonly List<int> triangles;
-
-        private readonly List<Vector3> vertices;
+        protected readonly MeshData MeshData;
 
         private int index;
 
-        public MeshBuilder() {
-            vertices = new List<Vector3>();
-            triangles = new List<int>();
-            colors = new List<Color32>();
-            normals = new List<Vector3>();
+        public GreedyMesher() {
+            MeshData = new MeshData();
         }
 
-        public MeshData GenerateMesh(Chunk chunk) {
+        protected abstract T EmptyBlock();
+
+        protected abstract T NullBlock();
+        
+        public MeshData GenerateMesh(Chunk<T> chunk)  {
             // Sweep over each axis (X, Y and Z)
             for (int direction = 0; direction < 3; direction++) {
                 int i, // loop var
@@ -42,7 +39,7 @@ namespace CodeBlaze.Voxel.Core.Mesh {
                 var chunkItr = new int[3];
                 var directionMask = new int[3];
 
-                var mask = new Mask[axis1Limit * axis2Limit];
+                var normalMask = new Mask[axis1Limit * axis2Limit];
                 directionMask[direction] = 1;
 
                 // Check each slice of the chunk one at a time
@@ -52,33 +49,37 @@ namespace CodeBlaze.Voxel.Core.Mesh {
                     // Compute the mask
                     for (chunkItr[axis2] = 0; chunkItr[axis2] < axis2Limit; ++chunkItr[axis2]) {
                         for (chunkItr[axis1] = 0; chunkItr[axis1] < axis1Limit; ++chunkItr[axis1]) {
-                            var currentBlock = chunk.GetBlock(
-                                chunkItr[0],
-                                chunkItr[1],
-                                chunkItr[2]
-                            );
+                            T currentBlock, compareBlock;
 
-                            var compareBlock = chunk.GetBlock(
-                                chunkItr[0] + directionMask[0],
-                                chunkItr[1] + directionMask[1],
-                                chunkItr[2] + directionMask[2]
-                            );
-
-                            bool blockCurrent =
-                                0 <= chunkItr[direction]
-                                    ? currentBlock.IsSolid()
-                                    : false; // check neighbour in -ve axis
-                            bool blockCompare =
-                                chunkItr[direction] < mainAxisLimit - 1
-                                    ? compareBlock.IsSolid()
-                                    : false; // check neighbour in +ve axis
+                            if (chunkItr[direction] >= 0) {
+                                currentBlock = chunk.GetBlock(
+                                    chunkItr[0],
+                                    chunkItr[1],
+                                    chunkItr[2]
+                                );
+                            } else { // check neighbour in -ve axis
+                                currentBlock = EmptyBlock();
+                            }
+                            
+                            if (chunkItr[direction] < mainAxisLimit - 1) {
+                                compareBlock = chunk.GetBlock(
+                                    chunkItr[0] + directionMask[0],
+                                    chunkItr[1] + directionMask[1],
+                                    chunkItr[2] + directionMask[2]
+                                );
+                            } else { // check neighbour in +ve axis
+                                compareBlock = EmptyBlock();
+                            }
+                            
+                            var blockCurrent = currentBlock.IsOpaque();
+                            var blockCompare = compareBlock.IsOpaque(); 
 
                             if (blockCurrent == blockCompare) {
-                                mask[n++] = new Mask(0, Color.magenta);
+                                normalMask[n++] = new Mask(NullBlock(), 0);
                             } else if (blockCurrent) {
-                                mask[n++] = new Mask(1, currentBlock.Color);
+                                normalMask[n++] = new Mask(currentBlock, 1);
                             } else {
-                                mask[n++] = new Mask(-1, compareBlock.Color);
+                                normalMask[n++] = new Mask(compareBlock, -1);
                             }
                         }
                     }
@@ -90,15 +91,15 @@ namespace CodeBlaze.Voxel.Core.Mesh {
                     // by looping over each block in this slice of the chunk
                     for (j = 0; j < axis2Limit; j++) {
                         for (i = 0; i < axis1Limit;) {
-                            if (mask[n].normal != 0) {
+                            if (normalMask[n].Normal != 0) {
                                 // Current Stuff
-                                var currentMask = mask[n];
+                                var currentMask = normalMask[n];
                                 chunkItr[axis1] = i;
                                 chunkItr[axis2] = j;
 
                                 // Compute the width of this quad and store it in w                        
                                 // This is done by searching along the current axis until mask[n + w] is false
-                                for (width = 1; i + width < axis1Limit && mask[n + width] == currentMask; width++) { }
+                                for (width = 1; i + width < axis1Limit && normalMask[n + width].Normal == currentMask.Normal; width++) { }
 
                                 // Compute the height of this quad and store it in h                        
                                 // This is done by checking if every block next to this row (range 0 to w) is also part of the mask.
@@ -110,12 +111,10 @@ namespace CodeBlaze.Voxel.Core.Mesh {
                                 for (height = 1; j + height < axis2Limit; height++) {
                                     // Check each block next to this quad
                                     for (k = 0; k < width; ++k) {
-                                        // If there's a hole in the mask, exit
-                                        if (mask[n + k + height * axis1Limit] != currentMask) {
-                                            done = true;
+                                        if (normalMask[n + k + height * axis1Limit].Normal == currentMask.Normal) continue;
 
-                                            break;
-                                        }
+                                        done = true;
+                                        break; // If there's a hole in the mask, exit
                                     }
 
                                     if (done) break;
@@ -129,7 +128,8 @@ namespace CodeBlaze.Voxel.Core.Mesh {
 
                                 // create quad
                                 CreateQuad(
-                                    currentMask,
+                                    currentMask.Normal,
+                                    currentMask.Block,
                                     directionMask,
                                     new Vector3(chunkItr[0], chunkItr[1], chunkItr[2]),
                                     new Vector3(chunkItr[0] + deltaAxis1[0], chunkItr[1] + deltaAxis1[1],
@@ -144,7 +144,7 @@ namespace CodeBlaze.Voxel.Core.Mesh {
                                 // Clear this part of the mask, so we don't add duplicate faces
                                 for (l = 0; l < height; ++l)
                                     for (k = 0; k < width; ++k)
-                                        mask[n + k + l * axis1Limit] = new Mask(0, Color.magenta);
+                                        normalMask[n + k + l * axis1Limit] = new Mask(NullBlock(), 0);
 
                                 i += width;
                                 n += width;
@@ -157,96 +157,70 @@ namespace CodeBlaze.Voxel.Core.Mesh {
                 }
             }
 
-            var data = new MeshData(
-                vertices.ToArray(),
-                triangles.ToArray(),
-                colors.ToArray(),
-                normals.ToArray()
-            );
-
-            // Clear Builder
-            Clear();
-
-            return data;
+            return MeshData;
         }
 
+        public void Clear() {
+            MeshData.Clear();
+            index = 0;
+        }
+        
+        protected virtual void CreateQuad(T block, Vector3Int normal) { }
+        
         // v1 -> BL
         // v2 -> TL
         // v3 -> BR
         // v4 -> TR
-        private void CreateQuad(Mask mask, IReadOnlyList<int> directionMask, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
-            vertices.Add(v1);
-            vertices.Add(v2);
-            vertices.Add(v3);
-            vertices.Add(v4);
+        private void CreateQuad(sbyte normalMask, T block, IReadOnlyList<int> directionMask, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
+            MeshData.Vertices.Add(v1);
+            MeshData.Vertices.Add(v2);
+            MeshData.Vertices.Add(v3);
+            MeshData.Vertices.Add(v4);
 
-            if (mask.normal == 1) {
-                triangles.Add(index);
-                triangles.Add(index + 1);
-                triangles.Add(index + 3);
-                triangles.Add(index);
-                triangles.Add(index + 3);
-                triangles.Add(index + 2);
-            } else if (mask.normal == -1) {
-                triangles.Add(index);
-                triangles.Add(index + 3);
-                triangles.Add(index + 1);
-                triangles.Add(index);
-                triangles.Add(index + 2);
-                triangles.Add(index + 3);
+            if (normalMask == 1) {
+                MeshData.Triangles.Add(index);
+                MeshData.Triangles.Add(index + 1);
+                MeshData.Triangles.Add(index + 3);
+                MeshData.Triangles.Add(index);
+                MeshData.Triangles.Add(index + 3);
+                MeshData.Triangles.Add(index + 2);
+            } else if (normalMask == -1) {
+                MeshData.Triangles.Add(index);
+                MeshData.Triangles.Add(index + 3);
+                MeshData.Triangles.Add(index + 1);
+                MeshData.Triangles.Add(index);
+                MeshData.Triangles.Add(index + 2);
+                MeshData.Triangles.Add(index + 3);
             }
 
             index += 4;
 
-            var normal = new Vector3(
-                mask.normal * directionMask[0],
-                mask.normal * directionMask[1],
-                mask.normal * directionMask[2]
+            var normal = new Vector3Int(
+                normalMask * directionMask[0],
+                normalMask * directionMask[1],
+                normalMask * directionMask[2]
             );
 
-            normals.Add(normal);
-            normals.Add(normal);
-            normals.Add(normal);
-            normals.Add(normal);
+            MeshData.Normals.Add(normal);
+            MeshData.Normals.Add(normal);
+            MeshData.Normals.Add(normal);
+            MeshData.Normals.Add(normal);
 
-            colors.Add(mask.color);
-            colors.Add(mask.color);
-            colors.Add(mask.color);
-            colors.Add(mask.color);
+            CreateQuad(block, normal);
         }
 
-        private void Clear() {
-            vertices.Clear();
-            triangles.Clear();
-            colors.Clear();
-            normals.Clear();
-            index = 0;
-        }
-        
         private readonly struct Mask {
 
-            public readonly Color32 color;
-            public readonly sbyte normal;
+            public readonly T Block;
+            public readonly sbyte Normal;
 
-            public Mask(sbyte normal, Color32 color) {
-                this.color = color;
-                this.normal = normal;
-            }
-
-            public static bool operator ==(Mask m1, Mask m2) {
-                return
-                    m1.normal == m2.normal &&
-                    m1.color.r == m2.color.r &&
-                    m1.color.g == m2.color.g &&
-                    m1.color.b == m2.color.b;
-            }
-
-            public static bool operator !=(Mask m1, Mask m2) {
-                return !(m1 == m2);
+            public Mask(T block, sbyte normal) {
+                Block = block;
+                Normal = normal;
             }
 
         }
-
+        
     }
 
 }
