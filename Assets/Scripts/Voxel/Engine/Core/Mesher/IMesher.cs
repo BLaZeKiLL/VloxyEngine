@@ -2,7 +2,7 @@
 
     public interface IMesher<T> where T : IBlock {
 
-        MeshData GenerateMesh(Chunk<T> chunk);
+        MeshData GenerateMesh(Chunk<T> chunk, NeighborChunks<T> neighbors);
 
     }
 
