@@ -28,7 +28,9 @@ MonoBehaviour:
     m_Name: Open UPM
     m_Url: https://package.openupm.com
     m_Scopes:
-    - com.tayx
+    - com.tayx.graphy
+    - com.cysharp.unitask
+    - io.codeblaze
     m_IsDefault: 0
     m_Capabilities: 0
   m_UserSelectedRegistryName: Open UPM
@@ -40,12 +42,16 @@ MonoBehaviour:
       m_Name: Open UPM
       m_Url: https://package.openupm.com
       m_Scopes:
-      - com.tayx
+      - com.tayx.graphy
+      - com.cysharp.unitask
+      - io.codeblaze
       m_IsDefault: 0
       m_Capabilities: 0
     m_Modified: 0
     m_Name: Open UPM
     m_Url: https://package.openupm.com
     m_Scopes:
-    - com.tayx
+    - com.tayx.graphy
+    - com.cysharp.unitask
+    - io.codeblaze
     m_SelectedScopeIndex: 0

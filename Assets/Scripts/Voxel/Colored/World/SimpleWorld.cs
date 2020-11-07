@@ -28,7 +28,8 @@ namespace CodeBlaze.Voxel.Colored.World {
         private Queue<ColoredChunk> _buildQueue;
         private ColoredGreedyMesher _mesher;
 
-        private Stopwatch _stopwatch;
+        private Stopwatch _buildwatch;
+        private Stopwatch _startwatch;
         private Vector3Int chunkSizeInt;
 
         private long _time;
@@ -38,7 +39,8 @@ namespace CodeBlaze.Voxel.Colored.World {
             _buildQueue = new Queue<ColoredChunk>();
             _mesher = new ColoredGreedyMesher();
             
-            _stopwatch = new Stopwatch();
+            _startwatch = new Stopwatch();
+            _buildwatch = new Stopwatch();
         }
 
         private void Start() {
@@ -58,12 +60,15 @@ namespace CodeBlaze.Voxel.Colored.World {
         }
 
         private IEnumerator SpawnChunks() {
+            _startwatch.Start();
             while (_buildQueue.Count > 0) {
                 SpawnChunk();
 
                 yield return null;
             }
+            _startwatch.Stop();
             Debug.Log($"AVERAGE MESH BUILD TIME : {(float)_time / _chunks.Count} MS");
+            Debug.Log($"START TIME : {_startwatch.ElapsedMilliseconds} MS");
             GC.Collect();
         }
 
@@ -77,13 +82,13 @@ namespace CodeBlaze.Voxel.Colored.World {
             var chunkRenderer = go.GetComponent<ChunkRenderer>();
             chunkRenderer.SetRenderSettings(_material, _chunkShadows);
             
-            _stopwatch.Start();
+            _buildwatch.Start();
             var data = _mesher.GenerateMesh(chunk, GetNeighbor(chunk));
-            _stopwatch.Stop();
+            _buildwatch.Stop();
             
-            _time += _stopwatch.ElapsedMilliseconds;
+            _time += _buildwatch.ElapsedMilliseconds;
             
-            _stopwatch.Reset();
+            _buildwatch.Reset();
             
             chunkRenderer.Render(data);
             _mesher.Clear();
