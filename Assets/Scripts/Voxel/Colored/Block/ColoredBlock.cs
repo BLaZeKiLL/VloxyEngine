@@ -18,7 +18,20 @@ namespace CodeBlaze.Voxel.Colored.Block {
 
         public bool IsTranslucent() => throw new System.NotImplementedException();
 
-        
+        public bool Equals(ColoredBlock other) {
+            var color2 = other.Color;
+
+            return Color.r == color2.r && Color.g == color2.g && Color.b == color2.b && Color.a == color2.a;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is ColoredBlock other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return Color.GetHashCode();
+        }
+
     }
     
     public static class ColoredBlockTypes {
