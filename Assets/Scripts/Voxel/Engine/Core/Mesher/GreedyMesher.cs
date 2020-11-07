@@ -17,6 +17,10 @@ namespace CodeBlaze.Voxel.Engine.Core.Mesher {
         protected abstract T EmptyBlock();
 
         protected abstract T NullBlock();
+
+        protected virtual void CreateQuad(T block, Vector3Int normal) { }
+
+        protected virtual bool CompareBlock(T block1, T block2) => block1.Equals(block2);
         
         public MeshData GenerateMesh(Chunk<T> chunk, NeighborChunks<T> neighbors)  {
             // Sweep over each axis (X, Y and Z)
@@ -149,7 +153,7 @@ namespace CodeBlaze.Voxel.Engine.Core.Mesher {
 
                                 // Compute the width of this quad and store it in w                        
                                 // This is done by searching along the current axis until mask[n + w] is false
-                                for (width = 1; i + width < axis1Limit && normalMask[n + width].Normal == currentMask.Normal; width++) { }
+                                for (width = 1; i + width < axis1Limit && CompareMask(normalMask[n + width] , currentMask); width++) { }
 
                                 // Compute the height of this quad and store it in h                        
                                 // This is done by checking if every block next to this row (range 0 to w) is also part of the mask.
@@ -161,7 +165,7 @@ namespace CodeBlaze.Voxel.Engine.Core.Mesher {
                                 for (height = 1; j + height < axis2Limit; height++) {
                                     // Check each block next to this quad
                                     for (k = 0; k < width; ++k) {
-                                        if (normalMask[n + k + height * axis1Limit].Normal == currentMask.Normal) continue;
+                                        if (CompareMask(normalMask[n + k + height * axis1Limit] , currentMask)) continue;
 
                                         done = true;
                                         break; // If there's a hole in the mask, exit
@@ -214,9 +218,7 @@ namespace CodeBlaze.Voxel.Engine.Core.Mesher {
             MeshData.Clear();
             index = 0;
         }
-        
-        protected virtual void CreateQuad(T block, Vector3Int normal) { }
-        
+
         // v1 -> BL
         // v2 -> TL
         // v3 -> BR
@@ -259,6 +261,8 @@ namespace CodeBlaze.Voxel.Engine.Core.Mesher {
             CreateQuad(block, normal);
         }
 
+        private bool CompareMask(Mask m1, Mask m2) => m1.Normal == m2.Normal && CompareBlock(m1.Block, m2.Block);
+
         private readonly struct Mask {
 
             public readonly T Block;
@@ -268,6 +272,24 @@ namespace CodeBlaze.Voxel.Engine.Core.Mesher {
                 Block = block;
                 Normal = normal;
             }
+
+            public override bool Equals(object obj) {
+                return obj is Mask other && Equals(other);
+            }
+            
+            public override int GetHashCode() {
+                unchecked {
+                    return (Block.GetHashCode() * 397) ^ Normal.GetHashCode();
+                }
+            }
+
+            public bool Equals(Mask otherMask) {
+                return Block.Equals(otherMask.Block) && Normal == otherMask.Normal;
+            }
+            
+            public static bool operator ==(Mask m1, Mask m2) => m1.Equals(m2);
+
+            public static bool operator !=(Mask m1, Mask m2) => !m1.Equals(m2);
 
         }
         

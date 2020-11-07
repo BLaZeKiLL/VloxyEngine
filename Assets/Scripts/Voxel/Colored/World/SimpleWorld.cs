@@ -30,6 +30,8 @@ namespace CodeBlaze.Voxel.Colored.World {
 
         private Stopwatch _stopwatch;
         private Vector3Int chunkSizeInt;
+
+        private long _time;
         
         private void Awake() {
             _chunks = new Dictionary<Vector3Int, ColoredChunk>();
@@ -61,7 +63,7 @@ namespace CodeBlaze.Voxel.Colored.World {
 
                 yield return null;
             }
-            
+            Debug.Log($"AVERAGE MESH BUILD TIME : {(float)_time / _chunks.Count} MS");
             GC.Collect();
         }
 
@@ -79,7 +81,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             var data = _mesher.GenerateMesh(chunk, GetNeighbor(chunk));
             _stopwatch.Stop();
             
-            Debug.Log($"CHUNK-{chunk.ID} MESH BUILD TIME : {_stopwatch.ElapsedMilliseconds}");
+            _time += _stopwatch.ElapsedMilliseconds;
             
             _stopwatch.Reset();
             
@@ -109,11 +111,11 @@ namespace CodeBlaze.Voxel.Colored.World {
 
         private ColoredChunk CreateChunk(Vector3Int size, Vector3Int position, int id) {
             var chunk = new ColoredChunk(size, position, id);
-            
-            var block = ColoredBlockTypes.RandomSolid();
-            
+
             for (int x = 0; x < size.x; x++) {
                 for (int z = 0; z <size.z; z++) {
+                    var block = ColoredBlockTypes.RandomSolid();
+                    
                     var height = Mathf.FloorToInt(
                         Mathf.PerlinNoise((position.x + x) * _frequency, (position.z + z) * _frequency) * size.y
                     );
