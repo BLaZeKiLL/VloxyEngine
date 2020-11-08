@@ -20,17 +20,17 @@ namespace CodeBlaze.Voxel.Colored.World {
 
         public ChunkRendererSettings RendererSettings { get; }
         
-        private SimpleWorld _world;
+        private ColoredWorld _world;
         private Queue<ColoredChunk> _buildQueue;
         private IObjectPool<ChunkRenderer> _rendererPool;
         
-        public WorldBuildCoordinator(SimpleWorld world, ChunkRendererSettings settings) {
+        public WorldBuildCoordinator(ColoredWorld world, ChunkRendererSettings settings) {
             _world = world;
             RendererSettings = settings;
             _buildQueue = new Queue<ColoredChunk>();
             
-            _rendererPool = new ObjectPool<ChunkRenderer>(
-                GetPoolSize(_world.Settings.DrawSize),
+            _rendererPool = new ObjectPool<ChunkRenderer>( // pool size = x^2 + 1
+                (2 * _world.CurrentSettings.DrawSize + 1) * (2 * _world.CurrentSettings.DrawSize + 1) + 1,
                 index => {
                     var go = new GameObject("Chunk", typeof(ChunkRenderer));
                     go.transform.parent = settings.Parent;
@@ -89,7 +89,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             watch.Start();
             while (_buildQueue.Count > 0) {
                 var chunk = _buildQueue.Dequeue();
-                var data = mesher.GenerateMesh(chunk, _world.GetNeighbor(chunk));
+                var data = mesher.GenerateMesh(chunk, _world.GetNeighbors(chunk));
                 
                 var renderer = _rendererPool.Claim();
                 renderer.transform.position = chunk.Position;
@@ -111,7 +111,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             
             watch.Start();
             var data = await UniTask.RunOnThreadPool(
-                () => new ColoredGreedyMesher().GenerateMesh(chunk, _world.GetNeighbor(chunk))
+                () => new ColoredGreedyMesher().GenerateMesh(chunk, _world.GetNeighbors(chunk))
             );
             watch.Stop();
 
@@ -122,8 +122,6 @@ namespace CodeBlaze.Voxel.Colored.World {
             
             return watch.ElapsedMilliseconds;
         }
-        
-        private int GetPoolSize(int input) => (2 * input + 1) * (2 * input + 1) + 1;
 
         [Serializable]
         public class ChunkRendererSettings {
