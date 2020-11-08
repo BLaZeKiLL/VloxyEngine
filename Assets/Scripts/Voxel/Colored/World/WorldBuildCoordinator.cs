@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
 using CodeBlaze.Library.Collections.Pools;
-using CodeBlaze.Voxel.Colored.Block;
 using CodeBlaze.Voxel.Colored.Chunk;
 using CodeBlaze.Voxel.Colored.Mesher;
-using CodeBlaze.Voxel.Engine.Core;
 using CodeBlaze.Voxel.Engine.Core.Renderer;
 
 using Cysharp.Threading.Tasks;
@@ -21,18 +18,19 @@ namespace CodeBlaze.Voxel.Colored.World {
 
     public class WorldBuildCoordinator {
 
+        public ChunkRendererSettings RendererSettings { get; }
+        
         private SimpleWorld _world;
         private Queue<ColoredChunk> _buildQueue;
         private IObjectPool<ChunkRenderer> _rendererPool;
-        private BuildMethod _buildMethod;
         
-        public WorldBuildCoordinator(SimpleWorld world, int drawSize, ChunkRendererSettings settings) {
+        public WorldBuildCoordinator(SimpleWorld world, ChunkRendererSettings settings) {
             _world = world;
-            _buildMethod = settings.BuildMethod;
+            RendererSettings = settings;
             _buildQueue = new Queue<ColoredChunk>();
             
             _rendererPool = new ObjectPool<ChunkRenderer>(
-                GetPoolSize(drawSize),
+                GetPoolSize(_world.Settings.DrawSize),
                 index => {
                     var go = new GameObject("Chunk", typeof(ChunkRenderer));
                     go.transform.parent = settings.Parent;
@@ -51,11 +49,11 @@ namespace CodeBlaze.Voxel.Colored.World {
         public void AddToBuildQueue(ColoredChunk chunk) => _buildQueue.Enqueue(chunk);
 
         public void ProcessBuildQueue() {
-            switch (_buildMethod) {
-                case BuildMethod.MULTI_THREADED:
+            switch (RendererSettings.BuildMethod) {
+                case BuildMethod.MultiThreaded:
                     BuildQueueMultiThread().Forget();
                     break;
-                case BuildMethod.SINGLE_THREADED:
+                case BuildMethod.SingleThreaded:
                     BuildQueueSingleThread();
                     break;
                 default:
@@ -84,10 +82,12 @@ namespace CodeBlaze.Voxel.Colored.World {
         private void BuildQueueSingleThread() {
             var mesher = new ColoredGreedyMesher();
             var watch = new Stopwatch();
+            var count = _buildQueue.Count;
+            
             watch.Start();
             while (_buildQueue.Count > 0) {
                 var chunk = _buildQueue.Dequeue();
-                var data = mesher.GenerateMesh(chunk, GetNeighbor(chunk));
+                var data = mesher.GenerateMesh(chunk, _world.GetNeighbor(chunk));
                 
                 var renderer = _rendererPool.Claim();
                 renderer.transform.position = chunk.Position;
@@ -98,7 +98,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             }
             watch.Stop();
                     
-            Debug.Log($"Average mesh build time : {(float)watch.ElapsedMilliseconds / _world.Chunks.Count} ms");
+            Debug.Log($"Average mesh build time : {(float)watch.ElapsedMilliseconds / count} ms");
             Debug.Log($"Build queue process time : {watch.Elapsed:s\\.fff} sec");
             
             GC.Collect();
@@ -109,7 +109,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             
             await UniTask.SwitchToThreadPool();
             watch.Start();
-            var data = new ColoredGreedyMesher().GenerateMesh(chunk, GetNeighbor(chunk));
+            var data = new ColoredGreedyMesher().GenerateMesh(chunk, _world.GetNeighbor(chunk));
             watch.Stop();
             await UniTask.SwitchToMainThread();
 
@@ -120,29 +120,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             
             return watch.ElapsedMilliseconds;
         }
-        
-        private NeighborChunks<ColoredBlock> GetNeighbor(ColoredChunk chunk) {
-            var position = chunk.Position;
-            var size = _world.ChunkSizeInt;
-            var chunks = _world.Chunks;
 
-            var px = position + Vector3Int.right * size;
-            var py = position + Vector3Int.up * size;
-            var pz = position + new Vector3Int(0, 0, 1) * size;
-            var nx = position + Vector3Int.left * size;
-            var ny = position + Vector3Int.down * size;
-            var nz = position + new Vector3Int(0, 0, -1) * size;
-            
-            return new NeighborChunks<ColoredBlock> {
-                ChunkPX = chunks.ContainsKey(px) ? chunks[px] : null,
-                ChunkPY = chunks.ContainsKey(py) ? chunks[py] : null,
-                ChunkPZ = chunks.ContainsKey(pz) ? chunks[pz] : null,
-                ChunkNX = chunks.ContainsKey(nx) ? chunks[nx] : null,
-                ChunkNY = chunks.ContainsKey(ny) ? chunks[ny] : null,
-                ChunkNZ = chunks.ContainsKey(nz) ? chunks[nz] : null
-            };
-        }
-        
         private int GetPoolSize(int input) {
             int ans = 1;
             
@@ -164,8 +142,8 @@ namespace CodeBlaze.Voxel.Colored.World {
         
         public enum BuildMethod {
 
-            MULTI_THREADED,
-            SINGLE_THREADED
+            MultiThreaded,
+            SingleThreaded
             
         }
 
