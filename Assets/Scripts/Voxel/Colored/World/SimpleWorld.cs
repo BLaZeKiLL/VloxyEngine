@@ -1,128 +1,56 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 using CodeBlaze.Voxel.Colored.Block;
 using CodeBlaze.Voxel.Colored.Chunk;
-using CodeBlaze.Voxel.Colored.Mesher;
-using CodeBlaze.Voxel.Engine.Core;
-using CodeBlaze.Voxel.Engine.Core.Renderer;
 
 using UnityEngine;
-using UnityEngine.Profiling;
-
-using Debug = UnityEngine.Debug;
 
 namespace CodeBlaze.Voxel.Colored.World {
 
     public class SimpleWorld : MonoBehaviour {
 
-        [SerializeField] private Vector3 _chunkSize = new Vector3(16,16,16);
-        [SerializeField] private int _drawSize;
-        [SerializeField] [Range(0.01f, 0.99f)] private float _frequency = 0.15f;
-        [SerializeField] private Material _material;
-        [SerializeField] private bool _chunkShadows;
+        [SerializeField] private WorldSettings _worldSettings;
+        [SerializeField] private WorldBuildCoordinator.ChunkRendererSettings _rendererSettings;
 
-        private Dictionary<Vector3Int, ColoredChunk> _chunks;
-        private Queue<ColoredChunk> _buildQueue;
-        private ColoredGreedyMesher _mesher;
+        public Dictionary<Vector3Int, ColoredChunk> Chunks { get; private set; }
+        public Vector3Int ChunkSizeInt { get; private set; }
 
-        private Stopwatch _buildwatch;
-        private Stopwatch _startwatch;
-        private Vector3Int chunkSizeInt;
+        private WorldBuildCoordinator _coordinator;
 
-        private long _time;
-        
         private void Awake() {
-            _chunks = new Dictionary<Vector3Int, ColoredChunk>();
-            _buildQueue = new Queue<ColoredChunk>();
-            _mesher = new ColoredGreedyMesher();
-            
-            _startwatch = new Stopwatch();
-            _buildwatch = new Stopwatch();
+            Chunks = new Dictionary<Vector3Int, ColoredChunk>();
+            ChunkSizeInt = Vector3Int.FloorToInt(_worldSettings.ChunkSize);
+            _rendererSettings.Parent = transform;
+            _coordinator = new WorldBuildCoordinator(this, _worldSettings.DrawSize, _rendererSettings);
         }
 
         private void Start() {
-            chunkSizeInt = Vector3Int.FloorToInt(_chunkSize);
             var id = 0;
+            var drawSize = _worldSettings.DrawSize;
             
-            for (int x = -_drawSize; x <= _drawSize; x++) {
-                for (int z = -_drawSize; z <= _drawSize; z++) {
-                    var chunk = CreateChunk(chunkSizeInt, new Vector3Int(chunkSizeInt.x * x, 0, chunkSizeInt.z * z),
+            for (int x = -drawSize; x <= drawSize; x++) {
+                for (int z = -drawSize; z <= drawSize; z++) {
+                    var chunk = CreateChunk(ChunkSizeInt, new Vector3Int(ChunkSizeInt.x * x, 0, ChunkSizeInt.z * z),
                         ++id);
-                    _chunks.Add(chunk.Position, chunk);
-                    _buildQueue.Enqueue(chunk);
+                    Chunks.Add(chunk.Position, chunk);
+                    _coordinator.AddToBuildQueue(chunk);
                 }
             }
-
-            StartCoroutine(SpawnChunks());
-        }
-
-        private IEnumerator SpawnChunks() {
-            _startwatch.Start();
-            while (_buildQueue.Count > 0) {
-                SpawnChunk();
-
-                yield return null;
-            }
-            _startwatch.Stop();
-            Debug.Log($"AVERAGE MESH BUILD TIME : {(float)_time / _chunks.Count} MS");
-            Debug.Log($"START TIME : {_startwatch.ElapsedMilliseconds} MS");
-            GC.Collect();
-        }
-
-        private void SpawnChunk() {
-            var chunk = _buildQueue.Dequeue();
-
-            var go = new GameObject($"Chunk-{chunk.ID}", typeof(ChunkRenderer));
-            go.transform.parent = transform;
-            go.transform.position = chunk.Position;
             
-            var chunkRenderer = go.GetComponent<ChunkRenderer>();
-            chunkRenderer.SetRenderSettings(_material, _chunkShadows);
-            
-            _buildwatch.Start();
-            var data = _mesher.GenerateMesh(chunk, GetNeighbor(chunk));
-            _buildwatch.Stop();
-            
-            _time += _buildwatch.ElapsedMilliseconds;
-            
-            _buildwatch.Reset();
-            
-            chunkRenderer.Render(data);
-            _mesher.Clear();
-        }
-
-        private NeighborChunks<ColoredBlock> GetNeighbor(ColoredChunk chunk) {
-            var position = chunk.Position;
-
-            var px = position + Vector3Int.right * chunkSizeInt;
-            var py = position + Vector3Int.up * chunkSizeInt;
-            var pz = position + new Vector3Int(0, 0, 1) * chunkSizeInt;
-            var nx = position + Vector3Int.left * chunkSizeInt;
-            var ny = position + Vector3Int.down * chunkSizeInt;
-            var nz = position + new Vector3Int(0, 0, -1) * chunkSizeInt;
-            
-            return new NeighborChunks<ColoredBlock> {
-                ChunkPX = _chunks.ContainsKey(px) ? _chunks[px] : null,
-                ChunkPY = _chunks.ContainsKey(py) ? _chunks[py] : null,
-                ChunkPZ = _chunks.ContainsKey(pz) ? _chunks[pz] : null,
-                ChunkNX = _chunks.ContainsKey(nx) ? _chunks[nx] : null,
-                ChunkNY = _chunks.ContainsKey(ny) ? _chunks[ny] : null,
-                ChunkNZ = _chunks.ContainsKey(nz) ? _chunks[nz] : null
-            };
+            _coordinator.ProcessBuildQueue();
+            Debug.Log("World Start Done");
         }
 
         private ColoredChunk CreateChunk(Vector3Int size, Vector3Int position, int id) {
             var chunk = new ColoredChunk(size, position, id);
-
+            var block = ColoredBlockTypes.RandomSolid();
+            var frequency = _worldSettings.Frequency;
+            
             for (int x = 0; x < size.x; x++) {
                 for (int z = 0; z <size.z; z++) {
-                    var block = ColoredBlockTypes.RandomSolid();
-                    
                     var height = Mathf.FloorToInt(
-                        Mathf.PerlinNoise((position.x + x) * _frequency, (position.z + z) * _frequency) * size.y
+                        Mathf.PerlinNoise((position.x + x) * frequency, (position.z + z) * frequency) * size.y
                     );
 
                     height = Mathf.Clamp(height, 1, size.y - 1);
@@ -140,6 +68,15 @@ namespace CodeBlaze.Voxel.Colored.World {
             return chunk;
         }
 
+        [Serializable]
+        public class WorldSettings {
+
+            public int DrawSize = 1;
+            public Vector3 ChunkSize = 16 * Vector3.one;
+            [Range(0.01f, 0.99f)] public float Frequency = 0.15f;
+
+        }
+        
     }
 
 }

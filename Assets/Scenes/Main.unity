@@ -166,11 +166,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a83105dc061a4b039ad4cd782e2d854d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _chunkSize: {x: 64, y: 32, z: 64}
-  _drawSize: 5
-  _frequency: 0.02
-  _material: {fileID: 2100000, guid: 104fcd82a3c84694d93fbfb0a9dbf2a1, type: 2}
-  _chunkShadows: 0
+  _worldSettings:
+    DrawSize: 5
+    ChunkSize: {x: 64, y: 32, z: 64}
+    Frequency: 0.02
+  _rendererSettings:
+    Material: {fileID: 2100000, guid: 104fcd82a3c84694d93fbfb0a9dbf2a1, type: 2}
+    CastShadows: 0
+    BuildMethod: 0
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
