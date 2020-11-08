@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+
+using CodeBlaze.Library.Behaviour;
 
 using UnityEngine;
 
 namespace CodeBlaze.Voxel.Engine.Core.World {
 
-    public class World<T> : MonoBehaviour where T : IBlock {
+    public class SingletonWorld<W,T> : Singleton<W> where T : IBlock where W : SingletonWorld<W, T> {
 
         [SerializeField] private WorldSettings _worldSettings;
         
@@ -15,7 +18,8 @@ namespace CodeBlaze.Voxel.Engine.Core.World {
 
         protected Dictionary<Vector3Int, Chunk<T>> Chunks;
 
-        protected virtual void Awake() {
+        protected override void Awake() {
+            base.Awake();
             Chunks = new Dictionary<Vector3Int, Chunk<T>>();
         }
 

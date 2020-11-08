@@ -24,8 +24,8 @@ namespace CodeBlaze.Voxel.Colored.World {
         private Queue<ColoredChunk> _buildQueue;
         private IObjectPool<ChunkRenderer> _rendererPool;
         
-        public WorldBuildCoordinator(ColoredWorld world, ChunkRendererSettings settings) {
-            _world = world;
+        public WorldBuildCoordinator(ChunkRendererSettings settings) {
+            _world = ColoredWorld.Current;
             RendererSettings = settings;
             _buildQueue = new Queue<ColoredChunk>();
             

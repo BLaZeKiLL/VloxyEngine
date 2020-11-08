@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-
-using CodeBlaze.Voxel.Colored.Block;
+﻿using CodeBlaze.Voxel.Colored.Block;
 using CodeBlaze.Voxel.Colored.Chunk;
-using CodeBlaze.Voxel.Engine.Core;
 using CodeBlaze.Voxel.Engine.Core.World;
 
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace CodeBlaze.Voxel.Colored.World {
 
-    public class ColoredWorld : World<ColoredBlock> {
+    public class ColoredWorld : SingletonWorld<ColoredWorld, ColoredBlock> {
 
         [SerializeField] private WorldBuildCoordinator.ChunkRendererSettings _rendererSettings;
 
@@ -20,7 +15,7 @@ namespace CodeBlaze.Voxel.Colored.World {
         protected override void Awake() {
             base.Awake();
             _rendererSettings.Parent = transform;
-            _coordinator = new WorldBuildCoordinator(this, _rendererSettings);
+            _coordinator = new WorldBuildCoordinator(_rendererSettings);
         }
 
         private void Start() {
