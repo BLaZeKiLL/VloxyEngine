@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace CodeBlaze.Voxel.Engine.Core {
+﻿namespace CodeBlaze.Voxel.Engine.Core {
 
     public interface IBlock {
 

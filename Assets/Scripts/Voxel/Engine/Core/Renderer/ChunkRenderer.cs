@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-using CodeBlaze.Voxel.Engine.Core.Mesher;
+﻿using CodeBlaze.Voxel.Engine.Core.Mesher;
 
 using UnityEngine;
 using UnityEngine.Rendering;
