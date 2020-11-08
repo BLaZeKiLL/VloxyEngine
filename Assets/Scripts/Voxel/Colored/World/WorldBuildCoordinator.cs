@@ -52,6 +52,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             switch (RendererSettings.BuildMethod) {
                 case BuildMethod.MultiThreaded:
                     BuildQueueMultiThread().Forget();
+
                     break;
                 case BuildMethod.SingleThreaded:
                     BuildQueueSingleThread();
@@ -63,6 +64,7 @@ namespace CodeBlaze.Voxel.Colored.World {
         
         private async UniTaskVoid BuildQueueMultiThread() {
             var tasks = new List<UniTask<long>>();
+
             var watch = new Stopwatch();
             
             watch.Start();
@@ -75,10 +77,10 @@ namespace CodeBlaze.Voxel.Colored.World {
 
             Debug.Log($"Average mesh build time : {result.Average()} ms");
             Debug.Log($"Build queue process time : {watch.Elapsed:s\\.fff} sec");
-            
+
             GC.Collect();
         }
-
+        
         private void BuildQueueSingleThread() {
             var mesher = new ColoredGreedyMesher();
             var watch = new Stopwatch();
@@ -107,11 +109,11 @@ namespace CodeBlaze.Voxel.Colored.World {
         private async UniTask<long> Build(ColoredChunk chunk) {
             var watch = new Stopwatch();
             
-            await UniTask.SwitchToThreadPool();
             watch.Start();
-            var data = new ColoredGreedyMesher().GenerateMesh(chunk, _world.GetNeighbor(chunk));
+            var data = await UniTask.RunOnThreadPool(
+                () => new ColoredGreedyMesher().GenerateMesh(chunk, _world.GetNeighbor(chunk))
+            );
             watch.Stop();
-            await UniTask.SwitchToMainThread();
 
             var renderer = _rendererPool.Claim();
             renderer.transform.position = chunk.Position;
@@ -120,15 +122,8 @@ namespace CodeBlaze.Voxel.Colored.World {
             
             return watch.ElapsedMilliseconds;
         }
-
-        private int GetPoolSize(int input) {
-            int ans = 1;
-            
-            for (int i = input; i > 0; i--)
-                ans *= i;
-
-            return ans + 1;
-        }
+        
+        private int GetPoolSize(int input) => (2 * input + 1) * (2 * input + 1) + 1;
 
         [Serializable]
         public class ChunkRendererSettings {

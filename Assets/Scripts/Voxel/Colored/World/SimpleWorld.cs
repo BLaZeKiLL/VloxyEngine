@@ -6,6 +6,7 @@ using CodeBlaze.Voxel.Colored.Chunk;
 using CodeBlaze.Voxel.Engine.Core;
 
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace CodeBlaze.Voxel.Colored.World {
 
@@ -19,6 +20,7 @@ namespace CodeBlaze.Voxel.Colored.World {
         private Dictionary<Vector3Int, ColoredChunk> _chunks;
 
         private WorldBuildCoordinator _coordinator;
+        private bool _started;
 
         private void Awake() {
             _chunks = new Dictionary<Vector3Int, ColoredChunk>();
@@ -39,9 +41,20 @@ namespace CodeBlaze.Voxel.Colored.World {
                 }
             }
             
+#if !BLOXY_BUILD_ONUPDATE
             _coordinator.ProcessBuildQueue();
+#endif
             Debug.Log("World Start Done");
         }
+
+#if BLOXY_BUILD_ONUPDATE
+        private void Update() {
+            if (_started || !Input.GetKeyDown(KeyCode.Space)) return;
+
+            _started = true;
+            _coordinator.ProcessBuildQueue();
+        }
+#endif
         
         public NeighborChunks<ColoredBlock> GetNeighbor(ColoredChunk chunk) {
             var position = chunk.Position;
@@ -66,10 +79,10 @@ namespace CodeBlaze.Voxel.Colored.World {
         private ColoredChunk CreateChunk(Vector3Int size, Vector3Int position, int id) {
             var chunk = new ColoredChunk(size, position, id);
             
+            var block = ColoredBlockTypes.RandomSolid();
+            
             for (int x = 0; x < size.x; x++) {
                 for (int z = 0; z <size.z; z++) {
-                    var block = ColoredBlockTypes.RandomSolid();
-                    
                     var height = Mathf.FloorToInt(
                         Mathf.PerlinNoise((position.x + x) * Settings.Frequency, (position.z + z) * Settings.Frequency) * size.y
                     );
