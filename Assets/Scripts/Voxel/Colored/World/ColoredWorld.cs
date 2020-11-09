@@ -6,32 +6,30 @@ using UnityEngine;
 
 namespace CodeBlaze.Voxel.Colored.World {
 
-    public class ColoredWorld : SingletonWorld<ColoredWorld, ColoredBlock> {
+    public class ColoredWorld : World<ColoredBlock> {
 
-        [SerializeField] private WorldBuildCoordinator.ChunkRendererSettings _rendererSettings;
-
-        private WorldBuildCoordinator _coordinator;
+        private ChunkMeshBuildQueue _buildQueue;
 
         protected override void Awake() {
             base.Awake();
-            _rendererSettings.Parent = transform;
-            _coordinator = new WorldBuildCoordinator(_rendererSettings);
+
+            _buildQueue = new ChunkMeshBuildQueue(this);
         }
 
         private void Start() {
             var id = 0;
 
-            for (int x = -CurrentSettings.DrawSize; x <= CurrentSettings.DrawSize; x++) {
-                for (int z = -CurrentSettings.DrawSize; z <= CurrentSettings.DrawSize; z++) {
-                    var chunk = CreateChunk(CurrentSettings.ChunkSize, new Vector3Int(CurrentSettings.ChunkSize.x * x, 0, CurrentSettings.ChunkSize.z * z),
+            for (int x = -WorldSettings.DrawSize; x <= WorldSettings.DrawSize; x++) {
+                for (int z = -WorldSettings.DrawSize; z <= WorldSettings.DrawSize; z++) {
+                    var chunk = CreateChunk(WorldSettings.ChunkSize, new Vector3Int(WorldSettings.ChunkSize.x * x, 0, WorldSettings.ChunkSize.z * z),
                         ++id);
                     Chunks.Add(chunk.Position, chunk);
-                    _coordinator.AddToBuildQueue(chunk);
+                    _buildQueue.AddToBuildQueue(chunk);
                 }
             }
             
             #if !BLOXY_BUILD_ONUPDATE
-            _coordinator.ProcessBuildQueue();
+            _buildQueue.Process();
             #endif
             
             Debug.Log("World Start Done");
@@ -55,7 +53,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             for (int x = 0; x < size.x; x++) {
                 for (int z = 0; z <size.z; z++) {
                     var height = Mathf.FloorToInt(
-                        Mathf.PerlinNoise((position.x + x) * CurrentSettings.Frequency, (position.z + z) * CurrentSettings.Frequency) * size.y
+                        Mathf.PerlinNoise((position.x + x) * WorldSettings.Frequency, (position.z + z) * WorldSettings.Frequency) * size.y
                     );
 
                     height = Mathf.Clamp(height, 1, size.y - 1);

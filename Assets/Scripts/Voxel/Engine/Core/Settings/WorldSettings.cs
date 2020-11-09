@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace CodeBlaze.Voxel.Engine.Core.World {
+namespace CodeBlaze.Voxel.Engine.Core.Settings {
 
     [Serializable]
     public class WorldSettings {

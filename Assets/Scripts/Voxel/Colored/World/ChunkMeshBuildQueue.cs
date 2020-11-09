@@ -3,58 +3,35 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-using CodeBlaze.Library.Collections.Pools;
 using CodeBlaze.Voxel.Colored.Chunk;
 using CodeBlaze.Voxel.Colored.Mesher;
-using CodeBlaze.Voxel.Engine.Core.Renderer;
+using CodeBlaze.Voxel.Engine.Core.Settings;
 
 using Cysharp.Threading.Tasks;
-
-using UnityEngine;
 
 using Debug = UnityEngine.Debug;
 
 namespace CodeBlaze.Voxel.Colored.World {
 
-    public class WorldBuildCoordinator {
-
-        public ChunkRendererSettings RendererSettings { get; }
+    public class ChunkMeshBuildQueue {
         
         private ColoredWorld _world;
         private Queue<ColoredChunk> _buildQueue;
-        private IObjectPool<ChunkRenderer> _rendererPool;
         
-        public WorldBuildCoordinator(ChunkRendererSettings settings) {
-            _world = ColoredWorld.Current;
-            RendererSettings = settings;
+        public ChunkMeshBuildQueue(ColoredWorld world) {
+            _world = world;
             _buildQueue = new Queue<ColoredChunk>();
-            
-            _rendererPool = new ObjectPool<ChunkRenderer>( // pool size = x^2 + 1
-                (2 * _world.CurrentSettings.DrawSize + 1) * (2 * _world.CurrentSettings.DrawSize + 1) + 1,
-                index => {
-                    var go = new GameObject("Chunk", typeof(ChunkRenderer));
-                    go.transform.parent = settings.Parent;
-                    go.SetActive(false);
-            
-                    var chunkRenderer = go.GetComponent<ChunkRenderer>();
-                    chunkRenderer.SetRenderSettings(settings.Material, settings.CastShadows);
-
-                    return chunkRenderer;
-                },
-                renderer => renderer.gameObject.SetActive(true),
-                renderer => renderer.gameObject.SetActive(false)
-            );
         }
 
         public void AddToBuildQueue(ColoredChunk chunk) => _buildQueue.Enqueue(chunk);
 
-        public void ProcessBuildQueue() {
-            switch (RendererSettings.BuildMethod) {
-                case BuildMethod.MultiThreaded:
+        public void Process() {
+            switch (_world.BuildQueueSettings.ProcessMethod) {
+                case BuildQueueSettings.BuildMethod.MultiThreaded:
                     BuildQueueMultiThread().Forget();
 
                     break;
-                case BuildMethod.SingleThreaded:
+                case BuildQueueSettings.BuildMethod.SingleThreaded:
                     BuildQueueSingleThread();
                     break;
                 default:
@@ -91,7 +68,7 @@ namespace CodeBlaze.Voxel.Colored.World {
                 var chunk = _buildQueue.Dequeue();
                 var data = mesher.GenerateMesh(chunk, _world.GetNeighbors(chunk));
                 
-                var renderer = _rendererPool.Claim();
+                var renderer = _world.RendererPool.Claim();
                 renderer.transform.position = chunk.Position;
                 renderer.name += $" {chunk.ID}";
                 renderer.Render(data);
@@ -115,29 +92,12 @@ namespace CodeBlaze.Voxel.Colored.World {
             );
             watch.Stop();
 
-            var renderer = _rendererPool.Claim();
+            var renderer = _world.RendererPool.Claim();
             renderer.transform.position = chunk.Position;
             renderer.name += $" {chunk.ID}";
             renderer.Render(data);
             
             return watch.ElapsedMilliseconds;
-        }
-
-        [Serializable]
-        public class ChunkRendererSettings {
-
-            [NonSerialized] public Transform Parent;
-            public Material Material;
-            public bool CastShadows;
-            public BuildMethod BuildMethod;
-
-        }
-        
-        public enum BuildMethod {
-
-            MultiThreaded,
-            SingleThreaded
-            
         }
 
     }
