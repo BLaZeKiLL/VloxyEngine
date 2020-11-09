@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using CodeBlaze.Voxel.Engine.Chunk;
 using CodeBlaze.Voxel.Colored.Block;
-using CodeBlaze.Voxel.Engine.Core;
 
 using UnityEngine;
 

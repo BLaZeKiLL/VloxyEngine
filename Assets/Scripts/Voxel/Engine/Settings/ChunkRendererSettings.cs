@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace CodeBlaze.Voxel.Engine.Core.Settings {
+namespace CodeBlaze.Voxel.Engine.Settings {
 
     [Serializable]
     public class ChunkRendererSettings {

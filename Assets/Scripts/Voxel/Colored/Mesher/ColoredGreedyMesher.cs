@@ -1,5 +1,5 @@
 ﻿using CodeBlaze.Voxel.Colored.Block;
-using CodeBlaze.Voxel.Engine.Core.Mesher;
+using CodeBlaze.Voxel.Engine.Mesher;
 
 using UnityEngine;
 

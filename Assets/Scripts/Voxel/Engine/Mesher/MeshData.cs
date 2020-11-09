@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace CodeBlaze.Voxel.Engine.Core.Mesher {
+namespace CodeBlaze.Voxel.Engine.Mesher {
 
     public class MeshData {
         

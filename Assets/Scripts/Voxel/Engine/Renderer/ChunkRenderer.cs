@@ -1,9 +1,9 @@
-﻿using CodeBlaze.Voxel.Engine.Core.Mesher;
+﻿using CodeBlaze.Voxel.Engine.Mesher;
 
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace CodeBlaze.Voxel.Engine.Core.Renderer {
+namespace CodeBlaze.Voxel.Engine.Renderer {
 
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
     public class ChunkRenderer : MonoBehaviour {

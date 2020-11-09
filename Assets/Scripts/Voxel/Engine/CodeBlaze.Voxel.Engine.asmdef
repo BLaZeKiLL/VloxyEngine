@@ -1,7 +1,8 @@
 {
-    "name": "CodeBlaze.Voxel.Engine.Core",
+    "name": "CodeBlaze.Voxel.Engine",
     "references": [
-        "GUID:9c1c4c82ebfda8c47bb5892fedda07a7"
+        "GUID:9c1c4c82ebfda8c47bb5892fedda07a7",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

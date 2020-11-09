@@ -1,4 +1,4 @@
-﻿namespace CodeBlaze.Voxel.Engine.Core {
+﻿namespace CodeBlaze.Voxel.Engine {
 
     public interface IBlock {
 

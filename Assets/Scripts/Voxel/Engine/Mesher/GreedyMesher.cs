@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 
+using CodeBlaze.Voxel.Engine.Chunk;
+
 using UnityEngine;
 
-namespace CodeBlaze.Voxel.Engine.Core.Mesher {
+namespace CodeBlaze.Voxel.Engine.Mesher {
 
     public abstract class GreedyMesher<T> : IMesher<T> where T : IBlock {
 

@@ -5,7 +5,7 @@ using System.Linq;
 
 using CodeBlaze.Voxel.Colored.Chunk;
 using CodeBlaze.Voxel.Colored.Mesher;
-using CodeBlaze.Voxel.Engine.Core.Settings;
+using CodeBlaze.Voxel.Engine.Settings;
 
 using Cysharp.Threading.Tasks;
 

@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 
 using CodeBlaze.Library.Collections.Pools;
-using CodeBlaze.Voxel.Engine.Core.Renderer;
-using CodeBlaze.Voxel.Engine.Core.Settings;
+using CodeBlaze.Voxel.Engine.Chunk;
+using CodeBlaze.Voxel.Engine.Renderer;
+using CodeBlaze.Voxel.Engine.Settings;
 
 using UnityEngine;
 
-namespace CodeBlaze.Voxel.Engine.Core.World {
+namespace CodeBlaze.Voxel.Engine.World {
 
     public class World<T> : MonoBehaviour where T : IBlock {
 

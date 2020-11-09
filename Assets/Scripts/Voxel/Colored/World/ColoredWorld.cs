@@ -1,6 +1,6 @@
 ﻿using CodeBlaze.Voxel.Colored.Block;
 using CodeBlaze.Voxel.Colored.Chunk;
-using CodeBlaze.Voxel.Engine.Core.World;
+using CodeBlaze.Voxel.Engine.World;
 
 using UnityEngine;
 
