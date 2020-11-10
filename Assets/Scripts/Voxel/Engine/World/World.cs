@@ -2,6 +2,7 @@
 
 using CodeBlaze.Library.Collections.Pools;
 using CodeBlaze.Voxel.Engine.Chunk;
+using CodeBlaze.Voxel.Engine.Meshing.Coordinator;
 using CodeBlaze.Voxel.Engine.Renderer;
 using CodeBlaze.Voxel.Engine.Settings;
 
@@ -9,11 +10,11 @@ using UnityEngine;
 
 namespace CodeBlaze.Voxel.Engine.World {
 
-    public class World<T> : MonoBehaviour where T : IBlock {
+    public abstract class World<T> : MonoBehaviour where T : IBlock {
 
         [SerializeField] private WorldSettings _worldSettings;
         [SerializeField] private ChunkRendererSettings _chunkRendererSettings;
-        [SerializeField] private BuildQueueSettings _buildQueueSettings;
+        [SerializeField] private BuildCoordinatorSettings _buildCoordinatorSettings;
 
         #region Settings
 
@@ -27,9 +28,9 @@ namespace CodeBlaze.Voxel.Engine.World {
             set => _chunkRendererSettings = value;
         }
 
-        public BuildQueueSettings BuildQueueSettings {
-            get => _buildQueueSettings;
-            set => _buildQueueSettings = value;
+        public BuildCoordinatorSettings BuildCoordinatorSettings {
+            get => _buildCoordinatorSettings;
+            set => _buildCoordinatorSettings = value;
         }
 
         #endregion
@@ -37,13 +38,17 @@ namespace CodeBlaze.Voxel.Engine.World {
         public IObjectPool<ChunkRenderer> RendererPool { get; private set; }
         
         protected Dictionary<Vector3Int, Chunk<T>> Chunks;
+        protected MeshBuildCoordinator<T> BuildCoordinator;
 
         protected virtual void Awake() {
             Chunks = new Dictionary<Vector3Int, Chunk<T>>();
 
             RendererPool = CreateRendererPool(WorldSettings.DrawSize);
+            BuildCoordinator = MeshBuildCoordinatorProvider();
         }
 
+        protected abstract MeshBuildCoordinator<T> MeshBuildCoordinatorProvider();
+        
         #region Neighbors
         
         public NeighborChunks<T> GetNeighbors(Chunk<T> chunk) {

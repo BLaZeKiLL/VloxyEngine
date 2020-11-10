@@ -1,5 +1,10 @@
-﻿using CodeBlaze.Voxel.Colored.Block;
+﻿using System;
+
+using CodeBlaze.Voxel.Colored.Block;
 using CodeBlaze.Voxel.Colored.Chunk;
+using CodeBlaze.Voxel.Colored.Meshing.Coordinator;
+using CodeBlaze.Voxel.Engine.Meshing.Coordinator;
+using CodeBlaze.Voxel.Engine.Settings;
 using CodeBlaze.Voxel.Engine.World;
 
 using UnityEngine;
@@ -8,12 +13,15 @@ namespace CodeBlaze.Voxel.Colored.World {
 
     public class ColoredWorld : World<ColoredBlock> {
 
-        private ChunkMeshBuildQueue _buildQueue;
-
-        protected override void Awake() {
-            base.Awake();
-
-            _buildQueue = new ChunkMeshBuildQueue(this);
+        protected override MeshBuildCoordinator<ColoredBlock> MeshBuildCoordinatorProvider() {
+            switch (BuildCoordinatorSettings.ProcessMethod) {
+                case BuildCoordinatorSettings.BuildMethod.MultiThreaded:
+                    return new ColoredUniTaskMultiThreadedMeshBuildCoordinator(this);
+                case BuildCoordinatorSettings.BuildMethod.SingleThreaded:
+                    return new ColoredSingleThreadedMeshBuildCoordinator(this);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private void Start() {
@@ -24,12 +32,12 @@ namespace CodeBlaze.Voxel.Colored.World {
                     var chunk = CreateChunk(WorldSettings.ChunkSize, new Vector3Int(WorldSettings.ChunkSize.x * x, 0, WorldSettings.ChunkSize.z * z),
                         ++id);
                     Chunks.Add(chunk.Position, chunk);
-                    _buildQueue.AddToBuildQueue(chunk);
+                    BuildCoordinator.Add(chunk);
                 }
             }
             
             #if !BLOXY_BUILD_ONUPDATE
-            _buildQueue.Process();
+            BuildCoordinator.Process();
             #endif
             
             Debug.Log("World Start Done");
@@ -41,7 +49,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             if (_started || !Input.GetKeyDown(KeyCode.Space)) return;
 
             _started = true;
-            _coordinator.ProcessBuildQueue();
+            BuildCoordinator.Process();
         }
         #endif
 

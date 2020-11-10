@@ -4,15 +4,15 @@ using CodeBlaze.Voxel.Engine.Chunk;
 
 using UnityEngine;
 
-namespace CodeBlaze.Voxel.Engine.Mesher {
+namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
 
-    public abstract class GreedyMesher<T> : IMesher<T> where T : IBlock {
+    public abstract class GreedyMeshBuilder<T> : IMeshBuilder<T> where T : IBlock {
 
         protected readonly MeshData MeshData;
 
         private int index;
 
-        public GreedyMesher() {
+        public GreedyMeshBuilder() {
             MeshData = new MeshData();
         }
 

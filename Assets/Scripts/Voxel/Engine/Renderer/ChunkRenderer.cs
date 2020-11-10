@@ -1,4 +1,4 @@
-﻿using CodeBlaze.Voxel.Engine.Mesher;
+﻿using CodeBlaze.Voxel.Engine.Meshing;
 
 using UnityEngine;
 using UnityEngine.Rendering;

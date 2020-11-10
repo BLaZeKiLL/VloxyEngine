@@ -6,7 +6,7 @@ namespace CodeBlaze.Voxel.Engine.Chunk {
 
     public abstract class Chunk<T> where T : IBlock  {
 
-        protected T[] Blocks;
+        protected readonly T[] Blocks;
         
         public Vector3Int Position { get; }
         public Vector3Int Size { get; }

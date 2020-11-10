@@ -3,7 +3,7 @@
 namespace CodeBlaze.Voxel.Engine.Settings {
 
     [Serializable]
-    public class BuildQueueSettings {
+    public class BuildCoordinatorSettings {
 
         public BuildMethod ProcessMethod;
         

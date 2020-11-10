@@ -1,11 +1,11 @@
 ﻿using CodeBlaze.Voxel.Colored.Block;
-using CodeBlaze.Voxel.Engine.Mesher;
+using CodeBlaze.Voxel.Engine.Meshing.Builder;
 
 using UnityEngine;
 
-namespace CodeBlaze.Voxel.Colored.Mesher {
+namespace CodeBlaze.Voxel.Colored.Meshing.Builder {
 
-    public class ColoredGreedyMesher : GreedyMesher<ColoredBlock> {
+    public class ColoredGreedyMeshBuilder : GreedyMeshBuilder<ColoredBlock> {
 
         protected override ColoredBlock EmptyBlock() => ColoredBlockTypes.Air();
 
