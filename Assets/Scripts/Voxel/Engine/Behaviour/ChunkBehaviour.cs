@@ -3,10 +3,10 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace CodeBlaze.Voxel.Engine.Renderer {
+namespace CodeBlaze.Voxel.Engine.Behaviour {
 
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
-    public class ChunkRenderer : MonoBehaviour {
+    public class ChunkBehaviour : MonoBehaviour {
         
         private Mesh _mesh;
         private MeshRenderer _renderer;

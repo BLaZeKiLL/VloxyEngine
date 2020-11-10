@@ -18,7 +18,7 @@ namespace CodeBlaze.Voxel.Colored.Meshing.Coordinator {
         protected override void Render(Chunk<ColoredBlock> chunk, MeshData data) {
             if (!(chunk is ColoredChunk coloredChunk)) return;
 
-            var renderer = World.RendererPool.Claim();
+            var renderer = World.ChunkPool.Claim();
             renderer.transform.position = coloredChunk.Position;
             renderer.name += $" {coloredChunk.ID}";
             renderer.Render(data);

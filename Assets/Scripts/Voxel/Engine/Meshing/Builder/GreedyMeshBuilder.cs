@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
 
-    public abstract class GreedyMeshBuilder<T> : IMeshBuilder<T> where T : IBlock {
+    public abstract class GreedyMeshBuilder<B> : IMeshBuilder<B> where B : IBlock {
 
         protected readonly MeshData MeshData;
 
@@ -16,15 +16,15 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
             MeshData = new MeshData();
         }
 
-        protected abstract T EmptyBlock();
+        protected abstract B EmptyBlock();
 
-        protected abstract T NullBlock();
+        protected abstract B NullBlock();
 
-        protected virtual void CreateQuad(T block, Vector3Int normal) { }
+        protected virtual void CreateQuad(B block, Vector3Int normal) { }
 
-        protected virtual bool CompareBlock(T block1, T block2) => block1.Equals(block2);
+        protected virtual bool CompareBlock(B block1, B block2) => block1.Equals(block2);
         
-        public MeshData GenerateMesh(Chunk<T> chunk, NeighborChunks<T> neighbors)  {
+        public MeshData GenerateMesh(Chunk<B> chunk, NeighborChunks<B> neighbors)  {
             // Sweep over each axis (X, Y and Z)
             for (int direction = 0; direction < 3; direction++) {
                 int i, // loop var
@@ -55,7 +55,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
                     // Compute the mask
                     for (chunkItr[axis2] = 0; chunkItr[axis2] < axis2Limit; ++chunkItr[axis2]) {
                         for (chunkItr[axis1] = 0; chunkItr[axis1] < axis1Limit; ++chunkItr[axis1]) {
-                            T currentBlock, compareBlock;
+                            B currentBlock, compareBlock;
 
                             if (chunkItr[direction] >= 0) {
                                 currentBlock = chunk.GetBlock(
@@ -225,7 +225,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
         // v2 -> TL
         // v3 -> BR
         // v4 -> TR
-        private void CreateQuad(sbyte normalMask, T block, IReadOnlyList<int> directionMask, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
+        private void CreateQuad(sbyte normalMask, B block, IReadOnlyList<int> directionMask, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
             MeshData.Vertices.Add(v1);
             MeshData.Vertices.Add(v2);
             MeshData.Vertices.Add(v3);
@@ -267,10 +267,10 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
 
         private readonly struct Mask {
 
-            public readonly T Block;
+            public readonly B Block;
             public readonly sbyte Normal;
 
-            public Mask(T block, sbyte normal) {
+            public Mask(B block, sbyte normal) {
                 Block = block;
                 Normal = normal;
             }
