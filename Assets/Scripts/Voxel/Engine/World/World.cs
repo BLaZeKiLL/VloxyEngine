@@ -3,14 +3,14 @@
 using CodeBlaze.Library.Collections.Pools;
 using CodeBlaze.Voxel.Engine.Chunk;
 using CodeBlaze.Voxel.Engine.Meshing.Coordinator;
-using CodeBlaze.Voxel.Engine.Renderer;
+using CodeBlaze.Voxel.Engine.Behaviour;
 using CodeBlaze.Voxel.Engine.Settings;
 
 using UnityEngine;
 
 namespace CodeBlaze.Voxel.Engine.World {
 
-    public abstract class World<T> : MonoBehaviour where T : IBlock {
+    public abstract class World<B> : MonoBehaviour where B : IBlock {
 
         [SerializeField] private WorldSettings _worldSettings;
         [SerializeField] private ChunkRendererSettings _chunkRendererSettings;
@@ -35,23 +35,23 @@ namespace CodeBlaze.Voxel.Engine.World {
 
         #endregion
 
-        public IObjectPool<ChunkRenderer> RendererPool { get; private set; }
+        public IObjectPool<ChunkBehaviour> ChunkPool { get; private set; }
         
-        protected Dictionary<Vector3Int, Chunk<T>> Chunks;
-        protected MeshBuildCoordinator<T> BuildCoordinator;
+        protected Dictionary<Vector3Int, Chunk<B>> Chunks;
+        protected MeshBuildCoordinator<B> BuildCoordinator;
 
         protected virtual void Awake() {
-            Chunks = new Dictionary<Vector3Int, Chunk<T>>();
+            Chunks = new Dictionary<Vector3Int, Chunk<B>>();
 
-            RendererPool = CreateRendererPool(WorldSettings.DrawSize);
+            ChunkPool = CreateRendererPool(WorldSettings.DrawSize);
             BuildCoordinator = MeshBuildCoordinatorProvider();
         }
 
-        protected abstract MeshBuildCoordinator<T> MeshBuildCoordinatorProvider();
+        protected abstract MeshBuildCoordinator<B> MeshBuildCoordinatorProvider();
         
         #region Neighbors
         
-        public NeighborChunks<T> GetNeighbors(Chunk<T> chunk) {
+        public NeighborChunks<B> GetNeighbors(Chunk<B> chunk) {
             var position = chunk.Position;
 
             var px = position + Vector3Int.right * WorldSettings.ChunkSize;
@@ -61,7 +61,7 @@ namespace CodeBlaze.Voxel.Engine.World {
             var ny = position + Vector3Int.down * WorldSettings.ChunkSize;
             var nz = position + new Vector3Int(0, 0, -1) * WorldSettings.ChunkSize;
             
-            return new NeighborChunks<T> {
+            return new NeighborChunks<B> {
                 ChunkPX = Chunks.ContainsKey(px) ? Chunks[px] : null,
                 ChunkPY = Chunks.ContainsKey(py) ? Chunks[py] : null,
                 ChunkPZ = Chunks.ContainsKey(pz) ? Chunks[pz] : null,
@@ -71,37 +71,37 @@ namespace CodeBlaze.Voxel.Engine.World {
             };
         }
 
-        public Chunk<T> GetNeighborPX(Chunk<T> chunk) {
+        public Chunk<B> GetNeighborPX(Chunk<B> chunk) {
             var px = chunk.Position + Vector3Int.right * WorldSettings.ChunkSize;
 
             return Chunks.ContainsKey(px) ? Chunks[px] : null;
         }
         
-        public Chunk<T> GetNeighborPY(Chunk<T> chunk) {
+        public Chunk<B> GetNeighborPY(Chunk<B> chunk) {
             var py = chunk.Position + Vector3Int.up * WorldSettings.ChunkSize;
 
             return Chunks.ContainsKey(py) ? Chunks[py] : null;
         }
         
-        public Chunk<T> GetNeighborPZ(Chunk<T> chunk) {
+        public Chunk<B> GetNeighborPZ(Chunk<B> chunk) {
             var pz = chunk.Position + new Vector3Int(0, 0, 1) * WorldSettings.ChunkSize;
 
             return Chunks.ContainsKey(pz) ? Chunks[pz] : null;
         }
         
-        public Chunk<T> GetNeighborNX(Chunk<T> chunk) {
+        public Chunk<B> GetNeighborNX(Chunk<B> chunk) {
             var nx = chunk.Position + Vector3Int.left * WorldSettings.ChunkSize;
 
             return Chunks.ContainsKey(nx) ? Chunks[nx] : null;
         }
         
-        public Chunk<T> GetNeighborNY(Chunk<T> chunk) {
+        public Chunk<B> GetNeighborNY(Chunk<B> chunk) {
             var ny = chunk.Position + Vector3Int.down * WorldSettings.ChunkSize;
 
             return Chunks.ContainsKey(ny) ? Chunks[ny] : null;
         }
         
-        public Chunk<T> GetNeighborNZ(Chunk<T> chunk) {
+        public Chunk<B> GetNeighborNZ(Chunk<B> chunk) {
             var nz = chunk.Position + new Vector3Int(0, 0, -1) * WorldSettings.ChunkSize;
 
             return Chunks.ContainsKey(nz) ? Chunks[nz] : null;
@@ -109,14 +109,14 @@ namespace CodeBlaze.Voxel.Engine.World {
         
         #endregion
         
-        private IObjectPool<ChunkRenderer> CreateRendererPool(int drawSize) => new ObjectPool<ChunkRenderer>( // pool size = x^2 + 1
+        private IObjectPool<ChunkBehaviour> CreateRendererPool(int drawSize) => new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
             (2 * drawSize + 1) * (2 * drawSize + 1) + 1,
             index => {
-                var go = new GameObject("Chunk", typeof(ChunkRenderer));
+                var go = new GameObject("Chunk", typeof(ChunkBehaviour));
                 go.transform.parent = transform;
                 go.SetActive(false);
             
-                var chunkRenderer = go.GetComponent<ChunkRenderer>();
+                var chunkRenderer = go.GetComponent<ChunkBehaviour>();
                 chunkRenderer.SetRenderSettings(ChunkRendererSettings.Material, ChunkRendererSettings.CastShadows);
 
                 return chunkRenderer;

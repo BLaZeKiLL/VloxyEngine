@@ -4,21 +4,21 @@ using CodeBlaze.Voxel.Engine.World;
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
 
-    public abstract class MeshBuildCoordinator<T> where T : IBlock {
+    public abstract class MeshBuildCoordinator<B> where B : IBlock {
 
-        protected readonly World<T> World; // circular reference
+        protected readonly World<B> World; // circular reference
 
-        protected MeshBuildCoordinator(World<T> world) {
+        protected MeshBuildCoordinator(World<B> world) {
             World = world;
         }
 
-        public abstract void Add(Chunk<T> chunk);
+        public abstract void Add(Chunk<B> chunk);
 
         public abstract void Process();
 
-        protected abstract IMeshBuilder<T> MeshBuilderProvider();
+        protected abstract IMeshBuilder<B> MeshBuilderProvider();
 
-        protected abstract void Render(Chunk<T> chunk, MeshData data);
+        protected abstract void Render(Chunk<B> chunk, MeshData data);
         
         protected virtual void PostProcess() { }
 

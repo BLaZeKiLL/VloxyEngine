@@ -8,15 +8,15 @@ using CodeBlaze.Voxel.Engine.World;
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
 
-    public abstract class SingleThreadedMeshBuildCoordinator<T> : MeshBuildCoordinator<T> where T : IBlock {
+    public abstract class SingleThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
 
-        protected readonly Queue<Chunk<T>> BuildQueue;
+        protected readonly Queue<Chunk<B>> BuildQueue;
 
-        public SingleThreadedMeshBuildCoordinator(World<T> world) : base(world) {
-            BuildQueue = new Queue<Chunk<T>>();
+        public SingleThreadedMeshBuildCoordinator(World<B> world) : base(world) {
+            BuildQueue = new Queue<Chunk<B>>();
         }
 
-        public override void Add(Chunk<T> chunk) => BuildQueue.Enqueue(chunk);
+        public override void Add(Chunk<B> chunk) => BuildQueue.Enqueue(chunk);
 
         public override void Process() {
             var mesher = MeshBuilderProvider();
@@ -39,9 +39,9 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             GC.Collect();
         }
 
-        protected abstract override IMeshBuilder<T> MeshBuilderProvider();
+        protected abstract override IMeshBuilder<B> MeshBuilderProvider();
 
-        protected abstract override void Render(Chunk<T> chunk, MeshData data);
+        protected abstract override void Render(Chunk<B> chunk, MeshData data);
 
     }
 

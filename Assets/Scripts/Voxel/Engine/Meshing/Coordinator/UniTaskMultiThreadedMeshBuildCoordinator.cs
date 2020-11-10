@@ -11,21 +11,21 @@ using Cysharp.Threading.Tasks;
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
 
-    public abstract class UniTaskMultiThreadedMeshBuildCoordinator<T> : MeshBuildCoordinator<T> where T : IBlock {
+    public abstract class UniTaskMultiThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
 
-        protected readonly Queue<Chunk<T>> BuildQueue;
+        protected readonly Queue<Chunk<B>> BuildQueue;
 
-        protected UniTaskMultiThreadedMeshBuildCoordinator(World<T> world) : base(world) {
-            BuildQueue = new Queue<Chunk<T>>();
+        protected UniTaskMultiThreadedMeshBuildCoordinator(World<B> world) : base(world) {
+            BuildQueue = new Queue<Chunk<B>>();
         }
         
-        public override void Add(Chunk<T> chunk) => BuildQueue.Enqueue(chunk);
+        public override void Add(Chunk<B> chunk) => BuildQueue.Enqueue(chunk);
         
         public override void Process() => InternalProcess().Forget();
 
-        protected abstract override IMeshBuilder<T> MeshBuilderProvider();
+        protected abstract override IMeshBuilder<B> MeshBuilderProvider();
 
-        protected abstract override void Render(Chunk<T> chunk, MeshData data);
+        protected abstract override void Render(Chunk<B> chunk, MeshData data);
 
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private async UniTaskVoid InternalProcess() {
@@ -49,7 +49,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             PostProcess();
         }
         
-        private async UniTask<long> Build(Chunk<T> chunk) {
+        private async UniTask<long> Build(Chunk<B> chunk) {
             var watch = new Stopwatch();
             
             var data = await UniTask.RunOnThreadPool(

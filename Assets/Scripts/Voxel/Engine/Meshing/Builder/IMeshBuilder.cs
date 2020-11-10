@@ -2,9 +2,9 @@
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
 
-    public interface IMeshBuilder<T> where T : IBlock {
+    public interface IMeshBuilder<B> where B : IBlock {
 
-        MeshData GenerateMesh(Chunk<T> chunk, NeighborChunks<T> neighbors);
+        MeshData GenerateMesh(Chunk<B> chunk, NeighborChunks<B> neighbors);
 
         void Clear();
 
