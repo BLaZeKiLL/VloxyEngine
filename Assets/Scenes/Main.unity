@@ -169,11 +169,12 @@ MonoBehaviour:
   _worldSettings:
     DrawSize: 5
     Frequency: 0.02
-    ChunkSize: {x: 64, y: 32, z: 64}
-  _rendererSettings:
+    ChunkSize: {x: 32, y: 32, z: 32}
+  _chunkRendererSettings:
     Material: {fileID: 2100000, guid: 104fcd82a3c84694d93fbfb0a9dbf2a1, type: 2}
     CastShadows: 0
-    BuildMethod: 0
+  _buildCoordinatorSettings:
+    ProcessMethod: 0
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0

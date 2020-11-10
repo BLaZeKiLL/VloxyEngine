@@ -1,20 +1,17 @@
 ﻿using System.Collections.Generic;
 
+using CodeBlaze.Voxel.Engine.Chunk;
 using CodeBlaze.Voxel.Colored.Block;
-using CodeBlaze.Voxel.Engine.Core;
 
 using UnityEngine;
 
 namespace CodeBlaze.Voxel.Colored.Chunk {
 
     public class ColoredChunk : Chunk<ColoredBlock> {
-
-        public Vector3Int Position { get; }
         
         public int ID { get; }
 
-        public ColoredChunk(Vector3Int size, Vector3Int position, int Id) : base(size) {
-            Position = position;
+        public ColoredChunk(Vector3Int size, Vector3Int position, int Id) : base(size, position) {
             ID = Id;
         }
 
