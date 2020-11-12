@@ -41,8 +41,8 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             var result = await UniTask.WhenAll(tasks);
             watch.Stop();
 
-            UnityEngine.Debug.Log($"Average mesh build time : {result.Average()} ms");
-            UnityEngine.Debug.Log($"Build queue process time : {watch.Elapsed:s\\.fff} sec");
+            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average mesh build time : {result.Average()} ms");
+            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Build queue process time : {watch.Elapsed:s\\.fff} sec");
 
             GC.Collect();
             
@@ -81,7 +81,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             PostProcess();
         }
         
-        private async UniTask Build(Chunk<T> chunk) {
+        private async UniTask Build(Chunk<B> chunk) {
             var data = await UniTask.RunOnThreadPool(
                 () => MeshBuilderProvider().GenerateMesh(chunk, World.GetNeighbors(chunk))
             );

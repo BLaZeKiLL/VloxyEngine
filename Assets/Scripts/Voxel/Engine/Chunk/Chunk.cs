@@ -1,5 +1,7 @@
 ﻿using System;
 
+using CodeBlaze.Voxel.Engine.Behaviour;
+
 using UnityEngine;
 
 namespace CodeBlaze.Voxel.Engine.Chunk {
@@ -10,6 +12,7 @@ namespace CodeBlaze.Voxel.Engine.Chunk {
         
         public Vector3Int Position { get; }
         public Vector3Int Size { get; }
+        public ChunkBehaviour Behaviour { get; set; }
         
         protected Chunk(Vector3Int size, Vector3Int position) {
             Size = size;
