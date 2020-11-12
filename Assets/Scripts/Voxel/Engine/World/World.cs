@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using CodeBlaze.Library.Collections.Pools;
 using CodeBlaze.Voxel.Engine.Chunk;
@@ -16,39 +18,84 @@ namespace CodeBlaze.Voxel.Engine.World {
         [SerializeField] private ChunkRendererSettings _chunkRendererSettings;
         [SerializeField] private BuildCoordinatorSettings _buildCoordinatorSettings;
 
-        #region Settings
-
-        public WorldSettings WorldSettings {
-            get => _worldSettings;
-            set => _worldSettings = value;
-        }
-
-        public ChunkRendererSettings ChunkRendererSettings {
-            get => _chunkRendererSettings;
-            set => _chunkRendererSettings = value;
-        }
-
-        public BuildCoordinatorSettings BuildCoordinatorSettings {
-            get => _buildCoordinatorSettings;
-            set => _buildCoordinatorSettings = value;
-        }
-
-        #endregion
-
         public IObjectPool<ChunkBehaviour> ChunkPool { get; private set; }
+        public int PoolSize;
         
         protected Dictionary<Vector3Int, Chunk<B>> Chunks;
         protected MeshBuildCoordinator<B> BuildCoordinator;
+        protected Vector3Int FocusChunkCoord;
 
+        private List<Vector3Int> _activeChunks;
+        
         protected virtual void Awake() {
             Chunks = new Dictionary<Vector3Int, Chunk<B>>();
-
-            ChunkPool = CreateRendererPool(WorldSettings.DrawSize);
+            _activeChunks = new List<Vector3Int>();
+            
+            PoolSize = (2 * WorldSettings.DrawSize + 1) * (2 * WorldSettings.DrawSize + 1) + 1;
+            ChunkPool = CreateRendererPool();
             BuildCoordinator = MeshBuildCoordinatorProvider();
+
+            FocusChunkCoord = WorldSettings.Focus != null
+                ? GetChunkCoords(WorldSettings.Focus.position)
+                : Vector3Int.zero;
         }
 
-        protected abstract MeshBuildCoordinator<B> MeshBuildCoordinatorProvider();
+        protected void Start() {
+            WorldUpdate();
+            
+            Debug.Log("[World][Start] Done");
+        }
+
+        protected virtual void Update() {
+            var coords = GetChunkCoords(WorldSettings.Focus.position);
+
+            if (coords.x == FocusChunkCoord.x && coords.z == FocusChunkCoord.z) return;
+
+            FocusChunkCoord = coords;
+                
+            // update
+            WorldUpdate();
+        }
         
+        protected abstract MeshBuildCoordinator<B> MeshBuildCoordinatorProvider();
+
+        protected abstract Chunk<B> CreateChunk(Vector3Int position);
+
+        protected virtual void WorldUpdate() {
+            var current = new List<Vector3Int>(PoolSize);
+
+            var focusPosition = GetChunkCoords(WorldSettings.Focus.transform.position);
+            
+            for (int x = -WorldSettings.DrawSize; x <= WorldSettings.DrawSize; x++) {
+                for (int z = -WorldSettings.DrawSize; z <= WorldSettings.DrawSize; z++) {
+                    current.Add( focusPosition + new Vector3Int(WorldSettings.ChunkSize.x * x, 0, WorldSettings.ChunkSize.z * z));
+                }
+            }
+
+            var reclaim = _activeChunks.Where(x => !current.Contains(x)).ToList();
+            var claim = current.Where(x => !_activeChunks.Contains(x)).ToList();
+            
+            Debug.Log($"[World][Update] Reclaim : {reclaim.Count} Claim : {claim.Count}");
+            
+            foreach (var x in reclaim) {
+                ChunkPool.Reclaim(Chunks[x].Behaviour);
+            }
+            
+            foreach (var x in claim) {
+                if (Chunks.ContainsKey(x)) {
+                    BuildCoordinator.Add(Chunks[x]);
+                } else {
+                    var chunk = CreateChunk(x);
+                    Chunks.Add(chunk.Position, chunk);
+                    BuildCoordinator.Add(chunk);
+                }
+            }
+
+            _activeChunks = current;
+            
+            BuildCoordinator.Process();
+        }
+
         #region Neighbors
         
         public NeighborChunks<B> GetNeighbors(Chunk<B> chunk) {
@@ -108,9 +155,56 @@ namespace CodeBlaze.Voxel.Engine.World {
         }
         
         #endregion
+
+        #region Settings
+
+        public WorldSettings WorldSettings {
+            get => _worldSettings;
+            set => _worldSettings = value;
+        }
+
+        public ChunkRendererSettings ChunkRendererSettings {
+            get => _chunkRendererSettings;
+            set => _chunkRendererSettings = value;
+        }
+
+        public BuildCoordinatorSettings BuildCoordinatorSettings {
+            get => _buildCoordinatorSettings;
+            set => _buildCoordinatorSettings = value;
+        }
+
+        #endregion
+
+        #region Utils
+
+        public Vector3Int GetChunkCoords(Vector3 Position) {
+            var pos = Vector3Int.FloorToInt(Position);
+
+            var x = pos.x - pos.x % WorldSettings.ChunkSize.x;
+            var y = 0; //pos.y - pos.y % WorldSettings.ChunkSize.y;
+            var z = pos.z - pos.z % WorldSettings.ChunkSize.z;
+
+            x = pos.x < 0 ? x - WorldSettings.ChunkSize.x : x;
+            y = pos.y < 0 ? y - WorldSettings.ChunkSize.y : y;
+            z = pos.z < 0 ? z - WorldSettings.ChunkSize.z : z;
+            
+            return new Vector3Int(x,y,z);
+        }
         
-        private IObjectPool<ChunkBehaviour> CreateRendererPool(int drawSize) => new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
-            (2 * drawSize + 1) * (2 * drawSize + 1) + 1,
+        public Vector3Int GetChunkCoords(Vector3Int Position) {
+            var x = Position.x - Position.x % WorldSettings.ChunkSize.x;
+            var y = 0;//Position.y - Position.y % WorldSettings.ChunkSize.y;
+            var z = Position.z - Position.z % WorldSettings.ChunkSize.z;
+            
+            return new Vector3Int(x,y,z);
+        }
+
+        #endregion
+
+        #region Private
+
+        private IObjectPool<ChunkBehaviour> CreateRendererPool() => new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
+            PoolSize,
             index => {
                 var go = new GameObject("Chunk", typeof(ChunkBehaviour));
                 go.transform.parent = transform;
@@ -124,7 +218,9 @@ namespace CodeBlaze.Voxel.Engine.World {
             chunkRenderer => chunkRenderer.gameObject.SetActive(true),
             chunkRenderer => chunkRenderer.gameObject.SetActive(false)
         );
-        
+
+        #endregion
+
     }
 
 }
