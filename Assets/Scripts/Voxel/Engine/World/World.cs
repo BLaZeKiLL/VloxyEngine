@@ -31,7 +31,7 @@ namespace CodeBlaze.Voxel.Engine.World {
             Chunks = new Dictionary<Vector3Int, Chunk<B>>();
             _activeChunks = new List<Vector3Int>();
             
-            PoolSize = (2 * WorldSettings.DrawSize + 1) * (2 * WorldSettings.DrawSize + 1) + 1;
+            PoolSize = (2 * WorldSettings.DrawDistance + 1) * (2 * WorldSettings.DrawDistance + 1) + 1;
             ChunkPool = CreateRendererPool();
             BuildCoordinator = MeshBuildCoordinatorProvider();
 
@@ -41,6 +41,13 @@ namespace CodeBlaze.Voxel.Engine.World {
         }
 
         protected void Start() {
+            for (int x = -WorldSettings.ChunkPageSize; x <= WorldSettings.ChunkPageSize; x++) {
+                for (int z = -WorldSettings.ChunkPageSize; z <= WorldSettings.ChunkPageSize; z++) {
+                    var pos = new Vector3Int(x, 0, z) * WorldSettings.ChunkSize;
+                    Chunks.Add(pos, CreateChunk(pos));
+                }
+            }
+
             WorldUpdate();
             
             Debug.Log("[World][Start] Done");
@@ -66,9 +73,9 @@ namespace CodeBlaze.Voxel.Engine.World {
 
             var focusPosition = GetChunkCoords(WorldSettings.Focus.transform.position);
             
-            for (int x = -WorldSettings.DrawSize; x <= WorldSettings.DrawSize; x++) {
-                for (int z = -WorldSettings.DrawSize; z <= WorldSettings.DrawSize; z++) {
-                    current.Add( focusPosition + new Vector3Int(WorldSettings.ChunkSize.x * x, 0, WorldSettings.ChunkSize.z * z));
+            for (int x = -WorldSettings.DrawDistance; x <= WorldSettings.DrawDistance; x++) {
+                for (int z = -WorldSettings.DrawDistance; z <= WorldSettings.DrawDistance; z++) {
+                    current.Add( focusPosition + new Vector3Int(x,0,z) * WorldSettings.ChunkSize);
                 }
             }
 
@@ -82,13 +89,7 @@ namespace CodeBlaze.Voxel.Engine.World {
             }
             
             foreach (var x in claim) {
-                if (Chunks.ContainsKey(x)) {
-                    BuildCoordinator.Add(Chunks[x]);
-                } else {
-                    var chunk = CreateChunk(x);
-                    Chunks.Add(chunk.Position, chunk);
-                    BuildCoordinator.Add(chunk);
-                }
+                BuildCoordinator.Add(Chunks[x]);
             }
 
             _activeChunks = current;
@@ -185,7 +186,7 @@ namespace CodeBlaze.Voxel.Engine.World {
             var z = pos.z - pos.z % WorldSettings.ChunkSize.z;
 
             x = pos.x < 0 ? x - WorldSettings.ChunkSize.x : x;
-            y = pos.y < 0 ? y - WorldSettings.ChunkSize.y : y;
+            //y = pos.y < 0 ? y - WorldSettings.ChunkSize.y : y;
             z = pos.z < 0 ? z - WorldSettings.ChunkSize.z : z;
             
             return new Vector3Int(x,y,z);
