@@ -168,7 +168,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _worldSettings:
     Focus: {fileID: 963194228}
-    DrawSize: 10
+    ChunkPageSize: 50
+    DrawDistance: 7
     Frequency: 0.02
     ChunkSize: {x: 32, y: 32, z: 32}
   _chunkRendererSettings:
