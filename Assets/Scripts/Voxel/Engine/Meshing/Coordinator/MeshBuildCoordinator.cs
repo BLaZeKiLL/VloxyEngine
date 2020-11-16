@@ -1,5 +1,4 @@
 ﻿using CodeBlaze.Voxel.Engine.Chunk;
-using CodeBlaze.Voxel.Engine.Meshing.Builder;
 using CodeBlaze.Voxel.Engine.World;
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
@@ -15,9 +14,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
         public abstract void Add(Chunk<B> chunk);
 
         public abstract void Process();
-
-        protected abstract IMeshBuilder<B> MeshBuilderProvider();
-
+        
         protected abstract void Render(Chunk<B> chunk, MeshData data);
         
         protected virtual void PostProcess() { }

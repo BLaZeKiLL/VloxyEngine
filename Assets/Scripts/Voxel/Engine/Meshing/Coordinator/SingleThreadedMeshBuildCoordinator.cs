@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 using CodeBlaze.Voxel.Engine.Chunk;
-using CodeBlaze.Voxel.Engine.Meshing.Builder;
 using CodeBlaze.Voxel.Engine.World;
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
@@ -19,7 +18,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
         public override void Add(Chunk<B> chunk) => BuildQueue.Enqueue(chunk);
 
         public override void Process() {
-            var mesher = MeshBuilderProvider();
+            var mesher = VoxelProvider<B>.Current.MeshBuilder();
             var watch = new Stopwatch();
             var count = BuildQueue.Count;
             
@@ -38,9 +37,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             
             GC.Collect();
         }
-
-        protected abstract override IMeshBuilder<B> MeshBuilderProvider();
-
+        
         protected abstract override void Render(Chunk<B> chunk, MeshData data);
 
     }

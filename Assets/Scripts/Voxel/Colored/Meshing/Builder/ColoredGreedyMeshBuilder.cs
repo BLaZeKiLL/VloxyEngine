@@ -19,7 +19,7 @@ namespace CodeBlaze.Voxel.Colored.Meshing.Builder {
         }
 
         protected override bool CompareBlock(ColoredBlock block1, ColoredBlock block2) {
-            //return true;
+            return true;
             
             var color1 = block1.Color;
             var color2 = block2.Color;
