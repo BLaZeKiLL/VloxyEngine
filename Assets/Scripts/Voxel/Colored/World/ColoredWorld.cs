@@ -5,6 +5,7 @@ using System.Linq;
 using CodeBlaze.Voxel.Colored.Block;
 using CodeBlaze.Voxel.Colored.Chunk;
 using CodeBlaze.Voxel.Colored.Meshing.Coordinator;
+using CodeBlaze.Voxel.Engine;
 using CodeBlaze.Voxel.Engine.Chunk;
 using CodeBlaze.Voxel.Engine.Meshing.Coordinator;
 using CodeBlaze.Voxel.Engine.Settings;
@@ -19,7 +20,7 @@ namespace CodeBlaze.Voxel.Colored.World {
         private int id; // remove
 
         protected override MeshBuildCoordinator<ColoredBlock> MeshBuildCoordinatorProvider() {
-            switch (BuildCoordinatorSettings.ProcessMethod) {
+            switch (VoxelProvider.Current.Settings.BuildCoordinator.ProcessMethod) {
                 case BuildCoordinatorSettings.BuildMethod.MultiThreaded:
                     return new ColoredUniTaskMultiThreadedMeshBuildCoordinator(this);
                 case BuildCoordinatorSettings.BuildMethod.SingleThreaded:
@@ -35,7 +36,7 @@ namespace CodeBlaze.Voxel.Colored.World {
             var block = ColoredBlockTypes.RandomSolid();
             
             for (int x = 0; x < WorldSettings.ChunkSize.x; x++) {
-                for (int z = 0; z <WorldSettings.ChunkSize.z; z++) {
+                for (int z = 0; z < WorldSettings.ChunkSize.z; z++) {
                     var height = Mathf.FloorToInt(
                         Mathf.PerlinNoise((position.x + x) * WorldSettings.Frequency, (position.z + z) * WorldSettings.Frequency) * WorldSettings.ChunkSize.y
                     );
