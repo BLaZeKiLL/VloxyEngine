@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de6253de127543aeb23d6596fc20fad2, type: 3}
+  m_Name: VoxelSettings
+  m_EditorClassIdentifier: 
+  World:
+    ChunkPageSize: 25
+    DrawDistance: 5
+    Frequency: 0.02
+    ChunkSize: {x: 16, y: 256, z: 16}
+  ChunkRenderer:
+    Material: {fileID: 2100000, guid: 104fcd82a3c84694d93fbfb0a9dbf2a1, type: 2}
+    CastShadows: 0
+  BuildCoordinator:
+    ProcessMethod: 0

@@ -6,8 +6,7 @@ namespace CodeBlaze.Voxel.Engine.Settings {
 
     [Serializable]
     public class WorldSettings {
-
-        public Transform Focus;
+        
         public int ChunkPageSize = 25;
         public int DrawDistance = 1;
         [Range(0.01f, 0.99f)] public float Frequency = 0.15f;

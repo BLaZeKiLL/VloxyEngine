@@ -1,4 +1,5 @@
 ﻿using CodeBlaze.Voxel.Engine.Meshing;
+using CodeBlaze.Voxel.Engine.Settings;
 
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -16,9 +17,9 @@ namespace CodeBlaze.Voxel.Engine.Behaviour {
             _renderer = GetComponent<MeshRenderer>();
         }
 
-        public void SetRenderSettings(Material material, bool shadows) {
-            _renderer.material = material;
-            if (!shadows) _renderer.shadowCastingMode = ShadowCastingMode.Off;
+        public void SetRenderSettings(ChunkRendererSettings settings) {
+            _renderer.material = settings.Material;
+            if (!settings.CastShadows) _renderer.shadowCastingMode = ShadowCastingMode.Off;
         }
 
         public void Render(MeshData meshData) => meshData.Apply(_mesh);

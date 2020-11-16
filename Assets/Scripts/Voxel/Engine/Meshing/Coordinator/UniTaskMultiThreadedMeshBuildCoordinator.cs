@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 
 using CodeBlaze.Voxel.Engine.Chunk;
-using CodeBlaze.Voxel.Engine.Meshing.Builder;
 using CodeBlaze.Voxel.Engine.World;
 
 using Cysharp.Threading.Tasks;
@@ -22,9 +21,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
         public override void Add(Chunk<B> chunk) => BuildQueue.Enqueue(chunk);
         
         public override void Process() => InternalProcess().Forget();
-
-        protected abstract override IMeshBuilder<B> MeshBuilderProvider();
-
+        
         protected abstract override void Render(Chunk<B> chunk, MeshData data);
 
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -55,7 +52,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             var data = await UniTask.RunOnThreadPool(
                 () => {
                     watch.Start();
-                    var _data = MeshBuilderProvider().GenerateMesh(chunk, World.GetNeighbors(chunk));
+                    var _data = VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(chunk, World.GetNeighbors(chunk));
                     watch.Stop();
 
                     return _data;
@@ -83,7 +80,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
         
         private async UniTask Build(Chunk<B> chunk) {
             var data = await UniTask.RunOnThreadPool(
-                () => MeshBuilderProvider().GenerateMesh(chunk, World.GetNeighbors(chunk))
+                () => VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(chunk, World.GetNeighbors(chunk))
             );
 
             Render(chunk, data);
