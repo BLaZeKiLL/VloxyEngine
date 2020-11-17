@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: VoxelSettings
   m_EditorClassIdentifier: 
   World:
-    ChunkPageSize: 25
-    DrawDistance: 5
+    ChunkPageSize: 32
+    DrawDistance: 6
     Frequency: 0.02
-    ChunkSize: {x: 16, y: 256, z: 16}
+    ChunkSize: {x: 32, y: 32, z: 32}
   ChunkRenderer:
     Material: {fileID: 2100000, guid: 104fcd82a3c84694d93fbfb0a9dbf2a1, type: 2}
     CastShadows: 0

@@ -12,13 +12,7 @@ namespace CodeBlaze.Voxel.Colored.Meshing.Coordinator {
         public ColoredSingleThreadedMeshBuildCoordinator(World<ColoredBlock> world) : base(world) { }
         
         protected override void Render(Chunk<ColoredBlock> chunk, MeshData data) {
-            if (!(chunk is ColoredChunk coloredChunk)) return;
-
-            var behaviour = World.ChunkPool.Claim();
-            behaviour.transform.position = coloredChunk.Position;
-            behaviour.name += $" {coloredChunk.ID}";
-            behaviour.Render(data);
-            chunk.Behaviour = behaviour;
+            World.ChunkPool.Claim(chunk).Render(data);
         }
 
     }
