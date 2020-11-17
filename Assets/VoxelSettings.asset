@@ -17,8 +17,6 @@ MonoBehaviour:
     DrawDistance: 6
     Frequency: 0.02
     ChunkSize: {x: 32, y: 32, z: 32}
-  ChunkRenderer:
+  Renderer:
     Material: {fileID: 2100000, guid: 104fcd82a3c84694d93fbfb0a9dbf2a1, type: 2}
     CastShadows: 0
-  BuildCoordinator:
-    ProcessMethod: 0

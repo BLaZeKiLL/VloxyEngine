@@ -28,7 +28,7 @@ namespace CodeBlaze.Voxel.Engine.Chunk {
                     go.SetActive(false);
             
                     var chunkRenderer = go.GetComponent<ChunkBehaviour>();
-                    chunkRenderer.SetRenderSettings(VoxelProvider<B>.Current.Settings.ChunkRenderer);
+                    chunkRenderer.SetRenderSettings(VoxelProvider<B>.Current.Settings.Renderer);
 
                     return chunkRenderer;
                 },
@@ -51,7 +51,7 @@ namespace CodeBlaze.Voxel.Engine.Chunk {
             var reclaim = _active.Keys.Where(x => !current.Contains(x)).ToList();
             var claim = current.Where(x => !_active.Keys.Contains(x)).ToList();
             
-            Debug.Log($"[World][Update] Reclaim : {reclaim.Count} Claim : {claim.Count}");
+            Debug.Log($"[ChunkPool][Update] Reclaim : {reclaim.Count} Claim : {claim.Count}");
             
             foreach (var x in reclaim) {
                 Reclaim(x);
@@ -64,6 +64,7 @@ namespace CodeBlaze.Voxel.Engine.Chunk {
             var behaviour = _pool.Claim();
 
             behaviour.transform.position = chunk.Position;
+            behaviour.name = chunk.Name();
             
             _active.Add(chunk.Position, behaviour);
             

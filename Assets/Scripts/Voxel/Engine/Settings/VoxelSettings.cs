@@ -6,8 +6,7 @@ namespace CodeBlaze.Voxel.Engine.Settings {
     public class VoxelSettings : ScriptableObject {
 
         public WorldSettings World;
-        public ChunkRendererSettings ChunkRenderer;
-        public BuildCoordinatorSettings BuildCoordinator;
+        public RendererSettings Renderer;
 
     }
 

@@ -8,11 +8,7 @@ namespace CodeBlaze.Voxel.Colored.World {
 
     public class ColoredWorld : World<ColoredBlock> {
 
-        protected override Func<IVoxelProvider<ColoredBlock>> Initializer() {
-            return () => new ColoredVoxelProvider();
-        }
-        
-        
+        protected override Func<VoxelProvider<ColoredBlock>> Provider() => () => new ColoredVoxelProvider();
 
     }
 

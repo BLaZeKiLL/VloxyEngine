@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
 
-    public abstract class GreedyMeshBuilder<B> : IMeshBuilder<B> where B : IBlock {
+    public class GreedyMeshBuilder<B> : IMeshBuilder<B> where B : IBlock {
 
         protected readonly MeshData MeshData;
 
@@ -16,10 +16,8 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
             MeshData = new MeshData();
         }
 
-        protected abstract B EmptyBlock();
-
-        protected abstract B NullBlock();
-
+        protected virtual B EmptyBlock() => default;
+        
         protected virtual void CreateQuad(B block, Vector3Int normal) { }
 
         protected virtual bool CompareBlock(B block1, B block2) => block1.Equals(block2);
@@ -131,7 +129,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
                             var blockCompare = compareBlock.IsOpaque(); 
 
                             if (blockCurrent == blockCompare) {
-                                normalMask[n++] = new Mask(NullBlock(), 0);
+                                normalMask[n++] = default;
                             } else if (blockCurrent) {
                                 normalMask[n++] = new Mask(currentBlock, 1);
                             } else {
@@ -200,7 +198,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
                                 // Clear this part of the mask, so we don't add duplicate faces
                                 for (l = 0; l < height; ++l)
                                     for (k = 0; k < width; ++k)
-                                        normalMask[n + k + l * axis1Limit] = new Mask(NullBlock(), 0);
+                                        normalMask[n + k + l * axis1Limit] = default;
 
                                 i += width;
                                 n += width;
