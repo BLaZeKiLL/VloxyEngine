@@ -10,19 +10,21 @@ using Cysharp.Threading.Tasks;
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
 
-    public abstract class UniTaskMultiThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
+    public class UniTaskMultiThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
 
         protected readonly Queue<Chunk<B>> BuildQueue;
 
-        protected UniTaskMultiThreadedMeshBuildCoordinator(World<B> world) : base(world) {
+        public UniTaskMultiThreadedMeshBuildCoordinator(World<B> world) : base(world) {
             BuildQueue = new Queue<Chunk<B>>();
         }
         
         public override void Add(Chunk<B> chunk) => BuildQueue.Enqueue(chunk);
         
         public override void Process() => InternalProcess().Forget();
-        
-        protected abstract override void Render(Chunk<B> chunk, MeshData data);
+
+        protected override void Render(Chunk<B> chunk, MeshData data) {
+            World.ChunkPool.Claim(chunk).Render(data);
+        }
 
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private async UniTaskVoid InternalProcess() {
@@ -38,8 +40,8 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             var result = await UniTask.WhenAll(tasks);
             watch.Stop();
 
-            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average mesh build time : {result.Average()} ms");
-            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Build queue process time : {watch.Elapsed:s\\.fff} sec");
+            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average mesh build time : {result.Average():0.###} ms");
+            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Build queue process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
 
             GC.Collect();
             

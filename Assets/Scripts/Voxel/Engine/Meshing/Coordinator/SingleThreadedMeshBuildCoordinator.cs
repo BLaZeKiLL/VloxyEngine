@@ -7,7 +7,7 @@ using CodeBlaze.Voxel.Engine.World;
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
 
-    public abstract class SingleThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
+    public class SingleThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
 
         protected readonly Queue<Chunk<B>> BuildQueue;
 
@@ -32,13 +32,15 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             }
             watch.Stop();
                     
-            UnityEngine.Debug.Log($"Average mesh build time : {(float)watch.ElapsedMilliseconds / count} ms");
-            UnityEngine.Debug.Log($"Build queue process time : {watch.Elapsed:s\\.fff} sec");
+            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average mesh build time : {(float)watch.ElapsedMilliseconds / count:0.###} ms");
+            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Build queue process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
             
             GC.Collect();
         }
-        
-        protected abstract override void Render(Chunk<B> chunk, MeshData data);
+
+        protected override void Render(Chunk<B> chunk, MeshData data) {
+            World.ChunkPool.Claim(chunk).Render(data);
+        }
 
     }
 

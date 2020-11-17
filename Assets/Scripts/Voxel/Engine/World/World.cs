@@ -1,46 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
-using CodeBlaze.Library.Collections.Pools;
 using CodeBlaze.Voxel.Engine.Chunk;
 using CodeBlaze.Voxel.Engine.Meshing.Coordinator;
-using CodeBlaze.Voxel.Engine.Behaviour;
 using CodeBlaze.Voxel.Engine.Settings;
 
 using UnityEngine;
 
 namespace CodeBlaze.Voxel.Engine.World {
 
-    public abstract class World<B> : MonoBehaviour where B : IBlock {
+    public class World<B> : MonoBehaviour where B : IBlock {
 
         [SerializeField] private Transform _focus;
         [SerializeField] private VoxelSettings _settings;
 
-        public IObjectPool<ChunkBehaviour> ChunkPool { get; private set; }
+        public ChunkPool<B> ChunkPool { get; private set; }
         protected MeshBuildCoordinator<B> BuildCoordinator;
         
         protected Dictionary<Vector3Int, Chunk<B>> Chunks;
         protected Vector3Int FocusChunkCoord;
 
-        private int _poolSize;
         private WorldSettings _worldSettings;
-        private List<Vector3Int> _activeChunks;
-        
+
+        #region Virtual
+
+        protected virtual Func<VoxelProvider<B>> Provider() => () => new VoxelProvider<B>();
         protected virtual void WorldAwake() { }
         protected virtual void WorldStart() { }
         protected virtual void WorldUpdate() { }
 
+        #endregion
+
+        #region Unity
+
         private void Awake() {
-            VoxelProvider<B>.Initialize(Initializer(), _settings);
+            VoxelProvider<B>.Initialize(Provider(), _settings);
 
             _worldSettings = VoxelProvider<B>.Current.Settings.World;
 
             Chunks = new Dictionary<Vector3Int, Chunk<B>>();
-            _activeChunks = new List<Vector3Int>();
             
-            _poolSize = (2 * _worldSettings.DrawDistance + 1) * (2 * _worldSettings.DrawDistance + 1) + 1;
-            ChunkPool = CreateRendererPool();
+            ChunkPool = VoxelProvider<B>.Current.ChunkPool(transform);
             BuildCoordinator = VoxelProvider<B>.Current.MeshBuildCoordinator(this);
 
             FocusChunkCoord = _focus != null
@@ -54,7 +54,7 @@ namespace CodeBlaze.Voxel.Engine.World {
             for (int x = -_worldSettings.ChunkPageSize; x <= _worldSettings.ChunkPageSize; x++) {
                 for (int z = -_worldSettings.ChunkPageSize; z <= _worldSettings.ChunkPageSize; z++) {
                     var pos = new Vector3Int(x, 0, z) * _worldSettings.ChunkSize;
-                    Chunks.Add(pos, VoxelProvider<B>.Current.Chunk(pos));
+                    Chunks.Add(pos, VoxelProvider<B>.Current.CreateChunk(pos));
                 }
             }
 
@@ -77,37 +77,8 @@ namespace CodeBlaze.Voxel.Engine.World {
             // update
             ChunkPoolUpdate();
         }
-
-        protected abstract Func<IVoxelProvider<B>> Initializer();
         
-        private void ChunkPoolUpdate() {
-            var current = new List<Vector3Int>(_poolSize);
-
-            var focusPosition = GetChunkCoords(_focus.transform.position);
-            
-            for (int x = -_worldSettings.DrawDistance; x <= _worldSettings.DrawDistance; x++) {
-                for (int z = -_worldSettings.DrawDistance; z <= _worldSettings.DrawDistance; z++) {
-                    current.Add( focusPosition + new Vector3Int(x,0,z) * _worldSettings.ChunkSize);
-                }
-            }
-
-            var reclaim = _activeChunks.Where(x => !current.Contains(x)).ToList();
-            var claim = current.Where(x => !_activeChunks.Contains(x)).ToList();
-            
-            Debug.Log($"[World][Update] Reclaim : {reclaim.Count} Claim : {claim.Count}");
-            
-            foreach (var x in reclaim) {
-                ChunkPool.Reclaim(Chunks[x].Behaviour);
-            }
-            
-            foreach (var x in claim) {
-                BuildCoordinator.Add(Chunks[x]);
-            }
-
-            _activeChunks = current;
-            
-            BuildCoordinator.Process();
-        }
+        #endregion
 
         #region Neighbors
         
@@ -196,23 +167,13 @@ namespace CodeBlaze.Voxel.Engine.World {
         #endregion
 
         #region Private
+        private void ChunkPoolUpdate() {
+            foreach (var x in ChunkPool.Update(GetChunkCoords(_focus.transform.position))) {
+                BuildCoordinator.Add(Chunks[x]);
+            }
 
-        private IObjectPool<ChunkBehaviour> CreateRendererPool() => new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
-            _poolSize,
-            index => {
-                var go = new GameObject("Chunk", typeof(ChunkBehaviour));
-                go.transform.parent = transform;
-                go.SetActive(false);
-            
-                var chunkRenderer = go.GetComponent<ChunkBehaviour>();
-                chunkRenderer.SetRenderSettings(VoxelProvider<B>.Current.Settings.ChunkRenderer);
-
-                return chunkRenderer;
-            },
-            chunkRenderer => chunkRenderer.gameObject.SetActive(true),
-            chunkRenderer => chunkRenderer.gameObject.SetActive(false)
-        );
-
+            BuildCoordinator.Process();
+        }
         #endregion
 
     }

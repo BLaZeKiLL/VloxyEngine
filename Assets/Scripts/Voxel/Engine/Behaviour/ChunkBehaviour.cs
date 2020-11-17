@@ -17,7 +17,7 @@ namespace CodeBlaze.Voxel.Engine.Behaviour {
             _renderer = GetComponent<MeshRenderer>();
         }
 
-        public void SetRenderSettings(ChunkRendererSettings settings) {
+        public void SetRenderSettings(RendererSettings settings) {
             _renderer.material = settings.Material;
             if (!settings.CastShadows) _renderer.shadowCastingMode = ShadowCastingMode.Off;
         }

@@ -12,24 +12,22 @@ namespace CodeBlaze.Voxel.Engine {
 
     public class VoxelProvider<B> where B : IBlock {
 
-        public static IVoxelProvider<B> Current { get; private set; }
+        public static VoxelProvider<B> Current { get; private set; }
         
-        public static void Initialize(Func<IVoxelProvider<B>> initializer, VoxelSettings settings) {
-            Current = initializer();
+        public static void Initialize(Func<VoxelProvider<B>> provider, VoxelSettings settings) {
+            Current = provider();
             Current.Settings = settings;
         }
-
-    }
-
-    public interface IVoxelProvider<B> where B : IBlock {
-
-        VoxelSettings Settings { get; set; }
-
-        Chunk<B> Chunk(Vector3Int position);
         
-        IMeshBuilder<B> MeshBuilder();
+        public VoxelSettings Settings { get; set; }
+
+        public virtual Chunk<B> CreateChunk(Vector3Int position) => new Chunk<B>(Settings.World.ChunkSize, position);
+
+        public virtual ChunkPool<B> ChunkPool(Transform transform) => new ChunkPool<B>(transform);
+
+        public virtual IMeshBuilder<B> MeshBuilder() => new GreedyMeshBuilder<B>();
         
-        MeshBuildCoordinator<B> MeshBuildCoordinator(World<B> world);
+        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(World<B> world) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(world);
 
     }
 
