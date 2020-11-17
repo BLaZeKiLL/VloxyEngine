@@ -11,8 +11,10 @@ A library to create block based voxel worlds
 - Networking
 
 ## Todo's
-- Debug Tools/Gizmos
-- Provider to configure the engine
-- Settings scriptable objects
-- 3D chunks
-- Generation System
+- [x] Provider to configure the engine
+- [x] Settings scriptable objects
+- [ ] Settings Extensions
+- [ ] Debug Tools/Gizmos
+- [ ] 3D chunks
+- [ ] Generation System
+- [ ] Provider Lifecycle Control

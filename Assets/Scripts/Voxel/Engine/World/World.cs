@@ -28,6 +28,7 @@ namespace CodeBlaze.Voxel.Engine.World {
         protected virtual void WorldAwake() { }
         protected virtual void WorldStart() { }
         protected virtual void WorldUpdate() { }
+        protected virtual void WorldChunkPoolUpdate() { }
 
         #endregion
 
@@ -173,6 +174,8 @@ namespace CodeBlaze.Voxel.Engine.World {
             }
 
             BuildCoordinator.Process();
+
+            WorldChunkPoolUpdate();
         }
         #endregion
 
