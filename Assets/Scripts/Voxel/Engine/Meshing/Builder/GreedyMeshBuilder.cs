@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using CodeBlaze.Voxel.Engine.Chunk;
 
@@ -175,20 +176,25 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
             MeshData.Vertices.Add(v3);
             MeshData.Vertices.Add(v4);
 
-            if (normalMask == 1) {
-                MeshData.Triangles.Add(index);
-                MeshData.Triangles.Add(index + 1);
-                MeshData.Triangles.Add(index + 3);
-                MeshData.Triangles.Add(index);
-                MeshData.Triangles.Add(index + 3);
-                MeshData.Triangles.Add(index + 2);
-            } else if (normalMask == -1) {
-                MeshData.Triangles.Add(index);
-                MeshData.Triangles.Add(index + 3);
-                MeshData.Triangles.Add(index + 1);
-                MeshData.Triangles.Add(index);
-                MeshData.Triangles.Add(index + 2);
-                MeshData.Triangles.Add(index + 3);
+            switch (normalMask) {
+                case 1:
+                    MeshData.Triangles.Add(index);
+                    MeshData.Triangles.Add(index + 1);
+                    MeshData.Triangles.Add(index + 3);
+                    MeshData.Triangles.Add(index);
+                    MeshData.Triangles.Add(index + 3);
+                    MeshData.Triangles.Add(index + 2);
+
+                    break;
+                case -1:
+                    MeshData.Triangles.Add(index);
+                    MeshData.Triangles.Add(index + 3);
+                    MeshData.Triangles.Add(index + 1);
+                    MeshData.Triangles.Add(index);
+                    MeshData.Triangles.Add(index + 2);
+                    MeshData.Triangles.Add(index + 3);
+
+                    break;
             }
 
             index += 4;

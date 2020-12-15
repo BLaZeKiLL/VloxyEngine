@@ -1,5 +1,6 @@
 {
     "name": "CodeBlaze.Voxel.Colored",
+    "rootNamespace": "CodeBlaze.Voxel.Colored",
     "references": [
         "GUID:3d017d579b2996d4ab609c560edcfc6d",
         "GUID:9c1c4c82ebfda8c47bb5892fedda07a7",
