@@ -61,13 +61,15 @@ namespace CodeBlaze.Voxel.Engine.World {
 
             ChunkPoolUpdate();
             
-            Debug.Log("[World][Start] Done");
+            Debug.Log("[World][Start] Chunks Created : " + Chunks.Count);
             
             WorldStart();
         }
 
         private void Update() {
-            var coords = GetChunkCoords(_focus.position);
+            var coords = _focus != null
+                ? GetChunkCoords(_focus.position)
+                : Vector3Int.zero;
             
             WorldUpdate();
 
@@ -169,7 +171,7 @@ namespace CodeBlaze.Voxel.Engine.World {
 
         #region Private
         private void ChunkPoolUpdate() {
-            foreach (var x in ChunkPool.Update(GetChunkCoords(_focus.transform.position))) {
+            foreach (var x in ChunkPool.Update(FocusChunkCoord)) {
                 BuildCoordinator.Add(Chunks[x]);
             }
 

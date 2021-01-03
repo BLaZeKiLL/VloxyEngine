@@ -17,7 +17,7 @@ namespace CodeBlaze.Voxel.Engine.Chunk {
         public int Size { get; }
         
         public ChunkPool(Transform transform) {
-            Size = (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1) * (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1) + 1;
+            Size = (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1) * (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1);
             
             _active = new Dictionary<Vector3Int, ChunkBehaviour>(Size);
             _pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1

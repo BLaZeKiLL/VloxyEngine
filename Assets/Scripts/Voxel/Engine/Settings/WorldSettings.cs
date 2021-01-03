@@ -4,13 +4,24 @@ using UnityEngine;
 
 namespace CodeBlaze.Voxel.Engine.Settings {
 
+    /// <summary>
+    /// For fixed size worlds, for there to be edge faces ChunkPageSize = DrawDistance
+    /// </summary>
     [Serializable]
     public class WorldSettings {
         
-        public int ChunkPageSize = 25;
-        public int DrawDistance = 1;
-        [Range(0.01f, 0.99f)] public float Frequency = 0.15f;
-        public Vector3Int ChunkSize = 16 * Vector3Int.one; // this is serialized, rider issue
+        [Tooltip("Number of chunks per page = (2 * chunk_page_size + 1)^2")]
+        public int ChunkPageSize = 32;
+        
+        [Tooltip("Number of chunk_behaviours per page = (2 * draw_distance + 1)^2")]
+        public int DrawDistance = 7;
+        
+        [Range(0.01f, 0.99f)]
+        [Tooltip("Perlin noise frequency")]
+        public float Frequency = 0.02f;
+        
+        [Tooltip("Chunk dimensions")]
+        public Vector3Int ChunkSize = 32 * Vector3Int.one;
 
     }
 
