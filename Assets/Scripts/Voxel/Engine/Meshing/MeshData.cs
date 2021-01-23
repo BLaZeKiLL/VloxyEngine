@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace CodeBlaze.Voxel.Engine.Meshing {
 
@@ -27,7 +28,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing {
             mesh.SetUVs(3, UV4);
             
             mesh.SetColors(Colors);
-            
+
             if (Normals.Count > 0)
                 mesh.SetNormals(Normals);
             else
