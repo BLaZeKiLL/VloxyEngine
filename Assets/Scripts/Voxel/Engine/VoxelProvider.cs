@@ -1,10 +1,9 @@
 ﻿using System;
 
-using CodeBlaze.Voxel.Engine.Chunk;
+using CodeBlaze.Voxel.Engine.Data;
 using CodeBlaze.Voxel.Engine.Meshing.Builder;
 using CodeBlaze.Voxel.Engine.Meshing.Coordinator;
 using CodeBlaze.Voxel.Engine.Settings;
-using CodeBlaze.Voxel.Engine.World;
 
 using UnityEngine;
 
@@ -30,7 +29,7 @@ namespace CodeBlaze.Voxel.Engine {
 
         public virtual IMeshBuilder<B> MeshBuilder() => new GreedyMeshBuilder<B>();
         
-        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(World<B> world) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(world);
+        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(ChunkPool<B> chunkPool) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(chunkPool);
 
     }
 

@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-using CodeBlaze.Voxel.Engine.Chunk;
-using CodeBlaze.Voxel.Engine.World;
+using CodeBlaze.Voxel.Engine.Data;
 
 using Cysharp.Threading.Tasks;
 
@@ -12,18 +11,18 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
 
     public class UniTaskMultiThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
 
-        protected readonly Queue<Chunk<B>> BuildQueue;
+        protected readonly Queue<ChunkJobData<B>> JobQueue;
 
-        public UniTaskMultiThreadedMeshBuildCoordinator(World<B> world) : base(world) {
-            BuildQueue = new Queue<Chunk<B>>();
+        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool) : base(chunkPool) {
+            JobQueue = new Queue<ChunkJobData<B>>();
         }
         
-        public override void Add(Chunk<B> chunk) => BuildQueue.Enqueue(chunk);
+        public override void Add(ChunkJobData<B> jobData) => JobQueue.Enqueue(jobData);
         
         public override void Process() => InternalProcess().Forget();
 
-        protected override void Render(Chunk<B> chunk, MeshData data) {
-            World.ChunkPool.Claim(chunk).Render(data);
+        protected override void Render(Chunk<B> chunk, MeshData meshData) {
+            ChunkPool.Claim(chunk).Render(meshData);
         }
 
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -33,8 +32,8 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             var watch = new Stopwatch();
             
             watch.Start();
-            while (BuildQueue.Count > 0) {
-                tasks.Add(Build(BuildQueue.Dequeue()));
+            while (JobQueue.Count > 0) {
+                tasks.Add(ScheduleJob(JobQueue.Dequeue()));
             }
 
             var result = await UniTask.WhenAll(tasks);
@@ -48,20 +47,20 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             PostProcess();
         }
         
-        private async UniTask<long> Build(Chunk<B> chunk) {
+        private async UniTask<long> ScheduleJob(ChunkJobData<B> jobData) {
             var watch = new Stopwatch();
             
-            var data = await UniTask.RunOnThreadPool(
+            var	meshData = await UniTask.RunOnThreadPool(
                 () => {
                     watch.Start();
-                    var _data = VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(chunk, World.GetNeighbors(chunk));
+                    var _meshData = VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(jobData);
                     watch.Stop();
 
-                    return _data;
+                    return _meshData;
                 }
             );
 
-            Render(chunk, data);
+            Render(jobData.Chunk, meshData);
             
             return watch.ElapsedMilliseconds;
         }  
@@ -70,7 +69,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             var tasks = new List<UniTask>();
             
             while (BuildQueue.Count > 0) {
-                tasks.Add(Build(BuildQueue.Dequeue()));
+                tasks.Add(ScheduleJob(JobQueue.Dequeue()));
             }
             
             await UniTask.WhenAll(tasks);
@@ -80,12 +79,12 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             PostProcess();
         }
         
-        private async UniTask Build(Chunk<B> chunk) {
-            var data = await UniTask.RunOnThreadPool(
-                () => VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(chunk, World.GetNeighbors(chunk))
+        private async UniTask ScheduleJob(ChunkJobData<B> jobData) {
+            var meshData = await UniTask.RunOnThreadPool(
+                () => VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(jobData)
             );
 
-            Render(chunk, data);
+            Render(jobData, meshData);
         }  
         #endif
 

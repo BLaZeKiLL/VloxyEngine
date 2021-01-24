@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   World:
     ChunkPageSize: 32
-    DrawDistance: 7
+    DrawDistance: 4
     Frequency: 0.05
     ChunkSize: {x: 32, y: 32, z: 32}
   Renderer:

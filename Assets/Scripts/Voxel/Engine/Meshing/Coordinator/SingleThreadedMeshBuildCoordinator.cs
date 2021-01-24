@@ -2,31 +2,30 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-using CodeBlaze.Voxel.Engine.Chunk;
-using CodeBlaze.Voxel.Engine.World;
+using CodeBlaze.Voxel.Engine.Data;
 
 namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
 
     public class SingleThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
 
-        protected readonly Queue<Chunk<B>> BuildQueue;
+        protected readonly Queue<ChunkJobData<B>> JobQueue;
 
-        public SingleThreadedMeshBuildCoordinator(World<B> world) : base(world) {
-            BuildQueue = new Queue<Chunk<B>>();
+        public SingleThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool) : base(chunkPool) {
+            JobQueue = new Queue<ChunkJobData<B>>();
         }
 
-        public override void Add(Chunk<B> chunk) => BuildQueue.Enqueue(chunk);
+        public override void Add(ChunkJobData<B> jobData) => JobQueue.Enqueue(jobData);
 
         public override void Process() {
             var mesher = VoxelProvider<B>.Current.MeshBuilder();
             var watch = new Stopwatch();
-            var count = BuildQueue.Count;
+            var count = JobQueue.Count;
             
             watch.Start();
-            while (BuildQueue.Count > 0) {
-                var chunk = BuildQueue.Dequeue();
+            while (JobQueue.Count > 0) {
+                var data = JobQueue.Dequeue();
 
-                Render(chunk, mesher.GenerateMesh(chunk, World.GetNeighbors(chunk)));
+                Render(data.Chunk, mesher.GenerateMesh(data));
                 
                 mesher.Clear();
             }
@@ -38,8 +37,8 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             GC.Collect();
         }
 
-        protected override void Render(Chunk<B> chunk, MeshData data) {
-            World.ChunkPool.Claim(chunk).Render(data);
+        protected override void Render(Chunk<B> chunk, MeshData meshData) {
+            ChunkPool.Claim(chunk).Render(meshData);
         }
 
     }
