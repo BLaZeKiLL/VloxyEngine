@@ -12,7 +12,7 @@ namespace CodeBlaze.Voxel.Engine.Noise.Settings {
         public FastNoiseLite.FractalType FractalType = FastNoiseLite.FractalType.FBm;
         public float Gain = 0.5f;
         public float Lacunarity = 2f;
-        public int Octaves = 4;
+        public int Octaves = 5;
 
     }
 
