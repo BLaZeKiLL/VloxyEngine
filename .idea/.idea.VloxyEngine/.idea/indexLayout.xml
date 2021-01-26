@@ -11,10 +11,10 @@
       <Path>Library/PackageCache/com.unity.ide.visualstudio@2.0.5</Path>
       <Path>Library/PackageCache/com.unity.ide.vscode@1.2.3</Path>
       <Path>Library/PackageCache/com.unity.postprocessing@2.3.0</Path>
-      <Path>Library/PackageCache/com.unity.test-framework@1.1.20</Path>
+      <Path>Library/PackageCache/com.unity.test-framework@1.1.22</Path>
       <Path>Library/PackageCache/com.unity.textmeshpro@3.0.3</Path>
-      <Path>Library/PackageCache/com.unity.timeline@1.4.5</Path>
-      <Path>Library/PackageCache/io.codeblaze.library@1.4.1</Path>
+      <Path>Library/PackageCache/com.unity.timeline@1.4.6</Path>
+      <Path>Library/PackageCache/io.codeblaze.cbsl@1.1.2</Path>
       <Path>Packages</Path>
       <Path>ProjectSettings</Path>
     </explicitIncludes>

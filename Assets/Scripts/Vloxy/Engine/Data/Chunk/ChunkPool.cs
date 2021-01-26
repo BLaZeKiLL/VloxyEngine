@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using CodeBlaze.Library.Collections.Pools;
+using CBSL.Core.Collections.Pools;
+
 using CodeBlaze.Vloxy.Engine.Behaviour;
 
 using UnityEngine;

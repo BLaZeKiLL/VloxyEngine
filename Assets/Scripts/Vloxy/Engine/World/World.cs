@@ -36,7 +36,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
         #region Unity
 
         private void Awake() {
-            VoxelProvider<B>.Initialize(Provider(), _settings);
+            VoxelProvider<B>.Initialize(Provider(), provider => {
+                provider.Settings = _settings;
+            });
 
             _worldSettings = VoxelProvider<B>.Current.Settings.World;
 
