@@ -1,4 +1,4 @@
-﻿# Bloxy Engine
+﻿# Vloxy Engine
 A library to create block based voxel worlds
 
 ## Goals
@@ -11,14 +11,12 @@ A library to create block based voxel worlds
 - Networking
 
 ## Todo
-- [ ] Settings Extensions
 - [ ] Debug Tools/Gizmos
+- [ ] Native Containers & New Mesh API's
 - [ ] AO Generation
-- [ ] 3D chunks
-- [ ] Generation System
-- [ ] Chunk Serialization
+- [ ] Jobs & Burst
+- [ ] Chunk Pages & Serialization
 - [ ] Runtime Modifications of voxels
-- [ ] Provider Lifecycle Control
 
 ## Done
 - [x] Greedy Mesh Builder
@@ -28,3 +26,6 @@ A library to create block based voxel worlds
 - [x] Chunk Pool (infinite generation)
 - [x] Provider to configure the engine
 - [x] Settings scriptable objects
+- [x] 3D chunks
+- [x] Noise Profile System
+- [x] Settings Extensions
