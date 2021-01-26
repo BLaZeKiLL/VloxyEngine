@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using CodeBlaze.Voxel.Engine.Noise.Settings;
+
+using UnityEngine;
 
 namespace CodeBlaze.Voxel.Engine.Settings {
 
@@ -7,6 +9,7 @@ namespace CodeBlaze.Voxel.Engine.Settings {
 
         public WorldSettings World;
         public RendererSettings Renderer;
+        public INoiseSettings NoiseSettings;
 
     }
 

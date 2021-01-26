@@ -17,8 +17,11 @@ namespace CodeBlaze.Voxel.Engine.Data {
         public int Size { get; }
         
         public ChunkPool(Transform transform) {
-            Size = (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1) * (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1);
-            
+            Size = 
+                (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1) *
+                (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1) *
+                (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1);
+            Debug.Log("[ChunkPool][Start] Pool Size : " + Size);
             _active = new Dictionary<Vector3Int, ChunkBehaviour>(Size);
             _pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
                 Size,

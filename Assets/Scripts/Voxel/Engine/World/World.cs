@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using CodeBlaze.Voxel.Engine.Data;
 using CodeBlaze.Voxel.Engine.Meshing.Coordinator;
+using CodeBlaze.Voxel.Engine.Noise.Profile;
 using CodeBlaze.Voxel.Engine.Settings;
 
 using UnityEngine;
@@ -16,15 +16,16 @@ namespace CodeBlaze.Voxel.Engine.World {
 
         public ChunkPool<B> ChunkPool { get; private set; }
         protected MeshBuildCoordinator<B> BuildCoordinator;
+        protected INoiseProfile<B> NoiseProfile;
         
         protected Dictionary<Vector3Int, Chunk<B>> Chunks;
         protected Vector3Int FocusChunkCoord;
 
         private WorldSettings _worldSettings;
-
+        
         #region Virtual
 
-        protected virtual Func<VoxelProvider<B>> Provider() => () => new VoxelProvider<B>();
+        protected virtual VoxelProvider<B> Provider() => new VoxelProvider<B>();
         protected virtual void WorldAwake() { }
         protected virtual void WorldStart() { }
         protected virtual void WorldUpdate() { }
@@ -43,25 +44,24 @@ namespace CodeBlaze.Voxel.Engine.World {
             
             ChunkPool = VoxelProvider<B>.Current.ChunkPool(transform);
             BuildCoordinator = VoxelProvider<B>.Current.MeshBuildCoordinator(ChunkPool);
+            NoiseProfile = VoxelProvider<B>.Current.NoiseProfile();
 
-            FocusChunkCoord = _focus != null
-                ? GetChunkCoords(_focus.position)
-                : Vector3Int.zero;
-            
             WorldAwake();
         }
 
         private void Start() {
-            for (int x = -_worldSettings.ChunkPageSize; x <= _worldSettings.ChunkPageSize; x++) {
-                for (int z = -_worldSettings.ChunkPageSize; z <= _worldSettings.ChunkPageSize; z++) {
-                    for (int y = -_worldSettings.ChunkPageSize; y <= _worldSettings.ChunkPageSize; y++) {
+            for (int x = -_worldSettings.ChunkPageSize; x < _worldSettings.ChunkPageSize; x++) {
+                for (int z = -_worldSettings.ChunkPageSize; z < _worldSettings.ChunkPageSize; z++) {
+                    for (int y = -_worldSettings.ChunkPageSize; y < _worldSettings.ChunkPageSize; y++) {
                         var pos = new Vector3Int(x, y, z) * _worldSettings.ChunkSize;
-                        Chunks.Add(pos, VoxelProvider<B>.Current.CreateChunk(pos));
+                        var chunk = VoxelProvider<B>.Current.CreateChunk(pos);
+                        NoiseProfile.Fill(chunk);
+                        Chunks.Add(pos, chunk);
                     }
                 }
             }
-
-            ChunkPoolUpdate();
+            
+            FocusChunkCoord = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
             
             Debug.Log("[World][Start] Chunks Created : " + Chunks.Count);
             
@@ -79,7 +79,7 @@ namespace CodeBlaze.Voxel.Engine.World {
 
             FocusChunkCoord = coords;
                 
-            // update
+            // chunk update
             ChunkPoolUpdate();
         }
         
@@ -153,7 +153,8 @@ namespace CodeBlaze.Voxel.Engine.World {
         #region Private
         private void ChunkPoolUpdate() {
             foreach (var x in ChunkPool.Update(FocusChunkCoord)) {
-                BuildCoordinator.Add(GetChunkJobData(Chunks[x]));
+                if (Chunks.ContainsKey(x))
+                    BuildCoordinator.Add(GetChunkJobData(Chunks[x]));
             }
 
             BuildCoordinator.Process();

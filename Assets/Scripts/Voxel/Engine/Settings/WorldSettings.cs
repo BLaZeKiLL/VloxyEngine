@@ -15,11 +15,7 @@ namespace CodeBlaze.Voxel.Engine.Settings {
         
         [Tooltip("Number of chunk_behaviours per page = (2 * draw_distance + 1)^2")]
         public int DrawDistance = 7;
-        
-        [Range(0.01f, 0.99f)]
-        [Tooltip("Perlin noise frequency")]
-        public float Frequency = 0.02f;
-        
+
         [Tooltip("Chunk dimensions")]
         public Vector3Int ChunkSize = 32 * Vector3Int.one;
 
