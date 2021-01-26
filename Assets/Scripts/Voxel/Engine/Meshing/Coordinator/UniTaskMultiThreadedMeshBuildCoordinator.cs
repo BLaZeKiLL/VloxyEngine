@@ -39,8 +39,10 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
             var result = await UniTask.WhenAll(tasks);
             watch.Stop();
 
-            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average mesh build time : {result.Average():0.###} ms");
-            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Build queue process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+            if (result.Length > 0) {
+                UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average mesh build time : {result.Average():0.###} ms");
+                UnityEngine.Debug.Log($"[MeshBuildCoordinator] Build queue process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+            }
 
             GC.Collect();
             
@@ -68,7 +70,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
         public async UniTaskVoid InternalProcess() {
             var tasks = new List<UniTask>();
             
-            while (BuildQueue.Count > 0) {
+            while (JobQueue.Count > 0) {
                 tasks.Add(ScheduleJob(JobQueue.Dequeue()));
             }
             
@@ -84,7 +86,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Coordinator {
                 () => VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(jobData)
             );
 
-            Render(jobData, meshData);
+            Render(jobData.Chunk, meshData);
         }  
         #endif
 
