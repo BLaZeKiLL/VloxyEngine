@@ -1,5 +1,7 @@
 ﻿using System;
 
+using CBSL.Core.Source.Core.Runtime.Provider;
+
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Meshing.Builder;
 using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
@@ -10,19 +12,9 @@ using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine {
 
-    public class VoxelProvider<B> where B : IBlock {
-
-        public static VoxelProvider<B> Current { get; private set; }
-        
-        public static void Initialize(VoxelProvider<B> provider, VoxelSettings settings) {
-            Current = provider;
-            Current.Settings = settings;
-            Current.Initialize();
-        }
+    public class VoxelProvider<B> : Provider<VoxelProvider<B>> where B : IBlock {
         
         public VoxelSettings Settings { get; set; }
-
-        protected virtual void Initialize() { }
 
         public virtual Chunk<B> CreateChunk(Vector3Int position) => new Chunk<B>(Settings.World.ChunkSize, position);
 
