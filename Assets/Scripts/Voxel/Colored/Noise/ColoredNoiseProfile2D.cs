@@ -4,12 +4,12 @@ using CodeBlaze.Voxel.Engine.Noise.Settings;
 
 namespace CodeBlaze.Voxel.Colored.Noise {
 
-    public class ColoredNoiseProfile2D : NoiseProfile2D<ColoredBlock> {
+    public class ColoredNoiseProfile2D : FastNoiseProfile2D<ColoredBlock> {
 
         public ColoredNoiseProfile2D(NoiseSettings2D settings) : base(settings) { }
         
         protected override ColoredBlock GetBlock(int heightMapValue, int blockHeight) {
-            return heightMapValue >= blockHeight ? ColoredBlockTypes.RandomSolid() : ColoredBlockTypes.Air();
+            return heightMapValue >= blockHeight ? ColoredBlockTypes.Red() : ColoredBlockTypes.Air();
         }
 
     }

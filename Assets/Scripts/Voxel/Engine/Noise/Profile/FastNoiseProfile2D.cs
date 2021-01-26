@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace CodeBlaze.Voxel.Engine.Noise.Profile {
 
-    public class NoiseProfile2D<B> : INoiseProfile<B> where B : IBlock {
+    public class FastNoiseProfile2D<B> : INoiseProfile<B> where B : IBlock {
 
         private FastNoiseLite _noise;
         private NoiseSettings2D _settings;
@@ -13,12 +13,13 @@ namespace CodeBlaze.Voxel.Engine.Noise.Profile {
         
         protected virtual B GetBlock(int heightMapValue, int blockHeight) => default;
         
-        public NoiseProfile2D(NoiseSettings2D settings) {
+        public FastNoiseProfile2D(NoiseSettings2D settings) {
             _settings = settings;
             _heightHalf = settings.Height / 2;
             _noise = new FastNoiseLite(_settings.Seed);
             _noise.SetNoiseType(_settings.NoiseType);
             _noise.SetFrequency(_settings.Frequency);
+            _noise.SetFractalType(_settings.FractalType);
             _noise.SetFractalGain(_settings.Gain);
             _noise.SetFractalLacunarity(_settings.Lacunarity);
             _noise.SetFractalOctaves(_settings.Octaves);
@@ -40,7 +41,7 @@ namespace CodeBlaze.Voxel.Engine.Noise.Profile {
         }
 
         private int GetHeight(int x, int z) {
-            return Mathf.Clamp(Mathf.RoundToInt(_noise.GetNoise(x, z) * _settings.Height ), -_heightHalf, _heightHalf);
+            return Mathf.Clamp(Mathf.RoundToInt(_noise.GetNoise(x, z) * _heightHalf ), -_heightHalf, _heightHalf);
         }
 
     }
