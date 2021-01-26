@@ -1,0 +1,13 @@
+﻿namespace CodeBlaze.Voxel.Engine.Data {
+
+    public interface IBlock {
+
+        bool IsOpaque();
+
+        bool IsTransparent();
+
+        bool IsTranslucent();
+
+    }
+
+}

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-using CodeBlaze.Voxel.Engine.Chunk;
+﻿using CodeBlaze.Voxel.Engine.Data;
 
 using UnityEngine;
 
@@ -11,8 +8,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
 
         protected readonly MeshData MeshData;
 
-        protected Chunk<B> Chunk;
-        protected NeighborChunks<B> Neighbor;
+        protected ChunkJobData<B> JobData;
         
         private int index;
 
@@ -26,9 +22,8 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
 
         protected virtual bool CompareBlock(B block1, B block2) => block1.Equals(block2);
         
-        public MeshData GenerateMesh(Chunk<B> chunk, NeighborChunks<B> neighbor) {
-            Chunk = chunk;
-            Neighbor = neighbor;
+        public MeshData GenerateMesh(ChunkJobData<B> data) {
+            JobData = data;
             
             // Sweep over each axis (X, Y and Z)
             for (int direction = 0; direction < 3; direction++) {
@@ -38,9 +33,9 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
                 int axis1 = (direction + 1) % 3;
                 int axis2 = (direction + 2) % 3;
 
-                int mainAxisLimit = Chunk.Size[direction];
-                int axis1Limit = Chunk.Size[axis1];
-                int axis2Limit = Chunk.Size[axis2];
+                int mainAxisLimit = JobData.Chunk.Size[direction];
+                int axis1Limit = JobData.Chunk.Size[axis1];
+                int axis2Limit = JobData.Chunk.Size[axis2];
                 
                 var deltaAxis1 = Vector3Int.zero;
                 var deltaAxis2 = Vector3Int.zero;
@@ -145,8 +140,7 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
         }
 
         public void Clear() {
-            Chunk = null;
-            Neighbor = null;
+            JobData = null;
             MeshData.Clear();
             index = 0;
         }
@@ -154,16 +148,16 @@ namespace CodeBlaze.Voxel.Engine.Meshing.Builder {
         protected B GetBlock(Vector3Int pos, int limit) {
             int x = pos.x, y = pos.y, z = pos.z;
             
-            if (x < 0) return Neighbor.ChunkNX == null ? EmptyBlock() : Neighbor.ChunkNX.GetBlock(x + limit, y, z);
-            if (x >= limit) return Neighbor.ChunkPX == null ? EmptyBlock() : Neighbor.ChunkPX.GetBlock(x - limit,y,z);
+            if (x < 0) return JobData.ChunkNX == null ? EmptyBlock() : JobData.ChunkNX.GetBlock(x + limit, y, z);
+            if (x >= limit) return JobData.ChunkPX == null ? EmptyBlock() : JobData.ChunkPX.GetBlock(x - limit,y,z);
             
-            if (y < 0) return Neighbor.ChunkNY == null ? EmptyBlock() : Neighbor.ChunkNY.GetBlock(x, y + limit, z);
-            if (y >= limit) return Neighbor.ChunkPY == null ? EmptyBlock() : Neighbor.ChunkPY.GetBlock(x,y - limit,z);
+            if (y < 0) return JobData.ChunkNY == null ? EmptyBlock() : JobData.ChunkNY.GetBlock(x, y + limit, z);
+            if (y >= limit) return JobData.ChunkPY == null ? EmptyBlock() : JobData.ChunkPY.GetBlock(x,y - limit,z);
             
-            if (z < 0) return Neighbor.ChunkNZ == null ? EmptyBlock() : Neighbor.ChunkNZ.GetBlock(x, y, z + limit);
-            if (z >= limit) return Neighbor.ChunkPZ == null ? EmptyBlock() : Neighbor.ChunkPZ.GetBlock(x,y,z - limit);
+            if (z < 0) return JobData.ChunkNZ == null ? EmptyBlock() : JobData.ChunkNZ.GetBlock(x, y, z + limit);
+            if (z >= limit) return JobData.ChunkPZ == null ? EmptyBlock() : JobData.ChunkPZ.GetBlock(x,y,z - limit);
 
-            return Chunk.GetBlock(x, y, z);
+            return JobData.Chunk.GetBlock(x, y, z);
         }
 
         // v1 -> BL
