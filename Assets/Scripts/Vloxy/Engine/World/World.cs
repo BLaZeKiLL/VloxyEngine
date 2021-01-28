@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
+
+using Cysharp.Threading.Tasks;
 
 using UnityEngine;
 
@@ -154,12 +157,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         #region Private
         private void ChunkPoolUpdate() {
-            foreach (var x in ChunkPool.Update(FocusChunkCoord)) {
-                if (Chunks.ContainsKey(x))
-                    BuildCoordinator.Add(GetChunkJobData(Chunks[x]));
-            }
+            var jobs = ChunkPool
+                .Update(FocusChunkCoord)
+                .FindAll(coord => Chunks.ContainsKey(coord))
+                .Select(coord => GetChunkJobData(Chunks[coord]))
+                .ToList();
 
-            BuildCoordinator.Process();
+            BuildCoordinator.Process(jobs);
 
             WorldChunkPoolUpdate();
         }

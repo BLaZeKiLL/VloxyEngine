@@ -7,88 +7,111 @@ using CodeBlaze.Vloxy.Engine.Data;
 
 using Cysharp.Threading.Tasks;
 
+using UnityEngine;
+
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
     public class UniTaskMultiThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
-
-        protected readonly Queue<ChunkJobData<B>> JobQueue;
-
-        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool) : base(chunkPool) {
-            JobQueue = new Queue<ChunkJobData<B>>();
-        }
         
-        public override void Add(ChunkJobData<B> jobData) => JobQueue.Enqueue(jobData);
+        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool) : base(chunkPool) { }
         
-        public override void Process() => InternalProcess().Forget();
+        public override void Process(List<ChunkJobData<B>> jobs) => InternalProcess(jobs).Forget();
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
             ChunkPool.Claim(chunk).Render(meshData);
         }
 
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        private async UniTaskVoid InternalProcess() {
-            var tasks = new List<UniTask<long>>();
-
+        private async UniTaskVoid InternalProcess(List<ChunkJobData<B>> jobs) {
             var watch = new Stopwatch();
             
             watch.Start();
-            while (JobQueue.Count > 0) {
-                tasks.Add(ScheduleJob(JobQueue.Dequeue()));
-            }
-
-            var result = await UniTask.WhenAll(tasks);
+            var batches = CreateBatches(jobs);
+            var result = await UniTask.WhenAll(batches.Select(ScheduleJob).ToList());
             watch.Stop();
 
             if (result.Length > 0) {
                 UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average mesh build time : {result.Average():0.###} ms");
                 UnityEngine.Debug.Log($"[MeshBuildCoordinator] Build queue process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
             }
-
-            GC.Collect();
             
             PostProcess();
         }
         
-        private async UniTask<long> ScheduleJob(ChunkJobData<B> jobData) {
+        private async UniTask<long> ScheduleJob(Batch batch) {
             var watch = new Stopwatch();
             
-            var	meshData = await UniTask.RunOnThreadPool(
+            var	result = await UniTask.RunOnThreadPool(
                 () => {
                     watch.Start();
-                    var _meshData = VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(jobData);
+                    var _meshData = batch.Process();
                     watch.Stop();
 
                     return _meshData;
                 }
             );
 
-            Render(jobData.Chunk, meshData);
-            
+            for (var index = 0; index < result.Length; index++) {
+                Render(batch.GetChunk(index), result[index]);
+            }
+
             return watch.ElapsedMilliseconds;
         }  
         #else
-        public async UniTaskVoid InternalProcess() {
+        public async UniTaskVoid InternalProcess(List<ChunkJobData<B>> jobs) {
             var tasks = new List<UniTask>();
             
-            while (JobQueue.Count > 0) {
-                tasks.Add(ScheduleJob(JobQueue.Dequeue()));
-            }
-            
-            await UniTask.WhenAll(tasks);
-            
-            GC.Collect();
+            await UniTask.WhenAll(CreateBatches(jobs).Select(ScheduleJob).ToList());
             
             PostProcess();
         }
         
-        private async UniTask ScheduleJob(ChunkJobData<B> jobData) {
-            var meshData = await UniTask.RunOnThreadPool(
-                () => VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(jobData)
+        private async UniTask ScheduleJob(Batch batch) {
+            var	result = await UniTask.RunOnThreadPool(
+                () => {
+                    var _meshData = batch.Process();
+
+                    return _meshData;
+                }
             );
 
-            Render(jobData.Chunk, meshData);
+            for (var index = 0; index < result.Length; index++) {
+                Render(batch.GetChunk(index), result[index]);
+            }
         }  
         #endif
+
+        private Batch[] CreateBatches(List<ChunkJobData<B>> jobs) {
+            var batches = new Batch[Mathf.CeilToInt((float) jobs.Count / 32)];
+            var bindex = 0;
+            for (int i = 0; i < jobs.Count; i += 32) {
+                batches[bindex++] = new Batch(jobs.GetRange(i, Math.Min(32, jobs.Count - i)));
+            }
+
+            return batches;
+        }
+
+        private class Batch {
+            
+            private List<ChunkJobData<B>> _data;
+
+            public Batch(List<ChunkJobData<B>> data) {
+                _data = data;
+            }
+
+            public Chunk<B> GetChunk(int index) => _data[index].Chunk;
+            
+            public MeshData[] Process() {
+                var result = new MeshData[_data.Count];
+
+                for (int i = 0; i < _data.Count; i++) {
+                    result[i] = VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(_data[i]);
+                }
+
+                return result;
+            }
+
+        }
 
     }
 

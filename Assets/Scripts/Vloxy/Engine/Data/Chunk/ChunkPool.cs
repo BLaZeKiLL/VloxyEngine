@@ -41,7 +41,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             );
         }
 
-        public IEnumerable<Vector3Int> Update(Vector3Int focus) {
+        public List<Vector3Int> Update(Vector3Int focus) {
             var current = new List<Vector3Int>(Size);
 
             var world = VoxelProvider<B>.Current.Settings.World;
