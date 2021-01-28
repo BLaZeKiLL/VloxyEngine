@@ -8,21 +8,19 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
     public class FastNoiseProfile2D<B> : INoiseProfile<B> where B : IBlock {
 
         private FastNoiseLite _noise;
-        private NoiseSettings2D _settings;
         private int _heightHalf;
         
         protected virtual B GetBlock(int heightMapValue, int blockHeight) => default;
         
         public FastNoiseProfile2D(NoiseSettings2D settings) {
-            _settings = settings;
             _heightHalf = settings.Height / 2;
-            _noise = new FastNoiseLite(_settings.Seed);
-            _noise.SetNoiseType(_settings.NoiseType);
-            _noise.SetFrequency(_settings.Frequency);
-            _noise.SetFractalType(_settings.FractalType);
-            _noise.SetFractalGain(_settings.Gain);
-            _noise.SetFractalLacunarity(_settings.Lacunarity);
-            _noise.SetFractalOctaves(_settings.Octaves);
+            _noise = new FastNoiseLite(settings.Seed);
+            _noise.SetNoiseType(settings.NoiseType);
+            _noise.SetFrequency(settings.Frequency);
+            _noise.SetFractalType(settings.FractalType);
+            _noise.SetFractalGain(settings.Gain);
+            _noise.SetFractalLacunarity(settings.Lacunarity);
+            _noise.SetFractalOctaves(settings.Octaves);
         }
 
         public void Fill(Chunk<B> chunk) {

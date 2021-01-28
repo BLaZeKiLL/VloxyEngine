@@ -7,31 +7,23 @@ using CodeBlaze.Vloxy.Engine.Data;
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
     public class SingleThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
-
-        protected readonly Queue<ChunkJobData<B>> JobQueue;
-
-        public SingleThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool) : base(chunkPool) {
-            JobQueue = new Queue<ChunkJobData<B>>();
-        }
-
-        public override void Add(ChunkJobData<B> jobData) => JobQueue.Enqueue(jobData);
-
-        public override void Process() {
+        
+        public SingleThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool) : base(chunkPool) { }
+        
+        public override void Process(List<ChunkJobData<B>> jobs) {
             var mesher = VoxelProvider<B>.Current.MeshBuilder();
             var watch = new Stopwatch();
-            var count = JobQueue.Count;
             
             watch.Start();
-            while (JobQueue.Count > 0) {
-                var data = JobQueue.Dequeue();
 
-                Render(data.Chunk, mesher.GenerateMesh(data));
-                
+            foreach (var job in jobs) {
+                Render(job.Chunk, mesher.GenerateMesh(job));
                 mesher.Clear();
             }
+            
             watch.Stop();
                     
-            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average mesh build time : {(float)watch.ElapsedMilliseconds / count:0.###} ms");
+            UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average mesh build time : {(float)watch.ElapsedMilliseconds / jobs.Count:0.###} ms");
             UnityEngine.Debug.Log($"[MeshBuildCoordinator] Build queue process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
             
             GC.Collect();

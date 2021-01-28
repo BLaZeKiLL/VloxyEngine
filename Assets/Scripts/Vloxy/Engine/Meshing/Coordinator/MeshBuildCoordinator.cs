@@ -1,4 +1,6 @@
-﻿using CodeBlaze.Vloxy.Engine.Data;
+﻿using System.Collections.Generic;
+
+using CodeBlaze.Vloxy.Engine.Data;
 
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
@@ -10,9 +12,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             ChunkPool = chunkPool;
         }
 
-        public abstract void Add(ChunkJobData<B> jobData);
-
-        public abstract void Process();
+        public abstract void Process(List<ChunkJobData<B>> jobs);
         
         protected abstract void Render(Chunk<B> chunk, MeshData meshData);
         

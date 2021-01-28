@@ -19,9 +19,9 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         
         public ChunkPool(Transform transform) {
             Size = 
-                (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1) *
-                (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1) *
-                (2 * VoxelProvider<B>.Current.Settings.World.DrawDistance + 1);
+                (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1) *
+                (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1) *
+                (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1);
             Debug.Log("[ChunkPool][Start] Pool Size : " + Size);
             _active = new Dictionary<Vector3Int, ChunkBehaviour>(Size);
             _pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
@@ -41,10 +41,10 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             );
         }
 
-        public IEnumerable<Vector3Int> Update(Vector3Int focus) {
+        public List<Vector3Int> Update(Vector3Int focus) {
             var current = new List<Vector3Int>(Size);
 
-            var world = VoxelProvider<B>.Current.Settings.World;
+            var world = VoxelProvider<B>.Current.Settings.Chunk;
             
             for (int x = -world.DrawDistance; x <= world.DrawDistance; x++) {
                 for (int z = -world.DrawDistance; z <= world.DrawDistance; z++) {

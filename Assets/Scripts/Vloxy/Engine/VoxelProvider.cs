@@ -16,7 +16,7 @@ namespace CodeBlaze.Vloxy.Engine {
         
         public VoxelSettings Settings { get; set; }
 
-        public virtual Chunk<B> CreateChunk(Vector3Int position) => new Chunk<B>(Settings.World.ChunkSize, position);
+        public virtual Chunk<B> CreateChunk(Vector3Int position) => new Chunk<B>(Settings.Chunk.ChunkSize, position);
 
         public virtual INoiseProfile<B> NoiseProfile() => null;
 
@@ -24,7 +24,7 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual IMeshBuilder<B> MeshBuilder() => new GreedyMeshBuilder<B>();
         
-        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(ChunkPool<B> chunkPool) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(chunkPool);
+        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(ChunkPool<B> chunkPool) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(chunkPool, Settings.Schedular.BatchSize);
 
     }
 
