@@ -22,8 +22,9 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                 (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1) *
                 (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1) *
                 (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1);
-            Debug.Log("[ChunkPool][Start] Pool Size : " + Size);
+            
             _active = new Dictionary<Vector3Int, ChunkBehaviour>(Size);
+            
             _pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
                 Size,
                 index => {
@@ -39,6 +40,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                 chunkRenderer => chunkRenderer.gameObject.SetActive(true),
                 chunkRenderer => chunkRenderer.gameObject.SetActive(false)
             );
+            
+            Debug.Log("[ChunkPool][Start] Pool Initialized, Size : " + Size);
         }
 
         public List<Vector3Int> Update(Vector3Int focus) {
