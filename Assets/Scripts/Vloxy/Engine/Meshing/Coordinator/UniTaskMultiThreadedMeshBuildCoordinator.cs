@@ -12,8 +12,12 @@ using UnityEngine;
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
     public class UniTaskMultiThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
-        
-        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool) : base(chunkPool) { }
+
+        private int _batchSize;
+
+        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool, int batchSize) : base(chunkPool) {
+            _batchSize = batchSize;
+        }
         
         public override void Process(List<ChunkJobData<B>> jobs) => InternalProcess(jobs).Forget();
 
@@ -26,13 +30,13 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             var watch = new Stopwatch();
             
             watch.Start();
-            var batches = CreateBatches(jobs);
-            var result = await UniTask.WhenAll(batches.Select(ScheduleJob).ToList());
+            var result = await UniTask.WhenAll(CreateBatches(jobs).Select(ScheduleJob).ToList());
             watch.Stop();
 
             if (result.Length > 0) {
-                UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average mesh build time : {result.Average():0.###} ms");
-                UnityEngine.Debug.Log($"[MeshBuildCoordinator] Build queue process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+                UnityEngine.Debug.Log($"[MeshBuildCoordinator] Number of batches : {result.Length}");
+                UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average batch process time : {result.Average():0.###} ms");
+                UnityEngine.Debug.Log($"[MeshBuildCoordinator] Total batch process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
             }
             
             PostProcess();
@@ -81,11 +85,11 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         }  
         #endif
 
-        private Batch[] CreateBatches(List<ChunkJobData<B>> jobs) {
+        private IEnumerable<Batch> CreateBatches(List<ChunkJobData<B>> jobs) {
             var batches = new Batch[Mathf.CeilToInt((float) jobs.Count / 32)];
             var bindex = 0;
-            for (int i = 0; i < jobs.Count; i += 32) {
-                batches[bindex++] = new Batch(jobs.GetRange(i, Math.Min(32, jobs.Count - i)));
+            for (int i = 0; i < jobs.Count; i += _batchSize) {
+                batches[bindex++] = new Batch(jobs.GetRange(i, Math.Min(_batchSize, jobs.Count - i)));
             }
 
             return batches;

@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de6253de127543aeb23d6596fc20fad2, type: 3}
   m_Name: VoxelSettings
   m_EditorClassIdentifier: 
-  World:
-    ChunkPageSize: 8
-    DrawDistance: 4
+  Chunk:
+    ChunkPageSize: 16
+    DrawDistance: 7
     ChunkSize: {x: 32, y: 32, z: 32}
+  Schedular:
+    BatchSize: 32
   Renderer:
     Material: {fileID: 2100000, guid: 104fcd82a3c84694d93fbfb0a9dbf2a1, type: 2}
     CastShadows: 0
