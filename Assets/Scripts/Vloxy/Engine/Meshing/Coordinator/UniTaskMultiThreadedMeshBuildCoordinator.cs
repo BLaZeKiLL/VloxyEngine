@@ -12,7 +12,9 @@ using UnityEngine;
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
     public class UniTaskMultiThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
-
+        
+        private const string TAG = "<color=green>MeshBuildCoordinator</color>";
+        
         private int _batchSize;
 
         public UniTaskMultiThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool, int batchSize) : base(chunkPool) {
@@ -34,9 +36,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             watch.Stop();
 
             if (result.Length > 0) {
-                UnityEngine.Debug.Log($"[MeshBuildCoordinator] Number of batches : {result.Length}");
-                UnityEngine.Debug.Log($"[MeshBuildCoordinator] Average batch process time : {result.Average():0.###} ms");
-                UnityEngine.Debug.Log($"[MeshBuildCoordinator] Total batch process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+                UnityEngine.Debug.unityLogger.Log(TAG,$"Number of batches : {result.Length}");
+                UnityEngine.Debug.unityLogger.Log(TAG,$"Average batch process time : {result.Average():0.###} ms");
+                UnityEngine.Debug.unityLogger.Log(TAG,$" Total batch process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
             }
             
             PostProcess();
@@ -86,7 +88,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         #endif
 
         private IEnumerable<Batch> CreateBatches(List<ChunkJobData<B>> jobs) {
-            var batches = new Batch[Mathf.CeilToInt((float) jobs.Count / 32)];
+            var batches = new Batch[Mathf.CeilToInt((float) jobs.Count / _batchSize)];
             var bindex = 0;
             for (int i = 0; i < jobs.Count; i += _batchSize) {
                 batches[bindex++] = new Batch(jobs.GetRange(i, Math.Min(_batchSize, jobs.Count - i)));
