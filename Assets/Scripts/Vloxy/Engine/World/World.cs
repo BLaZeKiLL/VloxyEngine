@@ -14,6 +14,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
     public class World<B> : MonoBehaviour where B : IBlock {
 
+        private const string TAG = "<color=cyan>World</color>";
+        
         [SerializeField] private Transform _focus;
         [SerializeField] private VoxelSettings _settings;
 
@@ -43,7 +45,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 provider.Settings = _settings;
             });
             
-            Debug.Log("[World][Awake] Voxel Provider Initialized");
+            Debug.unityLogger.Log(TAG,"Provider Initialized");
 
             _chunkSettings = VoxelProvider<B>.Current.Settings.Chunk;
 
@@ -59,7 +61,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void Start() {
             NoiseProfile.Generate(_settings);
             
-            Debug.Log("[World][Start] Height Map Generated");
+            Debug.unityLogger.Log(TAG,"Height Map Generated");
             
             for (int x = -_chunkSettings.ChunkPageSize; x < _chunkSettings.ChunkPageSize; x++) {
                 for (int z = -_chunkSettings.ChunkPageSize; z < _chunkSettings.ChunkPageSize; z++) {
@@ -76,7 +78,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             
             FocusChunkCoord = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
             
-            Debug.Log("[World][Start] Chunks Created : " + Chunks.Count);
+            Debug.unityLogger.Log(TAG,"Chunks Created : " + Chunks.Count);
             
             WorldStart();
         }
