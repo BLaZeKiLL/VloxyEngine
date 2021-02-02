@@ -5,7 +5,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
     public class Chunk<B> where B : IBlock {
 
         // TODO : initialize chunk data
-        public IChunkData<B> Data { get; }
+        public IChunkData<B> Data { get; set; }
         
         public Vector3Int Position { get; }
         

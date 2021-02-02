@@ -1,0 +1,18 @@
+{
+    "name": "CodeBlaze.Voxel.Engine.Test.TestBed",
+    "rootNamespace": "CodeBlaze.Voxel.Engine.Test.TestBed",
+    "references": [
+        "GUID:3d017d579b2996d4ab609c560edcfc6d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

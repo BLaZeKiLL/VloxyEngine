@@ -6,6 +6,8 @@
 
         B GetBlock(int x, int y, int z);
 
+        object GetData();
+
     }
 
 }

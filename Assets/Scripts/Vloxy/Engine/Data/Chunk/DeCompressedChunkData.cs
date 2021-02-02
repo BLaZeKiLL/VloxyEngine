@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 using UnityEngine;
 
@@ -9,11 +10,15 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         private B[] _blocks;
         private Vector3Int _size;
 
-        public DeCompressedChunkData(Vector3Int size) {
+        public DeCompressedChunkData(B[] blocks, Vector3Int size) {
+            if (blocks.Length != size.x * size.y * size.z) throw new InvalidDataException("Unexcpected number of blocks");
+            
             _size = size;
-            _blocks = new B[_size.x * _size.y * _size.z];
+            _blocks = blocks;
         }
 
+        public object GetData() => _blocks;
+        
         public void SetBlock(B block, int x, int y, int z) {
             if (!ContainsIndex(x, y, z)) {
                 throw new IndexOutOfRangeException($"Chunk does not contain index: ({x},{y},{z})");
