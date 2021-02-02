@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise.Settings;
@@ -15,10 +14,11 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         private int _heightHalf;
 
         private Dictionary<Vector2Int, int> _heightMap;
+        private Vector3Int _chunkSize;
         
         protected virtual B GetBlock(int heightMapValue, int blockHeight) => default;
         
-        public FastNoiseProfile2D(NoiseSettings2D settings) {
+        public FastNoiseProfile2D(NoiseSettings2D settings, Vector3Int chunkSize) {
             _heightHalf = settings.Height / 2;
             _noise = new FastNoiseLite(settings.Seed);
             _noise.SetNoiseType(settings.NoiseType);
@@ -27,6 +27,8 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             _noise.SetFractalGain(settings.Gain);
             _noise.SetFractalLacunarity(settings.Lacunarity);
             _noise.SetFractalOctaves(settings.Octaves);
+
+            _chunkSize = chunkSize;
         }
 
         public void Generate(VoxelSettings settings) {
@@ -44,14 +46,13 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
         public void Fill(Chunk<B> chunk) {
             var pos = chunk.Position;
-            var size = chunk.Size;
             
-            for (int x = 0; x < size.x; x++) {
-                for (int z = 0; z < size.z; z++) {
+            for (int x = 0; x < _chunkSize.x; x++) {
+                for (int z = 0; z < _chunkSize.z; z++) {
                     var height = _heightMap[new Vector2Int(pos.x + x, pos.z + z)];
                     
-                    for (int y = 0; y < size.y; y++) {
-                        chunk.SetBlock(GetBlock(height, pos.y + y), x,y,z);
+                    for (int y = 0; y < _chunkSize.y; y++) {
+                        chunk.Data.SetBlock(GetBlock(height, pos.y + y), x,y,z);
                     }
                 }
             }

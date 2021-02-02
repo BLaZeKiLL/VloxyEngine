@@ -8,6 +8,8 @@
 
         bool IsTranslucent();
 
+        byte[] GetBytes();
+
     }
 
 }

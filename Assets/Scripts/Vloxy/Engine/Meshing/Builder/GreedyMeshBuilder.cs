@@ -10,10 +10,12 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
 
         protected ChunkJobData<B> JobData;
         
-        private int index;
+        private int _index;
+        private Vector3Int _size;
 
-        public GreedyMeshBuilder() {
+        public GreedyMeshBuilder(Vector3Int size) {
             MeshData = new MeshData();
+            _size = size;
         }
 
         protected virtual B EmptyBlock() => default;
@@ -33,9 +35,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
                 int axis1 = (direction + 1) % 3;
                 int axis2 = (direction + 2) % 3;
 
-                int mainAxisLimit = JobData.Chunk.Size[direction];
-                int axis1Limit = JobData.Chunk.Size[axis1];
-                int axis2Limit = JobData.Chunk.Size[axis2];
+                int mainAxisLimit = _size[direction];
+                int axis1Limit = _size[axis1];
+                int axis2Limit = _size[axis2];
                 
                 var deltaAxis1 = Vector3Int.zero;
                 var deltaAxis2 = Vector3Int.zero;
@@ -142,22 +144,22 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
         public void Clear() {
             JobData = null;
             MeshData.Clear();
-            index = 0;
+            _index = 0;
         }
 
         protected B GetBlock(Vector3Int pos, int limit) {
             int x = pos.x, y = pos.y, z = pos.z;
             
-            if (x < 0) return JobData.ChunkNX == null ? EmptyBlock() : JobData.ChunkNX.GetBlock(x + limit, y, z);
-            if (x >= limit) return JobData.ChunkPX == null ? EmptyBlock() : JobData.ChunkPX.GetBlock(x - limit,y,z);
+            if (x < 0) return JobData.ChunkNX == null ? EmptyBlock() : JobData.ChunkNX.Data.GetBlock(x + limit, y, z);
+            if (x >= limit) return JobData.ChunkPX == null ? EmptyBlock() : JobData.ChunkPX.Data.GetBlock(x - limit,y,z);
             
-            if (y < 0) return JobData.ChunkNY == null ? EmptyBlock() : JobData.ChunkNY.GetBlock(x, y + limit, z);
-            if (y >= limit) return JobData.ChunkPY == null ? EmptyBlock() : JobData.ChunkPY.GetBlock(x,y - limit,z);
+            if (y < 0) return JobData.ChunkNY == null ? EmptyBlock() : JobData.ChunkNY.Data.GetBlock(x, y + limit, z);
+            if (y >= limit) return JobData.ChunkPY == null ? EmptyBlock() : JobData.ChunkPY.Data.GetBlock(x,y - limit,z);
             
-            if (z < 0) return JobData.ChunkNZ == null ? EmptyBlock() : JobData.ChunkNZ.GetBlock(x, y, z + limit);
-            if (z >= limit) return JobData.ChunkPZ == null ? EmptyBlock() : JobData.ChunkPZ.GetBlock(x,y,z - limit);
+            if (z < 0) return JobData.ChunkNZ == null ? EmptyBlock() : JobData.ChunkNZ.Data.GetBlock(x, y, z + limit);
+            if (z >= limit) return JobData.ChunkPZ == null ? EmptyBlock() : JobData.ChunkPZ.Data.GetBlock(x,y,z - limit);
 
-            return JobData.Chunk.GetBlock(x, y, z);
+            return JobData.Chunk.Data.GetBlock(x, y, z);
         }
 
         // v1 -> BL
@@ -172,26 +174,26 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
 
             switch (normalMask) {
                 case 1:
-                    MeshData.Triangles.Add(index);
-                    MeshData.Triangles.Add(index + 1);
-                    MeshData.Triangles.Add(index + 3);
-                    MeshData.Triangles.Add(index);
-                    MeshData.Triangles.Add(index + 3);
-                    MeshData.Triangles.Add(index + 2);
+                    MeshData.Triangles.Add(_index);
+                    MeshData.Triangles.Add(_index + 1);
+                    MeshData.Triangles.Add(_index + 3);
+                    MeshData.Triangles.Add(_index);
+                    MeshData.Triangles.Add(_index + 3);
+                    MeshData.Triangles.Add(_index + 2);
 
                     break;
                 case -1:
-                    MeshData.Triangles.Add(index);
-                    MeshData.Triangles.Add(index + 3);
-                    MeshData.Triangles.Add(index + 1);
-                    MeshData.Triangles.Add(index);
-                    MeshData.Triangles.Add(index + 2);
-                    MeshData.Triangles.Add(index + 3);
+                    MeshData.Triangles.Add(_index);
+                    MeshData.Triangles.Add(_index + 3);
+                    MeshData.Triangles.Add(_index + 1);
+                    MeshData.Triangles.Add(_index);
+                    MeshData.Triangles.Add(_index + 2);
+                    MeshData.Triangles.Add(_index + 3);
 
                     break;
             }
 
-            index += 4;
+            _index += 4;
 
             var normal = directionMask * normalMask;
 

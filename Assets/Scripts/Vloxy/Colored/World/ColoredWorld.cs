@@ -1,6 +1,4 @@
-﻿using System;
-
-using CodeBlaze.Vloxy.Colored.Block;
+﻿using CodeBlaze.Vloxy.Colored.Block;
 using CodeBlaze.Vloxy.Engine;
 using CodeBlaze.Vloxy.Engine.World;
 
