@@ -20,30 +20,25 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         public object GetData() => _blocks;
         
         public void SetBlock(B block, int x, int y, int z) {
-            if (!ContainsIndex(x, y, z)) {
+            try {
+                _blocks[FlattenIndex(x, y, z)] = block;
+            } catch (IndexOutOfRangeException) {
                 throw new IndexOutOfRangeException($"Chunk does not contain index: ({x},{y},{z})");
             }
-
-            _blocks[FlattenIndex(x, y, z)] = block;
         }
         
         public B GetBlock(int x, int y, int z) {
-            if (!ContainsIndex(x, y, z)) {
+            try {
+                return _blocks[FlattenIndex(x, y, z)];
+            } catch (IndexOutOfRangeException) {
                 throw new IndexOutOfRangeException($"Chunk does not contain index: ({x},{y},{z})");
             }
-            
-            return _blocks[FlattenIndex(x, y, z)];
         }
 
         private int FlattenIndex(int x, int y, int z) =>
             y * _size.x * _size.z +
             z * _size.x +
             x;
-
-        private bool ContainsIndex(int x, int y, int z) =>
-            x >= 0 && x < _size.x &&
-            y >= 0 && y < _size.y &&
-            z >= 0 && z < _size.z;
 
     }
 

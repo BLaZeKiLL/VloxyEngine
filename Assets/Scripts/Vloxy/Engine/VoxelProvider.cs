@@ -16,6 +16,8 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual Chunk<B> CreateChunk(Vector3Int position) => new Chunk<B>(position);
 
+        public virtual ChunkCompressor<B> ChunkCompressor(int blockSize) => null;
+
         public virtual INoiseProfile<B> NoiseProfile() => null;
 
         public virtual ChunkPool<B> ChunkPool(Transform transform) => new ChunkPool<B>(transform);

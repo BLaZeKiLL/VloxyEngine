@@ -66,7 +66,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
                     for (int y = -_chunkSettings.ChunkPageSize; y < _chunkSettings.ChunkPageSize; y++) {
                         var pos = new Vector3Int(x, y, z) * _chunkSettings.ChunkSize;
                         var chunk = VoxelProvider<B>.Current.CreateChunk(pos);
-                        NoiseProfile.Fill(chunk);
+                        var blocks = NoiseProfile.Fill(pos);
                         Chunks.Add(pos, chunk);
                     }
                 }

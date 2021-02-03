@@ -8,7 +8,7 @@ namespace CodeBlaze.Voxel.Engine.Test.TestBed {
 
     }
     
-    public struct TestBlock : IBlock {
+    public readonly struct TestBlock : IBlock {
 
         public TestBlockType Type { get; }
 

@@ -8,7 +8,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Settings {
         public int Height = 256;
         public int Seed = 1337;
         public FastNoiseLite.NoiseType NoiseType = FastNoiseLite.NoiseType.Perlin;
-        public float Frequency = 0.005f;
+        public float Frequency = 0.003f;
         public FastNoiseLite.FractalType FractalType = FastNoiseLite.FractalType.FBm;
         public float Gain = 0.5f;
         public float Lacunarity = 2f;

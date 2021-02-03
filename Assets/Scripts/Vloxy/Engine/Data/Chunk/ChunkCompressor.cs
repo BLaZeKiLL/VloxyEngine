@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using CodeBlaze.Vloxy.Engine.Extensions;
 
 using UnityEngine;
 
@@ -44,7 +45,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         public IChunkData<B> DeCompress(IChunkData<B> data) {
             var bytes = (List<byte>) data.GetData();
-            var blocks = new B[_chunkSize.x * _chunkSize.y * _chunkSize.z];
+            var blocks = new B[_chunkSize.Size()];
             var step = _blockSize + sizeof(int);
             var bindex = 0;
 
@@ -55,6 +56,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                 for (int j = bindex; j < count + bindex; j++) {
                     blocks[j] = block;
                 }
+
+                bindex += count;
             }
 
             return new DeCompressedChunkData<B>(blocks, _chunkSize);

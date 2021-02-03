@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "CodeBlaze.Voxel.Engine",
-        "CodeBlaze.Voxel.Engine.Test.TestBed"
+        "CodeBlaze.Voxel.Engine.Test.TestBed",
+        "CBSL.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

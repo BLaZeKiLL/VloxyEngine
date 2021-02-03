@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Data;
+using CodeBlaze.Vloxy.Engine.Extensions;
 using CodeBlaze.Vloxy.Engine.Noise.Settings;
 using CodeBlaze.Vloxy.Engine.Settings;
 
@@ -44,18 +45,20 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             }
         }
 
-        public void Fill(Chunk<B> chunk) {
-            var pos = chunk.Position;
-            
+        public B[] Fill(Vector3Int pos) {
+            var blocks = new B[_chunkSize.Size()];
+
             for (int x = 0; x < _chunkSize.x; x++) {
                 for (int z = 0; z < _chunkSize.z; z++) {
                     var height = _heightMap[new Vector2Int(pos.x + x, pos.z + z)];
                     
                     for (int y = 0; y < _chunkSize.y; y++) {
-                        chunk.Data.SetBlock(GetBlock(height, pos.y + y), x,y,z);
+                        blocks[_chunkSize.Flatten(x, y, z)] = GetBlock(height, pos.y + y);
                     }
                 }
             }
+
+            return blocks;
         }
 
         public void Clear() {
