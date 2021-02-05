@@ -1,4 +1,4 @@
-﻿using CBSL.Core.Source.Core.Runtime.Provider;
+﻿using CBSL.Core.Provider;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;

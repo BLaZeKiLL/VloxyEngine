@@ -12,7 +12,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
     public class ChunkBehaviourPool<B> where B : IBlock {
 
-        private const string TAG = "<color=yellow>ChunkPool</color>";
+        private const string TAG = "<color=yellow>ChunkBehaviourPool</color>";
         
         private IObjectPool<ChunkBehaviour> _pool;
 

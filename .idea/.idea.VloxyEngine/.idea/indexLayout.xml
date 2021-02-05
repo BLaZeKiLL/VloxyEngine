@@ -14,7 +14,7 @@
       <Path>Library/PackageCache/com.unity.test-framework@1.1.22</Path>
       <Path>Library/PackageCache/com.unity.textmeshpro@3.0.3</Path>
       <Path>Library/PackageCache/com.unity.timeline@1.4.6</Path>
-      <Path>Library/PackageCache/io.codeblaze.cbsl@1.1.2</Path>
+      <Path>Library/PackageCache/io.codeblaze.cbsl@1.2.0</Path>
       <Path>Packages</Path>
       <Path>ProjectSettings</Path>
     </explicitIncludes>
