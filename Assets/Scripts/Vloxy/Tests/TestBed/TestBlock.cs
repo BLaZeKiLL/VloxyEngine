@@ -1,4 +1,6 @@
-﻿using CodeBlaze.Vloxy.Engine.Data;
+﻿using System.Collections.Generic;
+
+using CodeBlaze.Vloxy.Engine.Data;
 
 namespace CodeBlaze.Voxel.Engine.Test.TestBed {
 
@@ -14,6 +16,10 @@ namespace CodeBlaze.Voxel.Engine.Test.TestBed {
 
         public TestBlock(TestBlockType type) {
             Type = type;
+        }
+
+        public TestBlock(List<byte> bytes) {
+            Type = (TestBlockType) bytes[0];
         }
 
         public bool IsOpaque() => Type != TestBlockType.Air;

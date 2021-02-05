@@ -1,8 +1,10 @@
-﻿using CodeBlaze.Vloxy.Engine.Data;
+﻿using System.Collections.Generic;
+
+using CodeBlaze.Vloxy.Engine.Data;
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Colored.Block {
+namespace CodeBlaze.Vloxy.Colored.Data.Block {
 
     public readonly struct ColoredBlock : IBlock {
 
@@ -10,6 +12,10 @@ namespace CodeBlaze.Vloxy.Colored.Block {
 
         public ColoredBlock(Color32 color) {
             Color = color;
+        }
+
+        public ColoredBlock(List<byte> bytes) {
+            Color = new Color32(bytes[0], bytes[1], bytes[2], bytes[3]);
         }
 
         public bool IsOpaque() => Color.a == byte.MaxValue;

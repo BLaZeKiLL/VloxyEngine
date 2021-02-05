@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
@@ -8,13 +9,13 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
         
         
-        protected readonly ChunkPool<B> ChunkPool; // circular reference
+        protected readonly ChunkBehaviourPool<B> ChunkBehaviourPool; // circular reference
 
-        protected MeshBuildCoordinator(ChunkPool<B> chunkPool) {
-            ChunkPool = chunkPool;
+        protected MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) {
+            ChunkBehaviourPool = chunkBehaviourPool;
         }
 
-        public abstract void Process(List<ChunkJobData<B>> jobs);
+        public abstract void Process(List<MeshBuildJobData<B>> jobs);
         
         protected abstract void Render(Chunk<B> chunk, MeshData meshData);
         

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Extensions;
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Engine.Data {
+namespace CodeBlaze.Vloxy.Engine.Components {
 
     public abstract class ChunkCompressor<B> where B : IBlock {
 

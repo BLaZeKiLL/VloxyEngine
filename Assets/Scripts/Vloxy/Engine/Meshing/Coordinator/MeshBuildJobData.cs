@@ -1,6 +1,8 @@
-﻿namespace CodeBlaze.Vloxy.Engine.Data {
+﻿using CodeBlaze.Vloxy.Engine.Data;
 
-    public class ChunkJobData<B> where B : IBlock {
+namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
+
+    public class MeshBuildJobData<B> where B : IBlock {
 
         public Chunk<B> Chunk { get; set; }
         public Chunk<B> ChunkPX { get; set; }
@@ -9,7 +11,7 @@
         public Chunk<B> ChunkNX { get; set; }
         public Chunk<B> ChunkNY { get; set; }
         public Chunk<B> ChunkNZ { get; set; }
-        
+
     }
 
 }

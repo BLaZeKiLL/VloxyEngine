@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
@@ -10,9 +11,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         
         private const string TAG = "<color=green>MeshBuildCoordinator</color>";
         
-        public SingleThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool) : base(chunkPool) { }
+        public SingleThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) : base(chunkBehaviourPool) { }
         
-        public override void Process(List<ChunkJobData<B>> jobs) {
+        public override void Process(List<MeshBuildJobData<B>> jobs) {
             var mesher = VoxelProvider<B>.Current.MeshBuilder();
             var watch = new Stopwatch();
             
@@ -32,7 +33,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         }
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
-            ChunkPool.Claim(chunk).Render(meshData);
+            ChunkBehaviourPool.Claim(chunk).Render(meshData);
         }
 
     }

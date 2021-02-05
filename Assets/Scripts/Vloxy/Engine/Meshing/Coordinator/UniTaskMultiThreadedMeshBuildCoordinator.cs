@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 
 using Cysharp.Threading.Tasks;
@@ -17,18 +18,18 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         
         private int _batchSize;
 
-        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool, int batchSize) : base(chunkPool) {
+        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool, int batchSize) : base(chunkBehaviourPool) {
             _batchSize = batchSize;
         }
         
-        public override void Process(List<ChunkJobData<B>> jobs) => InternalProcess(jobs).Forget();
+        public override void Process(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
-            ChunkPool.Claim(chunk).Render(meshData);
+            ChunkBehaviourPool.Claim(chunk).Render(meshData);
         }
 
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        private async UniTaskVoid InternalProcess(List<ChunkJobData<B>> jobs) {
+        private async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
             var watch = new Stopwatch();
             
             watch.Start();
@@ -87,7 +88,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         }  
         #endif
 
-        private IEnumerable<Batch> CreateBatches(List<ChunkJobData<B>> jobs) {
+        private IEnumerable<Batch> CreateBatches(List<MeshBuildJobData<B>> jobs) {
             var batches = new Batch[Mathf.CeilToInt((float) jobs.Count / _batchSize)];
             var bindex = 0;
             for (int i = 0; i < jobs.Count; i += _batchSize) {
@@ -99,9 +100,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
         private class Batch {
             
-            private List<ChunkJobData<B>> _data;
+            private List<MeshBuildJobData<B>> _data;
 
-            public Batch(List<ChunkJobData<B>> data) {
+            public Batch(List<MeshBuildJobData<B>> data) {
                 _data = data;
             }
 

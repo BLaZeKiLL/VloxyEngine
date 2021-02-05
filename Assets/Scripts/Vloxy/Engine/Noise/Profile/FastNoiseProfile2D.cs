@@ -11,15 +11,17 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
     public class FastNoiseProfile2D<B> : INoiseProfile<B> where B : IBlock {
 
+        private const string TAG = "<color=orange>FastNoiseProfile2D</color>";
+        
         private FastNoiseLite _noise;
         private int _heightHalf;
 
         private Dictionary<Vector2Int, int> _heightMap;
-        private Vector3Int _chunkSize;
+        private ChunkSettings _chunkSettings;
         
         protected virtual B GetBlock(int heightMapValue, int blockHeight) => default;
         
-        public FastNoiseProfile2D(NoiseSettings2D settings, Vector3Int chunkSize) {
+        public FastNoiseProfile2D(NoiseSettings2D settings, ChunkSettings chunkSettings) {
             _heightHalf = settings.Height / 2;
             _noise = new FastNoiseLite(settings.Seed);
             _noise.SetNoiseType(settings.NoiseType);
@@ -29,12 +31,12 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             _noise.SetFractalLacunarity(settings.Lacunarity);
             _noise.SetFractalOctaves(settings.Octaves);
 
-            _chunkSize = chunkSize;
+            _chunkSettings = chunkSettings;
         }
 
-        public void Generate(VoxelSettings settings) {
-            var sizeX = settings.Chunk.ChunkPageSize * settings.Chunk.ChunkSize.x;
-            var sizeZ = settings.Chunk.ChunkPageSize * settings.Chunk.ChunkSize.z;
+        public void Generate() {
+            var sizeX = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.x;
+            var sizeZ = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.z;
             
             _heightMap = new Dictionary<Vector2Int, int>();
 
@@ -43,22 +45,24 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
                     _heightMap.Add(new Vector2Int(x,z), GetHeight(x, z));
                 }
             }
+            
+            Debug.unityLogger.Log(TAG,"Height Map Generated");
         }
 
-        public B[] Fill(Vector3Int pos) {
-            var blocks = new B[_chunkSize.Size()];
+        public DeCompressedChunkData<B> Fill(Vector3Int pos) {
+            var blocks = new B[_chunkSettings.ChunkSize.Size()];
 
-            for (int x = 0; x < _chunkSize.x; x++) {
-                for (int z = 0; z < _chunkSize.z; z++) {
+            for (int x = 0; x < _chunkSettings.ChunkSize.x; x++) {
+                for (int z = 0; z < _chunkSettings.ChunkSize.z; z++) {
                     var height = _heightMap[new Vector2Int(pos.x + x, pos.z + z)];
                     
-                    for (int y = 0; y < _chunkSize.y; y++) {
-                        blocks[_chunkSize.Flatten(x, y, z)] = GetBlock(height, pos.y + y);
+                    for (int y = 0; y < _chunkSettings.ChunkSize.y; y++) {
+                        blocks[_chunkSettings.ChunkSize.Flatten(x, y, z)] = GetBlock(height, pos.y + y);
                     }
                 }
             }
 
-            return blocks;
+            return new DeCompressedChunkData<B>(blocks, _chunkSettings.ChunkSize);
         }
 
         public void Clear() {

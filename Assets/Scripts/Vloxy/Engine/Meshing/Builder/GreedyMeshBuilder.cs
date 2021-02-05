@@ -1,4 +1,5 @@
 ﻿using CodeBlaze.Vloxy.Engine.Data;
+using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
 
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
 
         protected readonly MeshData MeshData;
 
-        protected ChunkJobData<B> JobData;
+        protected MeshBuildJobData<B> JobData;
         
         private int _index;
         private Vector3Int _size;
@@ -24,7 +25,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
 
         protected virtual bool CompareBlock(B block1, B block2) => block1.Equals(block2);
         
-        public MeshData GenerateMesh(ChunkJobData<B> data) {
+        public MeshData GenerateMesh(MeshBuildJobData<B> data) {
             JobData = data;
             
             // Sweep over each axis (X, Y and Z)

@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine;
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Extensions;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
-using CodeBlaze.Vloxy.Engine.Noise.Settings;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Voxel.Engine.Test.TestBed;
 
@@ -15,7 +15,7 @@ using UnityEditor;
 
 using UnityEngine;
 
-namespace CodeBlaze.Voxel.Engine.Test.Runtime.Data {
+namespace CodeBlaze.Voxel.Engine.Test.Runtime.Components {
 
     public class CompressionTest {
         
@@ -34,9 +34,9 @@ namespace CodeBlaze.Voxel.Engine.Test.Runtime.Data {
             
             _noiseProfile = VoxelProvider<TestBlock>.Current.NoiseProfile();
             
-            _compressor = VoxelProvider<TestBlock>.Current.ChunkCompressor(sizeof(TestBlockType));
+            _compressor = VoxelProvider<TestBlock>.Current.ChunkCompressor();
 
-            _noiseProfile.Generate(VoxelProvider<TestBlock>.Current.Settings);
+            _noiseProfile.Generate();
         }
 
         [Test]
@@ -76,11 +76,12 @@ namespace CodeBlaze.Voxel.Engine.Test.Runtime.Data {
         public void ComplexDataCompression() {
             var blocks = _noiseProfile.Fill(Vector3Int.zero);
             
-            var compressedData = (CompressedChunkData<TestBlock>) _compressor.Compress(new DeCompressedChunkData<TestBlock>(blocks, _size));
+            var compressedData = (CompressedChunkData<TestBlock>) _compressor.Compress(blocks);
 
             var actual = (TestBlock[]) ((DeCompressedChunkData<TestBlock>) _compressor.DeCompress(compressedData)).GetData();
-
-            Assert.That(actual, Is.EquivalentTo(blocks));
+            var expected = (TestBlock[]) blocks.GetData();
+            
+            Assert.That(actual, Is.EquivalentTo(expected));
         }
 
     }
