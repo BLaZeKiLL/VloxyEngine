@@ -24,9 +24,9 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         protected abstract override byte[] GetBytes(B obj);
 
-        public void SetBlock(B block, int x, int y, int z) => GetDeCompressedData()[_chunkSize.Flatten(x, y, z)] = block;
+        public void SetBlock(B block, int x, int y, int z) => SetAt(_chunkSize.Flatten(x, y, z), block);
 
-        public B GetBlock(int x, int y, int z) => GetDeCompressedData()[_chunkSize.Flatten(x, y, z)];
+        public B GetBlock(int x, int y, int z) => GetAt(_chunkSize.Flatten(x, y, z));
 
     }
 
