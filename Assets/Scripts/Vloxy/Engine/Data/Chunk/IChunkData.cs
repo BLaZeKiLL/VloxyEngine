@@ -5,8 +5,7 @@
         void SetBlock(B block, int x, int y, int z);
 
         B GetBlock(int x, int y, int z);
-
-        object GetData();
+        
 
     }
 

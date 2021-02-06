@@ -17,10 +17,10 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual Chunk<B> CreateChunk(Vector3Int position) => new Chunk<B>(position);
 
-        public virtual ChunkStore<B> ChunkStore(INoiseProfile<B> noiseProfile) => new ChunkStore<B>(noiseProfile, ChunkCompressor(), Settings.Chunk);
+        public virtual ChunkStore<B> ChunkStore(INoiseProfile<B> noiseProfile) => new ChunkStore<B>(noiseProfile, Settings.Chunk);
 
-        public virtual ChunkCompressor<B> ChunkCompressor() => null;
-
+        public virtual IChunkData<B> ChunkData(B[] blocks) => null;
+        
         public virtual INoiseProfile<B> NoiseProfile() => null;
 
         public virtual ChunkBehaviourPool<B> ChunkPool(Transform transform) => new ChunkBehaviourPool<B>(transform);

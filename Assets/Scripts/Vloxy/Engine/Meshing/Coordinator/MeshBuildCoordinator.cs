@@ -7,8 +7,6 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
     public abstract class MeshBuildCoordinator<B> where B : IBlock {
 
-        
-        
         protected readonly ChunkBehaviourPool<B> ChunkBehaviourPool; // circular reference
 
         protected MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) {
@@ -19,7 +17,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         
         protected abstract void Render(Chunk<B> chunk, MeshData meshData);
         
-        protected virtual void PostProcess() { }
+        protected virtual void PreProcess(List<MeshBuildJobData<B>> jobs) { }
+        
+        protected virtual void PostProcess(List<MeshBuildJobData<B>> jobs) { }
 
     }
 

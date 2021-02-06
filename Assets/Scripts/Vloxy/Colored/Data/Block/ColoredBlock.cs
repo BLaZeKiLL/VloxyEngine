@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-using CodeBlaze.Vloxy.Engine.Data;
+﻿using CodeBlaze.Vloxy.Engine.Data;
 
 using UnityEngine;
 
@@ -14,7 +12,7 @@ namespace CodeBlaze.Vloxy.Colored.Data.Block {
             Color = color;
         }
 
-        public ColoredBlock(List<byte> bytes) {
+        public ColoredBlock(byte[] bytes) {
             Color = new Color32(bytes[0], bytes[1], bytes[2], bytes[3]);
         }
 

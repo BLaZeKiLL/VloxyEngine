@@ -1,4 +1,6 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
+﻿using System.Linq;
+
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
@@ -55,7 +57,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void Start() {
-            NoiseProfile.Generate();
+            NoiseProfile.GenerateHeightMap();
 
             ChunkStore.GenerateChunks();
 
@@ -71,13 +73,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 ? GetChunkCoords(_focus.position)
                 : Vector3Int.zero;
             
-            // WorldUpdate();
+            WorldUpdate();
 
             if (coords.x == FocusChunkCoord.x && coords.z == FocusChunkCoord.z) return;
 
             FocusChunkCoord = coords;
             
-            // ChunkPoolUpdate();
+            ChunkPoolUpdate();
         }
         
         #endregion
@@ -110,37 +112,16 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         #region Private
         private void ChunkPoolUpdate() {
-            // var jobs = ChunkBehaviourPool
-            //     .Update(FocusChunkCoord)
-            //     .FindAll(coord => ChunkStore.ContainsChunk(coord))
-            //     .Select(coord => GetChunkJobData(Chunks[coord]))
-            //     .ToList();
-            //
-            // BuildCoordinator.Process(jobs);
+            var jobs = ChunkBehaviourPool
+                .Update(FocusChunkCoord)
+                .FindAll(coord => ChunkStore.ContainsChunk(coord))
+                .Select(coord => ChunkStore.GetChunkJobData(coord))
+                .ToList();
+            
+            BuildCoordinator.Process(jobs);
 
             WorldChunkPoolUpdate();
         }
-        
-        // private MeshBuildJobData<B> GetChunkJobData(Chunk<B> chunk) {
-        //     var position = chunk.Position;
-        //
-        //     var px = position + Vector3Int.right * _chunkSettings.ChunkSize;
-        //     var py = position + Vector3Int.up * _chunkSettings.ChunkSize;
-        //     var pz = position + new Vector3Int(0, 0, 1) * _chunkSettings.ChunkSize;
-        //     var nx = position + Vector3Int.left * _chunkSettings.ChunkSize;
-        //     var ny = position + Vector3Int.down * _chunkSettings.ChunkSize;
-        //     var nz = position + new Vector3Int(0, 0, -1) * _chunkSettings.ChunkSize;
-        //     
-        //     return new MeshBuildJobData<B> {
-        //         Chunk = chunk,
-        //         ChunkPX = Chunks.ContainsKey(px) ? Chunks[px] : null,
-        //         ChunkPY = Chunks.ContainsKey(py) ? Chunks[py] : null,
-        //         ChunkPZ = Chunks.ContainsKey(pz) ? Chunks[pz] : null,
-        //         ChunkNX = Chunks.ContainsKey(nx) ? Chunks[nx] : null,
-        //         ChunkNY = Chunks.ContainsKey(ny) ? Chunks[ny] : null,
-        //         ChunkNZ = Chunks.ContainsKey(nz) ? Chunks[nz] : null
-        //     };
-        // }
         #endregion
 
     }

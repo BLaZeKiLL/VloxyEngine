@@ -34,7 +34,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             _chunkSettings = chunkSettings;
         }
 
-        public void Generate() {
+        public void GenerateHeightMap() {
             var sizeX = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.x;
             var sizeZ = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.z;
             
@@ -49,7 +49,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             Debug.unityLogger.Log(TAG,"Height Map Generated");
         }
 
-        public DeCompressedChunkData<B> Fill(Vector3Int pos) {
+        public IChunkData<B> GenerateChunkData(Vector3Int pos) {
             var blocks = new B[_chunkSettings.ChunkSize.Size()];
 
             for (int x = 0; x < _chunkSettings.ChunkSize.x; x++) {
@@ -62,7 +62,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
                 }
             }
 
-            return new DeCompressedChunkData<B>(blocks, _chunkSettings.ChunkSize);
+            return VoxelProvider<B>.Current.ChunkData(blocks);
         }
 
         public void Clear() {

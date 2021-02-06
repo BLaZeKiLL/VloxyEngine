@@ -63,7 +63,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             var reclaim = _active.Keys.Where(x => !current.Contains(x)).ToList();
             var claim = current.Where(x => !_active.Keys.Contains(x)).ToList();
             
-            Debug.unityLogger.Log(TAG,$"{reclaim.Count} Claim : {claim.Count}");
+            Debug.unityLogger.Log(TAG,$"Reclaim : {reclaim.Count}, Claim : {claim.Count}");
             
             foreach (var x in reclaim) {
                 Reclaim(x);
