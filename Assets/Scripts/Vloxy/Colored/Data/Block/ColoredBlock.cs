@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Colored.Block {
+namespace CodeBlaze.Vloxy.Colored.Data.Block {
 
     public readonly struct ColoredBlock : IBlock {
 
@@ -12,11 +12,17 @@ namespace CodeBlaze.Vloxy.Colored.Block {
             Color = color;
         }
 
+        public ColoredBlock(byte[] bytes) {
+            Color = new Color32(bytes[0], bytes[1], bytes[2], bytes[3]);
+        }
+
         public bool IsOpaque() => Color.a == byte.MaxValue;
 
         public bool IsTransparent() => Color.a == byte.MinValue;
 
         public bool IsTranslucent() => throw new System.NotImplementedException();
+
+        public byte[] GetBytes() => new[] { Color.r, Color.g, Color.b, Color.a };
 
         public bool Equals(ColoredBlock other) {
             var color2 = other.Color;

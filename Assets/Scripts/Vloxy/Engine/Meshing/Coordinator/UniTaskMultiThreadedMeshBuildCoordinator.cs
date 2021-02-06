@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 
 using Cysharp.Threading.Tasks;
@@ -17,18 +18,20 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         
         private int _batchSize;
 
-        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkPool<B> chunkPool, int batchSize) : base(chunkPool) {
+        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool, int batchSize) : base(chunkBehaviourPool) {
             _batchSize = batchSize;
         }
         
-        public override void Process(List<ChunkJobData<B>> jobs) => InternalProcess(jobs).Forget();
+        public override void Process(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
-            ChunkPool.Claim(chunk).Render(meshData);
+            ChunkBehaviourPool.Claim(chunk).Render(meshData);
         }
 
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        private async UniTaskVoid InternalProcess(List<ChunkJobData<B>> jobs) {
+        private async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
+            PreProcess(jobs);
+            
             var watch = new Stopwatch();
             
             watch.Start();
@@ -38,10 +41,10 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             if (result.Length > 0) {
                 UnityEngine.Debug.unityLogger.Log(TAG,$"Number of batches : {result.Length}");
                 UnityEngine.Debug.unityLogger.Log(TAG,$"Average batch process time : {result.Average():0.###} ms");
-                UnityEngine.Debug.unityLogger.Log(TAG,$" Total batch process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+                UnityEngine.Debug.unityLogger.Log(TAG,$"Total batch process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
             }
             
-            PostProcess();
+            PostProcess(jobs);
         }
         
         private async UniTask<long> ScheduleJob(Batch batch) {
@@ -64,12 +67,12 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             return watch.ElapsedMilliseconds;
         }  
         #else
-        public async UniTaskVoid InternalProcess(List<ChunkJobData<B>> jobs) {
-            var tasks = new List<UniTask>();
+        public async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
+            PreProcess(jobs);
             
             await UniTask.WhenAll(CreateBatches(jobs).Select(ScheduleJob).ToList());
             
-            PostProcess();
+            PostProcess(jobs);
         }
         
         private async UniTask ScheduleJob(Batch batch) {
@@ -87,7 +90,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         }  
         #endif
 
-        private IEnumerable<Batch> CreateBatches(List<ChunkJobData<B>> jobs) {
+        private IEnumerable<Batch> CreateBatches(List<MeshBuildJobData<B>> jobs) {
             var batches = new Batch[Mathf.CeilToInt((float) jobs.Count / _batchSize)];
             var bindex = 0;
             for (int i = 0; i < jobs.Count; i += _batchSize) {
@@ -99,9 +102,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
         private class Batch {
             
-            private List<ChunkJobData<B>> _data;
+            private List<MeshBuildJobData<B>> _data;
 
-            public Batch(List<ChunkJobData<B>> data) {
+            public Batch(List<MeshBuildJobData<B>> data) {
                 _data = data;
             }
 

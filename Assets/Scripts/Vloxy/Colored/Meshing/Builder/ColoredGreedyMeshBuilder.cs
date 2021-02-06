@@ -1,4 +1,4 @@
-﻿using CodeBlaze.Vloxy.Colored.Block;
+﻿using CodeBlaze.Vloxy.Colored.Data.Block;
 using CodeBlaze.Vloxy.Engine.Meshing.Builder;
 
 using UnityEngine;
@@ -6,6 +6,8 @@ using UnityEngine;
 namespace CodeBlaze.Vloxy.Colored.Meshing.Builder {
 
     public class ColoredGreedyMeshBuilder : GreedyMeshBuilder<ColoredBlock> {
+        
+        public ColoredGreedyMeshBuilder(Vector3Int size) : base(size) { }
         
         protected override void CreateQuad(ColoredBlock block, Vector3Int normal) {
             MeshData.Colors.Add(block.Color);

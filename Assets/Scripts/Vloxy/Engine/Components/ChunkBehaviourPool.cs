@@ -4,14 +4,15 @@ using System.Linq;
 using CBSL.Core.Collections.Pools;
 
 using CodeBlaze.Vloxy.Engine.Behaviour;
+using CodeBlaze.Vloxy.Engine.Data;
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Engine.Data {
+namespace CodeBlaze.Vloxy.Engine.Components {
 
-    public class ChunkPool<B> where B : IBlock {
+    public class ChunkBehaviourPool<B> where B : IBlock {
 
-        private const string TAG = "<color=yellow>ChunkPool</color>";
+        private const string TAG = "<color=yellow>ChunkBehaviourPool</color>";
         
         private IObjectPool<ChunkBehaviour> _pool;
 
@@ -19,7 +20,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         
         public int Size { get; }
         
-        public ChunkPool(Transform transform) {
+        public ChunkBehaviourPool(Transform transform) {
             Size = 
                 (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1) *
                 (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1) *
@@ -62,7 +63,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             var reclaim = _active.Keys.Where(x => !current.Contains(x)).ToList();
             var claim = current.Where(x => !_active.Keys.Contains(x)).ToList();
             
-            Debug.unityLogger.Log(TAG,$"{reclaim.Count} Claim : {claim.Count}");
+            Debug.unityLogger.Log(TAG,$"Reclaim : {reclaim.Count}, Claim : {claim.Count}");
             
             foreach (var x in reclaim) {
                 Reclaim(x);

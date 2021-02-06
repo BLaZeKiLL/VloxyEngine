@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
-
-using Cysharp.Threading.Tasks;
 
 using UnityEngine;
 
@@ -19,15 +17,15 @@ namespace CodeBlaze.Vloxy.Engine.World {
         [SerializeField] private Transform _focus;
         [SerializeField] private VoxelSettings _settings;
 
-        public ChunkPool<B> ChunkPool { get; private set; }
+        protected ChunkBehaviourPool<B> ChunkBehaviourPool;
         protected MeshBuildCoordinator<B> BuildCoordinator;
         protected INoiseProfile<B> NoiseProfile;
         
-        protected Dictionary<Vector3Int, Chunk<B>> Chunks;
+        protected ChunkStore<B> ChunkStore;
         protected Vector3Int FocusChunkCoord;
 
         private ChunkSettings _chunkSettings;
-        
+
         #region Virtual
 
         protected virtual VoxelProvider<B> Provider() => new VoxelProvider<B>();
@@ -48,38 +46,25 @@ namespace CodeBlaze.Vloxy.Engine.World {
             Debug.unityLogger.Log(TAG,"Provider Initialized");
 
             _chunkSettings = VoxelProvider<B>.Current.Settings.Chunk;
-
-            Chunks = new Dictionary<Vector3Int, Chunk<B>>();
-            
-            ChunkPool = VoxelProvider<B>.Current.ChunkPool(transform);
-            BuildCoordinator = VoxelProvider<B>.Current.MeshBuildCoordinator(ChunkPool);
+            ChunkBehaviourPool = VoxelProvider<B>.Current.ChunkPool(transform);
+            BuildCoordinator = VoxelProvider<B>.Current.MeshBuildCoordinator(ChunkBehaviourPool);
             NoiseProfile = VoxelProvider<B>.Current.NoiseProfile();
+            ChunkStore = VoxelProvider<B>.Current.ChunkStore(NoiseProfile);
+            
+            Debug.unityLogger.Log(TAG,"Components Constructed");
 
             WorldAwake();
         }
 
         private void Start() {
-            NoiseProfile.Generate(_settings);
-            
-            Debug.unityLogger.Log(TAG,"Height Map Generated");
-            
-            for (int x = -_chunkSettings.ChunkPageSize; x < _chunkSettings.ChunkPageSize; x++) {
-                for (int z = -_chunkSettings.ChunkPageSize; z < _chunkSettings.ChunkPageSize; z++) {
-                    for (int y = -_chunkSettings.ChunkPageSize; y < _chunkSettings.ChunkPageSize; y++) {
-                        var pos = new Vector3Int(x, y, z) * _chunkSettings.ChunkSize;
-                        var chunk = VoxelProvider<B>.Current.CreateChunk(pos);
-                        NoiseProfile.Fill(chunk);
-                        Chunks.Add(pos, chunk);
-                    }
-                }
-            }
-            
+            NoiseProfile.GenerateHeightMap();
+
+            ChunkStore.GenerateChunks();
+
             NoiseProfile.Clear();
             
             FocusChunkCoord = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
-            
-            Debug.unityLogger.Log(TAG,"Chunks Created : " + Chunks.Count);
-            
+
             WorldStart();
         }
 
@@ -93,48 +78,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
             if (coords.x == FocusChunkCoord.x && coords.z == FocusChunkCoord.z) return;
 
             FocusChunkCoord = coords;
-                
-            // chunk update
+            
             ChunkPoolUpdate();
-        }
-        
-        #endregion
-
-        #region Neighbors
-        public Chunk<B> GetNeighborPX(Chunk<B> chunk) {
-            var px = chunk.Position + Vector3Int.right * _chunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(px) ? Chunks[px] : null;
-        }
-        
-        public Chunk<B> GetNeighborPY(Chunk<B> chunk) {
-            var py = chunk.Position + Vector3Int.up * _chunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(py) ? Chunks[py] : null;
-        }
-        
-        public Chunk<B> GetNeighborPZ(Chunk<B> chunk) {
-            var pz = chunk.Position + new Vector3Int(0, 0, 1) * _chunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(pz) ? Chunks[pz] : null;
-        }
-        
-        public Chunk<B> GetNeighborNX(Chunk<B> chunk) {
-            var nx = chunk.Position + Vector3Int.left * _chunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(nx) ? Chunks[nx] : null;
-        }
-        
-        public Chunk<B> GetNeighborNY(Chunk<B> chunk) {
-            var ny = chunk.Position + Vector3Int.down * _chunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(ny) ? Chunks[ny] : null;
-        }
-        
-        public Chunk<B> GetNeighborNZ(Chunk<B> chunk) {
-            var nz = chunk.Position + new Vector3Int(0, 0, -1) * _chunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(nz) ? Chunks[nz] : null;
         }
         
         #endregion
@@ -167,36 +112,15 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         #region Private
         private void ChunkPoolUpdate() {
-            var jobs = ChunkPool
+            var jobs = ChunkBehaviourPool
                 .Update(FocusChunkCoord)
-                .FindAll(coord => Chunks.ContainsKey(coord))
-                .Select(coord => GetChunkJobData(Chunks[coord]))
+                .FindAll(coord => ChunkStore.ContainsChunk(coord))
+                .Select(coord => ChunkStore.GetChunkJobData(coord))
                 .ToList();
-
+            
             BuildCoordinator.Process(jobs);
 
             WorldChunkPoolUpdate();
-        }
-        
-        private ChunkJobData<B> GetChunkJobData(Chunk<B> chunk) {
-            var position = chunk.Position;
-
-            var px = position + Vector3Int.right * _chunkSettings.ChunkSize;
-            var py = position + Vector3Int.up * _chunkSettings.ChunkSize;
-            var pz = position + new Vector3Int(0, 0, 1) * _chunkSettings.ChunkSize;
-            var nx = position + Vector3Int.left * _chunkSettings.ChunkSize;
-            var ny = position + Vector3Int.down * _chunkSettings.ChunkSize;
-            var nz = position + new Vector3Int(0, 0, -1) * _chunkSettings.ChunkSize;
-            
-            return new ChunkJobData<B> {
-                Chunk = chunk,
-                ChunkPX = Chunks.ContainsKey(px) ? Chunks[px] : null,
-                ChunkPY = Chunks.ContainsKey(py) ? Chunks[py] : null,
-                ChunkPZ = Chunks.ContainsKey(pz) ? Chunks[pz] : null,
-                ChunkNX = Chunks.ContainsKey(nx) ? Chunks[nx] : null,
-                ChunkNY = Chunks.ContainsKey(ny) ? Chunks[ny] : null,
-                ChunkNZ = Chunks.ContainsKey(nz) ? Chunks[nz] : null
-            };
         }
         #endregion
 
