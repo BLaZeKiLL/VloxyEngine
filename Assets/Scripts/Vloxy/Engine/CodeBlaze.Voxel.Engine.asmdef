@@ -3,6 +3,7 @@
     "rootNamespace": "CodeBlaze.Voxel.Engine",
     "references": [
         "GUID:9c1c4c82ebfda8c47bb5892fedda07a7",
+        "GUID:97ae58377b8dfce4dbe768a56d9a3bb0",
         "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [],

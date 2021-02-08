@@ -11,8 +11,6 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
     public class ChunkStore<B> where B : IBlock {
 
-        private const string TAG = "<color=orange>ChunkStore</color>";
-        
         protected Dictionary<Vector3Int, Chunk<B>> Chunks;
 
         private INoiseProfile<B> _noiseProfile;
@@ -37,8 +35,8 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                     }
                 }
             }
-            
-            Debug.unityLogger.Log(TAG,"Chunks Created : " + Chunks.Count);
+
+            CBSL.Logging.Logger.Info<ChunkStore<B>>("Chunks Created : " + Chunks.Count);
         }
         
         public MeshBuildJobData<B> GetChunkJobData(Vector3Int position) {

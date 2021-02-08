@@ -13,9 +13,7 @@ using UnityEngine;
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
     public class UniTaskMultiThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
-        
-        private const string TAG = "<color=green>MeshBuildCoordinator</color>";
-        
+
         private int _batchSize;
 
         public UniTaskMultiThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool, int batchSize) : base(chunkBehaviourPool) {
@@ -31,7 +29,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
             PreProcess(jobs);
-            
+
             var watch = new Stopwatch();
             
             watch.Start();
@@ -39,9 +37,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             watch.Stop();
 
             if (result.Length > 0) {
-                UnityEngine.Debug.unityLogger.Log(TAG,$"Number of batches : {result.Length}");
-                UnityEngine.Debug.unityLogger.Log(TAG,$"Average batch process time : {result.Average():0.###} ms");
-                UnityEngine.Debug.unityLogger.Log(TAG,$"Total batch process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+                CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"Number of batches : {result.Length}");
+                CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"Average batch process time : {result.Average():0.###} ms");
+                CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"Total batch process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
             }
             
             PostProcess(jobs);

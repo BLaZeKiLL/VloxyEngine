@@ -8,9 +8,7 @@ using CodeBlaze.Vloxy.Engine.Data;
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
     public class SingleThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
-        
-        private const string TAG = "<color=green>MeshBuildCoordinator</color>";
-        
+
         public SingleThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) : base(chunkBehaviourPool) { }
         
         public override void Process(List<MeshBuildJobData<B>> jobs) {
@@ -26,8 +24,8 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             
             watch.Stop();
             
-            UnityEngine.Debug.unityLogger.Log(TAG,$"Average mesh build time : {(float)watch.ElapsedMilliseconds / jobs.Count:0.###} ms");
-            UnityEngine.Debug.unityLogger.Log(TAG,$"Build queue process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+            CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"Average mesh build time : {(float)watch.ElapsedMilliseconds / jobs.Count:0.###} ms");
+            CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"Build queue process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
             
             GC.Collect();
         }
