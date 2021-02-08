@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.cysharp.unitask": {
-      "version": "2.0.37",
+      "version": "2.1.2",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -52,7 +52,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.postprocessing": {
-      "version": "2.3.0",
+      "version": "3.0.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
