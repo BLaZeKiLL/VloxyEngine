@@ -11,8 +11,6 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
     public class FastNoiseProfile2D<B> : INoiseProfile<B> where B : IBlock {
 
-        private const string TAG = "<color=orange>FastNoiseProfile2D</color>";
-        
         private FastNoiseLite _noise;
         private int _heightHalf;
 
@@ -45,8 +43,8 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
                     _heightMap.Add(new Vector2Int(x,z), GetHeight(x, z));
                 }
             }
-            
-            Debug.unityLogger.Log(TAG,"Height Map Generated");
+
+            CBSL.Logging.Logger.Info<FastNoiseProfile2D<B>>("Height Map Generated");
         }
 
         public IChunkData<B> GenerateChunkData(Vector3Int pos) {

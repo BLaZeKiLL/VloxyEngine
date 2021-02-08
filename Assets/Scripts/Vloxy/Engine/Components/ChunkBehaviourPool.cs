@@ -12,8 +12,6 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
     public class ChunkBehaviourPool<B> where B : IBlock {
 
-        private const string TAG = "<color=yellow>ChunkBehaviourPool</color>";
-        
         private IObjectPool<ChunkBehaviour> _pool;
 
         private Dictionary<Vector3Int, ChunkBehaviour> _active;
@@ -43,8 +41,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 chunkRenderer => chunkRenderer.gameObject.SetActive(true),
                 chunkRenderer => chunkRenderer.gameObject.SetActive(false)
             );
-            
-            Debug.unityLogger.Log(TAG,"Initialized Size : " + Size);
+            CBSL.Logging.Logger.Info<ChunkBehaviourPool<B>>("Initialized Size : " + Size);
         }
 
         public List<Vector3Int> Update(Vector3Int focus) {
@@ -63,7 +60,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             var reclaim = _active.Keys.Where(x => !current.Contains(x)).ToList();
             var claim = current.Where(x => !_active.Keys.Contains(x)).ToList();
             
-            Debug.unityLogger.Log(TAG,$"Reclaim : {reclaim.Count}, Claim : {claim.Count}");
+            CBSL.Logging.Logger.Info<ChunkBehaviourPool<B>>($"Reclaim : {reclaim.Count}, Claim : {claim.Count}");
             
             foreach (var x in reclaim) {
                 Reclaim(x);

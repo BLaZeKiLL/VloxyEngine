@@ -12,8 +12,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
     public class World<B> : MonoBehaviour where B : IBlock {
 
-        private const string TAG = "<color=cyan>World</color>";
-        
         [SerializeField] private Transform _focus;
         [SerializeField] private VoxelSettings _settings;
 
@@ -43,7 +41,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 provider.Settings = _settings;
             });
             
-            Debug.unityLogger.Log(TAG,"Provider Initialized");
+            CBSL.Logging.Logger.Info<World<B>>("Provider Initialized");
 
             _chunkSettings = VoxelProvider<B>.Current.Settings.Chunk;
             ChunkBehaviourPool = VoxelProvider<B>.Current.ChunkPool(transform);
@@ -51,7 +49,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             NoiseProfile = VoxelProvider<B>.Current.NoiseProfile();
             ChunkStore = VoxelProvider<B>.Current.ChunkStore(NoiseProfile);
             
-            Debug.unityLogger.Log(TAG,"Components Constructed");
+            CBSL.Logging.Logger.Info<World<B>>("Components Constructed");
 
             WorldAwake();
         }
