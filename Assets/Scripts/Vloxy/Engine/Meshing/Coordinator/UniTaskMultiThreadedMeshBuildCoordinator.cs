@@ -35,7 +35,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             var watch = new Stopwatch();
             
             watch.Start();
-            var result = await UniTask.WhenAll(CreateBatches(jobs).Select(ScheduleJob).ToList());
+            var result = await UniTask.WhenAll(CreateBatches(jobs).Select(ScheduleMeshBuildJob).ToList());
             watch.Stop();
 
             if (result.Length > 0) {
@@ -47,13 +47,13 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             PostProcess(jobs);
         }
         
-        private async UniTask<long> ScheduleJob(Batch batch) {
+        private async UniTask<long> ScheduleMeshBuildJob(Batch batch) {
             var watch = new Stopwatch();
             
             var	result = await UniTask.RunOnThreadPool(
                 () => {
                     watch.Start();
-                    var _meshData = batch.Process();
+                    var _meshData = batch.ForEach(job => VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(job));
                     watch.Stop();
 
                     return _meshData;
@@ -61,7 +61,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             );
 
             for (var index = 0; index < result.Length; index++) {
-                Render(batch.GetChunk(index), result[index]);
+                Render(batch.Jobs[index].Chunk, result[index]);
             }
 
             return watch.ElapsedMilliseconds;
@@ -70,27 +70,21 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         public async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
             PreProcess(jobs);
             
-            await UniTask.WhenAll(CreateBatches(jobs).Select(ScheduleJob).ToList());
+            await UniTask.WhenAll(CreateBatches(jobs).Select(ScheduleMeshBuildJob).ToList());
             
             PostProcess(jobs);
         }
         
-        private async UniTask ScheduleJob(Batch batch) {
-            var	result = await UniTask.RunOnThreadPool(
-                () => {
-                    var _meshData = batch.Process();
-
-                    return _meshData;
-                }
-            );
+        private async UniTask ScheduleMeshBuildJob(Batch batch) {
+            var	result = await UniTask.RunOnThreadPool(() => batch.ForEach(job => VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(job)));
 
             for (var index = 0; index < result.Length; index++) {
-                Render(batch.GetChunk(index), result[index]);
+                Render(batch.Jobs[index].Chunk, result[index]);
             }
         }  
         #endif
 
-        private IEnumerable<Batch> CreateBatches(List<MeshBuildJobData<B>> jobs) {
+        protected IEnumerable<Batch> CreateBatches(List<MeshBuildJobData<B>> jobs) {
             var batches = new Batch[Mathf.CeilToInt((float) jobs.Count / _batchSize)];
             var bindex = 0;
             for (int i = 0; i < jobs.Count; i += _batchSize) {
@@ -100,24 +94,28 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             return batches;
         }
 
-        private class Batch {
+        protected class Batch {
             
-            private List<MeshBuildJobData<B>> _data;
+            public List<MeshBuildJobData<B>> Jobs { get; }
 
-            public Batch(List<MeshBuildJobData<B>> data) {
-                _data = data;
+            public Batch(List<MeshBuildJobData<B>> jobs) {
+                Jobs = jobs;
             }
 
-            public Chunk<B> GetChunk(int index) => _data[index].Chunk;
-            
-            public MeshData[] Process() {
-                var result = new MeshData[_data.Count];
-
-                for (int i = 0; i < _data.Count; i++) {
-                    result[i] = VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(_data[i]);
+            public T[] ForEach<T>(Func<MeshBuildJobData<B>, T> func) {
+                var result = new T[Jobs.Count];
+                
+                for (int i = 0; i < Jobs.Count; i++) {
+                    result[i] = func(Jobs[i]);
                 }
 
                 return result;
+            }
+
+            public void ForEach(Action<MeshBuildJobData<B>> action) {
+                for (int i = 0; i < Jobs.Count; i++) {
+                    action(Jobs[i]);
+                }
             }
 
         }
