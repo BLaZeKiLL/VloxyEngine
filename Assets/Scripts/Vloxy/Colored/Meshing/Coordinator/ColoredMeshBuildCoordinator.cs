@@ -13,9 +13,16 @@ namespace CodeBlaze.Vloxy.Colored.Meshing.Coordinator {
 
     public class ColoredMeshBuildCoordinator : UniTaskMultiThreadedMeshBuildCoordinator<ColoredBlock> {
 
-        public ColoredMeshBuildCoordinator(ChunkBehaviourPool<ColoredBlock> chunkBehaviourPool, int batchSize) : base(chunkBehaviourPool, batchSize) { }
+        private bool _useCompression;
+
+        public ColoredMeshBuildCoordinator(ChunkBehaviourPool<ColoredBlock> chunkBehaviourPool, int batchSize,
+            bool useCompression) : base(chunkBehaviourPool, batchSize) {
+            _useCompression = useCompression;
+        }
 
         protected override void PreProcess(List<MeshBuildJobData<ColoredBlock>> jobs) {
+            if (!_useCompression) return;
+            
             jobs.ForEach(job => {
                 if (((ColoredChunkData) job.Chunk.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((ColoredChunkData) job.Chunk.Data).DeCompress();
                 if (job.ChunkNX != null && ((ColoredChunkData) job.ChunkNX.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((ColoredChunkData) job.ChunkNX.Data).DeCompress();
@@ -28,6 +35,8 @@ namespace CodeBlaze.Vloxy.Colored.Meshing.Coordinator {
         }
 
         protected override void PostProcess(List<MeshBuildJobData<ColoredBlock>> jobs) {
+            if (!_useCompression) return;
+            
             foreach (var batch in CreateBatches(jobs)) {
                 ScheduleCompressionJob(batch).Forget();
             }

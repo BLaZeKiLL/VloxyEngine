@@ -21,12 +21,13 @@ namespace CodeBlaze.Vloxy.Colored {
 
         public override IChunkData<ColoredBlock> ChunkData(ColoredBlock[] blocks) {
             var data = new ColoredChunkData(blocks, 4, Settings.Chunk.ChunkSize);
-            data.Compress();
+            
+            if (Settings.Chunk.UseCompression) data.Compress();
 
             return data;
         }
 
-        public override MeshBuildCoordinator<ColoredBlock> MeshBuildCoordinator(ChunkBehaviourPool<ColoredBlock> chunkBehaviourPool) => new ColoredMeshBuildCoordinator(chunkBehaviourPool, Settings.Schedular.BatchSize);
+        public override MeshBuildCoordinator<ColoredBlock> MeshBuildCoordinator(ChunkBehaviourPool<ColoredBlock> chunkBehaviourPool) => new ColoredMeshBuildCoordinator(chunkBehaviourPool, Settings.Schedular.BatchSize, Settings.Chunk.UseCompression);
 
     }
 
