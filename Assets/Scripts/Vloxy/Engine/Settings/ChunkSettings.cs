@@ -19,6 +19,10 @@ namespace CodeBlaze.Vloxy.Engine.Settings {
         [Tooltip("Chunk dimensions")]
         public Vector3Int ChunkSize = 32 * Vector3Int.one;
 
+        // TODO : Move to custom settings
+        [Tooltip("Use Chunk Compression")] 
+        public bool UseCompression = true;
+
     }
 
 }
