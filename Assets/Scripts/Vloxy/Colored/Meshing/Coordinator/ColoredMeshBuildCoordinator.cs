@@ -3,8 +3,9 @@
 using CBSL.Core.Collections.Compressed;
 
 using CodeBlaze.Vloxy.Colored.Data.Block;
-using CodeBlaze.Vloxy.Colored.Data.Chunk;
+
 using CodeBlaze.Vloxy.Engine.Components;
+using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
 
 using Cysharp.Threading.Tasks;
@@ -24,13 +25,13 @@ namespace CodeBlaze.Vloxy.Colored.Meshing.Coordinator {
             if (!_useCompression) return;
             
             jobs.ForEach(job => {
-                if (((ColoredChunkData) job.Chunk.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((ColoredChunkData) job.Chunk.Data).DeCompress();
-                if (job.ChunkNX != null && ((ColoredChunkData) job.ChunkNX.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((ColoredChunkData) job.ChunkNX.Data).DeCompress();
-                if (job.ChunkNY != null && ((ColoredChunkData) job.ChunkNY.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((ColoredChunkData) job.ChunkNY.Data).DeCompress();
-                if (job.ChunkNZ != null && ((ColoredChunkData) job.ChunkNZ.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((ColoredChunkData) job.ChunkNZ.Data).DeCompress();
-                if (job.ChunkPX != null && ((ColoredChunkData) job.ChunkPX.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((ColoredChunkData) job.ChunkPX.Data).DeCompress();
-                if (job.ChunkPY != null && ((ColoredChunkData) job.ChunkPY.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((ColoredChunkData) job.ChunkPY.Data).DeCompress();
-                if (job.ChunkPZ != null && ((ColoredChunkData) job.ChunkPZ.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((ColoredChunkData) job.ChunkPZ.Data).DeCompress();
+                if (((CompressibleChunkData<ColoredBlock>) job.Chunk.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((CompressibleChunkData<ColoredBlock>) job.Chunk.Data).DeCompress();
+                if (job.ChunkNX != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkNX.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((CompressibleChunkData<ColoredBlock>) job.ChunkNX.Data).DeCompress();
+                if (job.ChunkNY != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkNY.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((CompressibleChunkData<ColoredBlock>) job.ChunkNY.Data).DeCompress();
+                if (job.ChunkNZ != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkNZ.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((CompressibleChunkData<ColoredBlock>) job.ChunkNZ.Data).DeCompress();
+                if (job.ChunkPX != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkPX.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((CompressibleChunkData<ColoredBlock>) job.ChunkPX.Data).DeCompress();
+                if (job.ChunkPY != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkPY.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((CompressibleChunkData<ColoredBlock>) job.ChunkPY.Data).DeCompress();
+                if (job.ChunkPZ != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkPZ.Data).State == CompressedArray<ColoredBlock>.DataState.COMPRESSED) ((CompressibleChunkData<ColoredBlock>) job.ChunkPZ.Data).DeCompress();
             });
         }
 
@@ -44,26 +45,26 @@ namespace CodeBlaze.Vloxy.Colored.Meshing.Coordinator {
 
         private async UniTaskVoid ScheduleCompressionJob(Batch batch) {
             await UniTask.RunOnThreadPool(() => batch.ForEach(job => {
-                if (((ColoredChunkData) job.Chunk.Data).State == CompressedArray<ColoredBlock>.DataState.DECOMPRESSED)
-                    ((ColoredChunkData) job.Chunk.Data).Compress();
-                if (job.ChunkNX != null && ((ColoredChunkData) job.ChunkNX.Data).State ==
+                if (((CompressibleChunkData<ColoredBlock>) job.Chunk.Data).State == CompressedArray<ColoredBlock>.DataState.DECOMPRESSED)
+                    ((CompressibleChunkData<ColoredBlock>) job.Chunk.Data).Compress();
+                if (job.ChunkNX != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkNX.Data).State ==
                     CompressedArray<ColoredBlock>.DataState.DECOMPRESSED)
-                    ((ColoredChunkData) job.ChunkNX.Data).Compress();
-                if (job.ChunkNY != null && ((ColoredChunkData) job.ChunkNY.Data).State ==
+                    ((CompressibleChunkData<ColoredBlock>) job.ChunkNX.Data).Compress();
+                if (job.ChunkNY != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkNY.Data).State ==
                     CompressedArray<ColoredBlock>.DataState.DECOMPRESSED)
-                    ((ColoredChunkData) job.ChunkNY.Data).Compress();
-                if (job.ChunkNZ != null && ((ColoredChunkData) job.ChunkNZ.Data).State ==
+                    ((CompressibleChunkData<ColoredBlock>) job.ChunkNY.Data).Compress();
+                if (job.ChunkNZ != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkNZ.Data).State ==
                     CompressedArray<ColoredBlock>.DataState.DECOMPRESSED)
-                    ((ColoredChunkData) job.ChunkNZ.Data).Compress();
-                if (job.ChunkPX != null && ((ColoredChunkData) job.ChunkPX.Data).State ==
+                    ((CompressibleChunkData<ColoredBlock>) job.ChunkNZ.Data).Compress();
+                if (job.ChunkPX != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkPX.Data).State ==
                     CompressedArray<ColoredBlock>.DataState.DECOMPRESSED)
-                    ((ColoredChunkData) job.ChunkPX.Data).Compress();
-                if (job.ChunkPY != null && ((ColoredChunkData) job.ChunkPY.Data).State ==
+                    ((CompressibleChunkData<ColoredBlock>) job.ChunkPX.Data).Compress();
+                if (job.ChunkPY != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkPY.Data).State ==
                     CompressedArray<ColoredBlock>.DataState.DECOMPRESSED)
-                    ((ColoredChunkData) job.ChunkPY.Data).Compress();
-                if (job.ChunkPZ != null && ((ColoredChunkData) job.ChunkPZ.Data).State ==
+                    ((CompressibleChunkData<ColoredBlock>) job.ChunkPY.Data).Compress();
+                if (job.ChunkPZ != null && ((CompressibleChunkData<ColoredBlock>) job.ChunkPZ.Data).State ==
                     CompressedArray<ColoredBlock>.DataState.DECOMPRESSED)
-                    ((ColoredChunkData) job.ChunkPZ.Data).Compress();
+                    ((CompressibleChunkData<ColoredBlock>) job.ChunkPZ.Data).Compress();
             }));
         }
 

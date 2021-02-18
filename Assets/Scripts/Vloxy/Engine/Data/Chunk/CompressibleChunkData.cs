@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using CBSL.Core.Collections.Compressed;
 
@@ -8,25 +9,31 @@ using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Data {
 
-    public abstract class CompressibleChunkData<B> : CompressedArray<B>, IChunkData<B> where B : IBlock {
+    public class CompressibleChunkData<B> : IChunkData<B> where B : IBlock {
 
         private Vector3Int _chunkSize;
+
+        private CompressedArray<B> _data;
         
-        public CompressibleChunkData(B[] data, int dataSize, Vector3Int chunkSize) : base(data, dataSize) {
+        public CompressibleChunkData(B[] data, int dataSize, Vector3Int chunkSize, Func<byte[], B> fromBytes, Func<B, byte[]> getBytes) {
             _chunkSize = chunkSize;
+            _data = new CompressedArray<B>(data, dataSize, fromBytes, getBytes);
         }
 
-        public CompressibleChunkData(List<byte> bytes, int dataSize, Vector3Int chunkSize) : base(bytes, chunkSize.Size(), dataSize) {
+        public CompressibleChunkData(List<byte> bytes, int dataSize, Vector3Int chunkSize, Func<byte[], B> fromBytes, Func<B, byte[]> getBytes) {
             _chunkSize = chunkSize;
+            _data = new CompressedArray<B>(bytes, _chunkSize.Size(),  dataSize, fromBytes, getBytes);
         }
 
-        protected abstract override B FromBytes(byte[] bytes);
+        public CompressedArray<B>.DataState State => _data.State;
 
-        protected abstract override byte[] GetBytes(B obj);
+        public void Compress() => _data.Compress();
 
-        public void SetBlock(B block, int x, int y, int z) => SetAt(_chunkSize.Flatten(x, y, z), block);
+        public void DeCompress() => _data.DeCompress();
+        
+        public void SetBlock(B block, int x, int y, int z) => _data.SetAt(_chunkSize.Flatten(x, y, z), block);
 
-        public B GetBlock(int x, int y, int z) => GetAt(_chunkSize.Flatten(x, y, z));
+        public B GetBlock(int x, int y, int z) => _data.GetAt(_chunkSize.Flatten(x, y, z));
 
     }
 
