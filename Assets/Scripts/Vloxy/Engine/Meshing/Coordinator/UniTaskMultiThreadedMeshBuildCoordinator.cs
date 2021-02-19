@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+
+using CBSL.Extension.UniTask.Threading;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 
 using Cysharp.Threading.Tasks;
-
-using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
@@ -25,97 +23,28 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
             ChunkBehaviourPool.Claim(chunk).Render(meshData);
         }
-
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        
         private async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
             PreProcess(jobs);
 
             var watch = new Stopwatch();
             
             watch.Start();
-            var result = await UniTask.WhenAll(CreateBatches(jobs).Select(ScheduleMeshBuildJob).ToList());
+            await BatchScheduler.Process(
+                jobs, 
+                _batchSize, 
+                meshBuildJobData => VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(meshBuildJobData), 
+                null,
+                (batch, meshData) => {
+                    for (int i = 0; i < meshData.Length; i++) {
+                        Render(batch.Input[i].Chunk, meshData[i]);
+                    }
+                });
             watch.Stop();
 
-            if (result.Length > 0) {
-                CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"Number of batches : {result.Length}");
-                CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"Average batch process time : {result.Average():0.###} ms");
-                CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"Total batch process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
-            }
-            
+            CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"Total batch process time : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+
             PostProcess(jobs);
-        }
-        
-        private async UniTask<long> ScheduleMeshBuildJob(Batch batch) {
-            var watch = new Stopwatch();
-            
-            var	result = await UniTask.RunOnThreadPool(
-                () => {
-                    watch.Start();
-                    var _meshData = batch.ForEach(job => VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(job));
-                    watch.Stop();
-
-                    return _meshData;
-                }
-            );
-
-            for (var index = 0; index < result.Length; index++) {
-                Render(batch.Jobs[index].Chunk, result[index]);
-            }
-
-            return watch.ElapsedMilliseconds;
-        }  
-        #else
-        public async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
-            PreProcess(jobs);
-            
-            await UniTask.WhenAll(CreateBatches(jobs).Select(ScheduleMeshBuildJob).ToList());
-            
-            PostProcess(jobs);
-        }
-        
-        private async UniTask ScheduleMeshBuildJob(Batch batch) {
-            var	result = await UniTask.RunOnThreadPool(() => batch.ForEach(job => VoxelProvider<B>.Current.MeshBuilder().GenerateMesh(job)));
-
-            for (var index = 0; index < result.Length; index++) {
-                Render(batch.Jobs[index].Chunk, result[index]);
-            }
-        }  
-        #endif
-
-        protected IEnumerable<Batch> CreateBatches(List<MeshBuildJobData<B>> jobs) {
-            var batches = new Batch[Mathf.CeilToInt((float) jobs.Count / _batchSize)];
-            var bindex = 0;
-            for (int i = 0; i < jobs.Count; i += _batchSize) {
-                batches[bindex++] = new Batch(jobs.GetRange(i, Math.Min(_batchSize, jobs.Count - i)));
-            }
-
-            return batches;
-        }
-
-        protected class Batch {
-            
-            public List<MeshBuildJobData<B>> Jobs { get; }
-
-            public Batch(List<MeshBuildJobData<B>> jobs) {
-                Jobs = jobs;
-            }
-
-            public T[] ForEach<T>(Func<MeshBuildJobData<B>, T> func) {
-                var result = new T[Jobs.Count];
-                
-                for (int i = 0; i < Jobs.Count; i++) {
-                    result[i] = func(Jobs[i]);
-                }
-
-                return result;
-            }
-
-            public void ForEach(Action<MeshBuildJobData<B>> action) {
-                for (int i = 0; i < Jobs.Count; i++) {
-                    action(Jobs[i]);
-                }
-            }
-
         }
 
     }

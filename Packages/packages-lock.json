@@ -100,7 +100,7 @@
       }
     },
     "io.codeblaze.cbsl": {
-      "version": "1.3.3",
+      "version": "1.4.2",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
