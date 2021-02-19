@@ -3,8 +3,9 @@
     "rootNamespace": "CodeBlaze.Voxel.Colored",
     "references": [
         "GUID:3d017d579b2996d4ab609c560edcfc6d",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
         "GUID:9c1c4c82ebfda8c47bb5892fedda07a7",
-        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+        "GUID:e6a73a9d3bbfb46448a9aafb240b9dd1"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

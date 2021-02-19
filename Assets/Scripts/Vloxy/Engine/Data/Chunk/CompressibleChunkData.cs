@@ -27,9 +27,15 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         public CompressedArray<B>.DataState State => _data.State;
 
-        public void Compress() => _data.Compress();
+        public void Compress() {
+            if (State == CompressedArray<B>.DataState.COMPRESSED) return;
+            _data.Compress();
+        }
 
-        public void DeCompress() => _data.DeCompress();
+        public void DeCompress() {
+            if (State == CompressedArray<B>.DataState.DECOMPRESSED) return;
+            _data.DeCompress();
+        }
         
         public void SetBlock(B block, int x, int y, int z) => _data.SetAt(_chunkSize.Flatten(x, y, z), block);
 
