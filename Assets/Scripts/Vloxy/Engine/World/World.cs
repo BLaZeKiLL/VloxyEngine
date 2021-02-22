@@ -27,6 +27,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
         #region Virtual
 
         protected virtual VoxelProvider<B> Provider() => new VoxelProvider<B>();
+        
+        protected virtual void WorldInitialize() { }
         protected virtual void WorldAwake() { }
         protected virtual void WorldStart() { }
         protected virtual void WorldUpdate() { }
@@ -39,6 +41,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void Awake() {
             VoxelProvider<B>.Initialize(Provider(), provider => {
                 provider.Settings = _settings;
+                WorldInitialize();
             });
             
             CBSL.Logging.Logger.Info<World<B>>("Provider Initialized");

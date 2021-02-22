@@ -8,7 +8,7 @@ namespace CodeBlaze.Vloxy.Engine.Settings {
     public class VoxelSettings : ScriptableObject {
 
         public ChunkSettings Chunk;
-        public SchedularSettings Schedular;
+        public SchedulerSettings Scheduler;
         public RendererSettings Renderer;
         public INoiseSettings NoiseSettings;
 
