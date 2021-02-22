@@ -5,9 +5,9 @@ using UnityEngine;
 namespace CodeBlaze.Vloxy.Engine.Settings {
 
     [Serializable]
-    public class SchedularSettings {
+    public class SchedulerSettings {
 
-        [Tooltip("Schedular Batch Size")]
+        [Tooltip("Scheduler Batch Size")]
         public int BatchSize = 32;
 
     }

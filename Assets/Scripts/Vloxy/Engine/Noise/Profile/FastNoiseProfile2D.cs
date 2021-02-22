@@ -60,7 +60,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
                 }
             }
 
-            return VoxelProvider<B>.Current.ChunkData(blocks);
+            return VoxelProvider<B>.Current.CreateChunkData(blocks);
         }
 
         public void Clear() {

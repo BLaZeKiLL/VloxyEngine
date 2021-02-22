@@ -433,7 +433,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   rotationLerpTime: 0.01
-  invertY: 0
+  invertY: 1
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0

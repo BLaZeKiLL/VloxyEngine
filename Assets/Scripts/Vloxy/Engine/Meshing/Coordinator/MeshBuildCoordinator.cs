@@ -7,7 +7,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
     public abstract class MeshBuildCoordinator<B> where B : IBlock {
 
-        protected readonly ChunkBehaviourPool<B> ChunkBehaviourPool; // circular reference
+        protected readonly ChunkBehaviourPool<B> ChunkBehaviourPool;
 
         protected MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) {
             ChunkBehaviourPool = chunkBehaviourPool;
