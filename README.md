@@ -11,12 +11,15 @@ A library to create block based voxel worlds
 - Networking
 
 ## Todo
-- [ ] Debug Tools/Gizmos
+- [ ] Chunk culling
 - [ ] Native Containers & New Mesh API's
 - [ ] AO Generation
 - [ ] Jobs & Burst
 - [ ] Chunk Pages & Serialization
+- [ ] Textured World
 - [ ] Runtime Modifications of voxels
+- [ ] Debug Tools/Gizmos
+- [ ] Docs
 
 ## Done
 - [x] Greedy Mesh Builder
@@ -29,3 +32,4 @@ A library to create block based voxel worlds
 - [x] 3D chunks
 - [x] Noise Profile System
 - [x] Settings Extensions
+- [x] Data compressions
