@@ -8,7 +8,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
         void GenerateHeightMap();
         
-        IChunkData<B> GenerateChunkData(Vector3Int pos);
+        void GenerateChunkData(Chunk<B> chunk);
 
         void Clear();
 

@@ -1,4 +1,5 @@
-﻿using CodeBlaze.Vloxy.Engine.Noise.Profile;
+﻿using CodeBlaze.Vloxy.Engine.Data;
+using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Noise.Settings;
 using CodeBlaze.Vloxy.Engine.Settings;
 
@@ -8,10 +9,9 @@ namespace CodeBlaze.Voxel.Engine.Test.TestBed {
 
         public TestNoiseProfile2D(NoiseSettings2D settings, ChunkSettings chunkSettings) : base(settings, chunkSettings) { }
 
-        protected override TestBlock GetBlock(int heightMapValue, int blockHeight) {
+        protected override TestBlock GetBlock(Chunk<TestBlock> chunk, int heightMapValue, int blockHeight) {
             return heightMapValue >= blockHeight ? new TestBlock(TestBlockType.Stone) : new TestBlock(TestBlockType.Air);
         }
-
 
     }
 

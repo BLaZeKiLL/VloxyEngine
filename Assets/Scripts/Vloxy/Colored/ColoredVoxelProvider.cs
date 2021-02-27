@@ -1,4 +1,5 @@
 ﻿using CodeBlaze.Vloxy.Colored.Data.Block;
+using CodeBlaze.Vloxy.Colored.Data.Chunk;
 using CodeBlaze.Vloxy.Colored.Meshing.Builder;
 using CodeBlaze.Vloxy.Colored.Noise;
 
@@ -7,6 +8,8 @@ using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Meshing.Builder;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Noise.Settings;
+
+using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Colored {
 
@@ -24,6 +27,9 @@ namespace CodeBlaze.Vloxy.Colored {
 
             return data;
         }
+
+        public override Chunk<ColoredBlock> CreateChunk(Vector3Int position) =>
+            new ColoredChunk(position, ColoredBlockTypes.RandomSolid().Color);
 
     }
 
