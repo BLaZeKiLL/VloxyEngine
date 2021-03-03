@@ -16,6 +16,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         public virtual string Name() {
             return $"Chunk {Position}";
         }
+        
+        public virtual void Update() {}
 
     }
 

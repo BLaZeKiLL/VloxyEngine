@@ -23,7 +23,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         public override void Process(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
-            ChunkBehaviourPool.Claim(chunk).Render(meshData);
+            ChunkBehaviourPool.Claim(chunk.Name(), chunk.Position).Render(meshData);
         }
         
         private async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {

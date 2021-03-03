@@ -31,7 +31,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         }
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
-            ChunkBehaviourPool.Claim(chunk).Render(meshData);
+            ChunkBehaviourPool.Claim(chunk.Name(), chunk.Position).Render(meshData);
         }
 
     }

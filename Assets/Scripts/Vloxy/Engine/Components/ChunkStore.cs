@@ -58,6 +58,8 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             };
         }
 
+        public Chunk<B> GetChunk(Vector3Int coord) => Chunks[coord];
+
         #region Neighbors
         public Chunk<B> GetNeighborPX(Chunk<B> chunk) {
             var px = chunk.Position + Vector3Int.right * _chunkSettings.ChunkSize;
