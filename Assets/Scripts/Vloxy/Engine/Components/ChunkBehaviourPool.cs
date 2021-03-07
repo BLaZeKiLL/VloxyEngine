@@ -44,7 +44,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             CBSL.Logging.Logger.Info<ChunkBehaviourPool<B>>("Initialized Size : " + Size);
         }
 
-        public List<Vector3Int> Update(Vector3Int focus) {
+        public List<Vector3Int> PoolUpdate(Vector3Int focus) {
             var current = new List<Vector3Int>(Size);
 
             var world = VoxelProvider<B>.Current.Settings.Chunk;
@@ -69,13 +69,13 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             return claim;
         }
 
-        public ChunkBehaviour Claim(Chunk<B> chunk) {
+        public ChunkBehaviour Claim(string name, Vector3Int position) {
             var behaviour = _pool.Claim();
 
-            behaviour.transform.position = chunk.Position;
-            behaviour.name = chunk.Name();
+            behaviour.transform.position = position;
+            behaviour.name = name;
             
-            _active.Add(chunk.Position, behaviour);
+            _active.Add(position, behaviour);
             
             return behaviour;
         }

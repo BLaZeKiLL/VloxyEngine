@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
@@ -23,6 +24,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected Vector3Int FocusChunkCoord;
 
         private ChunkSettings _chunkSettings;
+        private List<Chunk<B>> _activeChunks;
 
         #region Virtual
 
@@ -47,6 +49,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             CBSL.Logging.Logger.Info<World<B>>("Provider Initialized");
 
             _chunkSettings = VoxelProvider<B>.Current.Settings.Chunk;
+            _activeChunks = new List<Chunk<B>>();
             ChunkBehaviourPool = VoxelProvider<B>.Current.ChunkPool(transform);
             BuildCoordinator = VoxelProvider<B>.Current.MeshBuildCoordinator(ChunkBehaviourPool);
             NoiseProfile = VoxelProvider<B>.Current.NoiseProfile();
@@ -76,6 +79,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
             
             WorldUpdate();
 
+            _activeChunks.ForEach(chunk => chunk.Update());
+            
             if (coords.x == FocusChunkCoord.x && coords.z == FocusChunkCoord.z) return;
 
             FocusChunkCoord = coords;
@@ -113,12 +118,17 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         #region Private
         private void ChunkPoolUpdate() {
+            var activeChunks = new List<Chunk<B>>();
             var jobs = ChunkBehaviourPool
-                .Update(FocusChunkCoord)
+                .PoolUpdate(FocusChunkCoord)
                 .FindAll(coord => ChunkStore.ContainsChunk(coord))
-                .Select(coord => ChunkStore.GetChunkJobData(coord))
+                .Select(coord => {
+                    activeChunks.Add(ChunkStore.GetChunk(coord));
+                    return ChunkStore.GetChunkJobData(coord);
+                })
                 .ToList();
             
+            _activeChunks = activeChunks;
             BuildCoordinator.Process(jobs);
 
             WorldChunkPoolUpdate();
