@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
@@ -38,6 +39,12 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             }
 
             CBSL.Logging.Logger.Info<ChunkStore<B>>("Chunks Created : " + Chunks.Count);
+        }
+
+        public void Update(IEnumerable<Vector3Int> positions) {
+            foreach (var chunk in positions.Select(position => Chunks[position])) {
+                chunk.Update();
+            }
         }
         
         public MeshBuildJobData<B> GetChunkJobData(Vector3Int position) {

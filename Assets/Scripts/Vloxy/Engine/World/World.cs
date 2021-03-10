@@ -24,7 +24,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected Vector3Int FocusChunkCoord;
 
         private ChunkSettings _chunkSettings;
-        private List<Chunk<B>> _activeChunks;
 
         #region Virtual
 
@@ -49,7 +48,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
             CBSL.Logging.Logger.Info<World<B>>("Provider Initialized");
 
             _chunkSettings = VoxelProvider<B>.Current.Settings.Chunk;
-            _activeChunks = new List<Chunk<B>>();
             ChunkBehaviourPool = VoxelProvider<B>.Current.ChunkPool(transform);
             BuildCoordinator = VoxelProvider<B>.Current.MeshBuildCoordinator(ChunkBehaviourPool);
             NoiseProfile = VoxelProvider<B>.Current.NoiseProfile();
@@ -79,7 +77,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             
             WorldUpdate();
 
-            _activeChunks.ForEach(chunk => chunk.Update());
+            ChunkStore.Update(ChunkBehaviourPool.Active);
             
             if (coords.x == FocusChunkCoord.x && coords.z == FocusChunkCoord.z) return;
 
@@ -118,18 +116,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         #region Private
         private void ChunkPoolUpdate() {
-            var activeChunks = new List<Chunk<B>>();
             var jobs = ChunkBehaviourPool
-                .PoolUpdate(FocusChunkCoord)
-                .FindAll(coord => ChunkStore.ContainsChunk(coord))
-                .Select(coord => {
-                    activeChunks.Add(ChunkStore.GetChunk(coord));
-                    return ChunkStore.GetChunkJobData(coord);
-                })
-                .ToList()
-                .FindAll(job => job.Chunk.Data != null);
+                       .PoolUpdate(FocusChunkCoord)
+                       .FindAll(coord => ChunkStore.ContainsChunk(coord))
+                       .Select(coord => ChunkStore.GetChunkJobData(coord))
+                       .ToList()
+                       .FindAll(job => job.Chunk.Data != null);
 
-            _activeChunks = activeChunks;
             BuildCoordinator.Process(jobs);
 
             WorldChunkPoolUpdate();

@@ -14,19 +14,25 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
         private bool _useCompression;
         private int _batchSize;
+        private UniTask _task;
 
         public UniTaskMultiThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool, int batchSize, bool useCompression) : base(chunkBehaviourPool) {
             _batchSize = batchSize;
             _useCompression = useCompression;
         }
         
-        public override void Process(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();
+#pragma warning disable 4014
+        public override void Process(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs);
+#pragma warning restore 4014
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
             ChunkBehaviourPool.Claim(chunk.Name(), chunk.Position).Render(meshData);
         }
         
         private async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
+            await _task;
+            _task = UniTask.CompletedTask;
+            
             PreProcess(jobs);
 
             var watch = new Stopwatch();
@@ -60,9 +66,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
         protected override void PostProcess(List<MeshBuildJobData<B>> jobs) {
             if (!_useCompression) return;
 
-            BatchScheduler.Process(jobs, jobs.Count, job => {
+            _task = BatchScheduler.Process(jobs, jobs.Count, job => {
                 job.ForEach(chunk => ((CompressibleChunkData<B>) chunk.Data)?.Compress());
-            }, null, null).Forget();
+            }, null, null);
         }
 
     }
