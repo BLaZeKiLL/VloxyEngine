@@ -36,10 +36,16 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             if (State == CompressedArray<B>.DataState.DECOMPRESSED) return;
             _data.DeCompress();
         }
-        
+
         public void SetBlock(B block, int x, int y, int z) => _data.SetAt(_chunkSize.Flatten(x, y, z), block);
 
         public B GetBlock(int x, int y, int z) => _data.GetAt(_chunkSize.Flatten(x, y, z));
+
+        public void ForEach(Action<B> opt) {
+            for (int i = 0; i < _data.Length; i++) {
+                opt(_data.GetAt(i));
+            }
+        }
 
     }
 

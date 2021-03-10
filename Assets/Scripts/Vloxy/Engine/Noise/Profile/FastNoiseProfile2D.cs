@@ -47,7 +47,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             CBSL.Logging.Logger.Info<FastNoiseProfile2D<B>>("Height Map Generated");
         }
 
-        public void GenerateChunkData(Chunk<B> chunk) {
+        public IChunkData<B> GenerateChunkData(Chunk<B> chunk) {
             var blocks = new B[_chunkSettings.ChunkSize.Size()];
             var pos = chunk.Position;
 
@@ -61,7 +61,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
                 }
             }
 
-            chunk.Data = VoxelProvider<B>.Current.CreateChunkData(blocks);
+            return VoxelProvider<B>.Current.CreateChunkData(blocks);
         }
 
         public void Clear() {

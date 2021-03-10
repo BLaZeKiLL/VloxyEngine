@@ -126,8 +126,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
                     activeChunks.Add(ChunkStore.GetChunk(coord));
                     return ChunkStore.GetChunkJobData(coord);
                 })
-                .ToList();
-            
+                .ToList()
+                .FindAll(job => job.Chunk.Data != null);
+
             _activeChunks = activeChunks;
             BuildCoordinator.Process(jobs);
 

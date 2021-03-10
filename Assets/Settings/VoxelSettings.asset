@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: VoxelSettings
   m_EditorClassIdentifier: 
   Chunk:
-    ChunkPageSize: 8
-    DrawDistance: 4
+    ChunkPageSize: 10
+    DrawDistance: 6
     ChunkSize: {x: 32, y: 32, z: 32}
     UseCompression: 1
   Scheduler:
