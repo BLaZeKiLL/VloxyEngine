@@ -148,17 +148,17 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
             _index = 0;
         }
 
-        protected B GetBlock(Vector3Int pos, int limit) {
+        private B GetBlock(Vector3Int pos, int limit) {
             int x = pos.x, y = pos.y, z = pos.z;
             
-            if (x < 0) return JobData.ChunkNX == null ? EmptyBlock() : JobData.ChunkNX.Data.GetBlock(x + limit, y, z);
-            if (x >= limit) return JobData.ChunkPX == null ? EmptyBlock() : JobData.ChunkPX.Data.GetBlock(x - limit,y,z);
+            if (x < 0) return JobData.ChunkNX?.Data == null ? EmptyBlock() : JobData.ChunkNX.Data.GetBlock(x + limit, y, z);
+            if (x >= limit) return JobData.ChunkPX?.Data == null ? EmptyBlock() : JobData.ChunkPX.Data.GetBlock(x - limit,y,z);
             
-            if (y < 0) return JobData.ChunkNY == null ? EmptyBlock() : JobData.ChunkNY.Data.GetBlock(x, y + limit, z);
-            if (y >= limit) return JobData.ChunkPY == null ? EmptyBlock() : JobData.ChunkPY.Data.GetBlock(x,y - limit,z);
+            if (y < 0) return JobData.ChunkNY?.Data == null ? EmptyBlock() : JobData.ChunkNY.Data.GetBlock(x, y + limit, z);
+            if (y >= limit) return JobData.ChunkPY?.Data == null ? EmptyBlock() : JobData.ChunkPY.Data.GetBlock(x,y - limit,z);
             
-            if (z < 0) return JobData.ChunkNZ == null ? EmptyBlock() : JobData.ChunkNZ.Data.GetBlock(x, y, z + limit);
-            if (z >= limit) return JobData.ChunkPZ == null ? EmptyBlock() : JobData.ChunkPZ.Data.GetBlock(x,y,z - limit);
+            if (z < 0) return JobData.ChunkNZ?.Data == null ? EmptyBlock() : JobData.ChunkNZ.Data.GetBlock(x, y, z + limit);
+            if (z >= limit) return JobData.ChunkPZ?.Data == null ? EmptyBlock() : JobData.ChunkPZ.Data.GetBlock(x,y,z - limit);
 
             return JobData.Chunk.Data.GetBlock(x, y, z);
         }

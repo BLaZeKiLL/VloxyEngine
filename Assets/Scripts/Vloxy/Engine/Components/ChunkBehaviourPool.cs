@@ -60,14 +60,14 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             var reclaim = _active.Keys.Where(x => !current.Contains(x)).ToList();
             var claim = current.Where(x => !_active.Keys.Contains(x)).ToList();
             
-            CBSL.Logging.Logger.Info<ChunkBehaviourPool<B>>($"Reclaim : {reclaim.Count}, Claim : {claim.Count}");
+            CBSL.Logging.Logger.Info<ChunkBehaviourPool<B>>($"Reclaim : {reclaim.Count}, Claim : {reclaim.Count}");
             
-            foreach (var x in reclaim) {
-                Reclaim(x);
-            }
+            Reclaim(reclaim);
 
             return claim;
         }
+
+        public IEnumerable<Vector3Int> Active => _active.Keys;
 
         public ChunkBehaviour Claim(string name, Vector3Int position) {
             var behaviour = _pool.Claim();
@@ -80,10 +80,12 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             return behaviour;
         }
 
-        public void Reclaim(Vector3Int position) {
-            _pool.Reclaim(_active[position]);
+        public void Reclaim(IEnumerable<Vector3Int> positions) {
+            foreach (var position in positions) {
+                _pool.Reclaim(_active[position]);
 
-            _active.Remove(position);
+                _active.Remove(position);
+            }
         }
 
     }

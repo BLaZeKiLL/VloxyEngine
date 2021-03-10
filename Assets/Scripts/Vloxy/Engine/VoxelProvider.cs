@@ -1,4 +1,7 @@
-﻿using CBSL.Core.Provider;
+﻿using System;
+using System.Collections.Generic;
+
+using CBSL.Core.Provider;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
@@ -14,6 +17,12 @@ namespace CodeBlaze.Vloxy.Engine {
     public class VoxelProvider<B> : Provider<VoxelProvider<B>> where B : IBlock {
 
         public VoxelSettings Settings { get; set; }
+
+        public virtual ChunkDataPipeline<B> CreationPipeLine { get; } =
+            new ChunkDataPipeline<B>(new List<Func<IChunkData<B>, IChunkData<B>>> {
+                ChunkDataPipeline<B>.Functions.EmptyChunkRemover,
+                ChunkDataPipeline<B>.Functions.ChunkDataCompressor
+            });
 
         public virtual Chunk<B> CreateChunk(Vector3Int position) => new Chunk<B>(position);
 

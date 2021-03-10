@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
@@ -30,13 +31,20 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                     for (int y = -_chunkSettings.ChunkPageSize; y < _chunkSettings.ChunkPageSize; y++) {
                         var pos = new Vector3Int(x, y, z) * _chunkSettings.ChunkSize;
                         var chunk = VoxelProvider<B>.Current.CreateChunk(pos);
-                        _noiseProfile.GenerateChunkData(chunk);
+                        chunk.Data = VoxelProvider<B>.Current.CreationPipeLine.Apply(_noiseProfile.GenerateChunkData(chunk));
+                        
                         Chunks.Add(pos, chunk);
                     }
                 }
             }
 
             CBSL.Logging.Logger.Info<ChunkStore<B>>("Chunks Created : " + Chunks.Count);
+        }
+
+        public void Update(IEnumerable<Vector3Int> positions) {
+            foreach (var chunk in positions.Select(position => Chunks[position])) {
+                chunk.Update();
+            }
         }
         
         public MeshBuildJobData<B> GetChunkJobData(Vector3Int position) {
