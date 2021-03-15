@@ -18,7 +18,7 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public VoxelSettings Settings { get; set; }
 
-        public virtual ChunkDataPipeline<B> CreationPipeLine { get; } =
+        public virtual ChunkDataPipeline<B> ChunkCreationPipeLine { get; } =
             new ChunkDataPipeline<B>(new List<Func<IChunkData<B>, IChunkData<B>>> {
                 ChunkDataPipeline<B>.Functions.EmptyChunkRemover,
                 ChunkDataPipeline<B>.Functions.ChunkDataCompressor
@@ -36,7 +36,7 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual IMeshBuilder<B> MeshBuilder() => new GreedyMeshBuilder<B>(Settings.Chunk.ChunkSize);
         
-        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(chunkBehaviourPool, Settings.Scheduler.BatchSize, Settings.Chunk.UseCompression);
+        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(chunkBehaviourPool, Settings.Scheduler.BatchSize);
 
     }
 
