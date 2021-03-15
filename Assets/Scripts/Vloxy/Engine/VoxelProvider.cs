@@ -28,7 +28,7 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual ChunkStore<B> ChunkStore(INoiseProfile<B> noiseProfile) => new ChunkStore<B>(noiseProfile, Settings.Chunk);
 
-        public virtual IChunkData<B> CreateChunkData(B[] blocks) => null;
+        public virtual IChunkData<B> CreateChunkData(B[] blocks) => new CompressibleChunkData<B>(blocks, Settings.Chunk.ChunkSize);
 
         public virtual INoiseProfile<B> NoiseProfile() => null;
 

@@ -13,28 +13,23 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         private Vector3Int _chunkSize;
 
-        private CompressedArray<B> _data;
+        private CompressedNodeList<B> _data;
         
-        public CompressibleChunkData(B[] data, int dataSize, Vector3Int chunkSize, Func<byte[], B> fromBytes, Func<B, byte[]> getBytes) {
+        public CompressibleChunkData(B[] data, Vector3Int chunkSize) {
             _chunkSize = chunkSize;
-            _data = new CompressedArray<B>(data, dataSize, fromBytes, getBytes);
+            _data = new CompressedNodeList<B>(data);
         }
 
-        public CompressibleChunkData(List<byte> bytes, int dataSize, Vector3Int chunkSize, Func<byte[], B> fromBytes, Func<B, byte[]> getBytes) {
-            _chunkSize = chunkSize;
-            _data = new CompressedArray<B>(bytes, _chunkSize.Size(),  dataSize, fromBytes, getBytes);
-        }
-
-        public CompressedArray<B>.DataState State => _data.State;
+        public DataState State => _data.State;
 
         public void Compress() {
-            if (State == CompressedArray<B>.DataState.COMPRESSED) return;
+            if (State == DataState.COMPRESSED) return;
             _data.Compress();
         }
 
         public void DeCompress() {
-            if (State == CompressedArray<B>.DataState.DECOMPRESSED) return;
-            _data.DeCompress();
+            if (State == DataState.DECOMPRESSED) return;
+            _data.Decompress();
         }
 
         public void SetBlock(B block, int x, int y, int z) => _data.SetAt(_chunkSize.Flatten(x, y, z), block);
