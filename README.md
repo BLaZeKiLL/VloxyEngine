@@ -10,26 +10,4 @@ A library to create block based voxel worlds
 - Physics & Fluids
 - Networking
 
-## Todo
-- [ ] Chunk culling
-- [ ] Native Containers & New Mesh API's
-- [ ] AO Generation
-- [ ] Jobs & Burst
-- [ ] Chunk Pages & Serialization
-- [ ] Textured World
-- [ ] Runtime Modifications of voxels
-- [ ] Debug Tools/Gizmos
-- [ ] Docs
-
-## Done
-- [x] Greedy Mesh Builder
-- [x] Block, Chunk Base
-- [x] World (Chunk World)
-- [x] Build Coordinator (Multi-Threading)
-- [x] Chunk Pool (infinite generation)
-- [x] Provider to configure the engine
-- [x] Settings scriptable objects
-- [x] 3D chunks
-- [x] Noise Profile System
-- [x] Settings Extensions
-- [x] Data compressions
+Checkout the progress at [trello](https://trello.com/b/XXlUVOXe/vloxy-engine)
