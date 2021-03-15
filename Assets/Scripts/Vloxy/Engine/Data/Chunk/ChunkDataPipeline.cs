@@ -12,6 +12,12 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             Funcs = funcs;
         }
 
+        public ChunkDataPipeline() {
+            Funcs = new List<Func<IChunkData<B>, IChunkData<B>>>();
+        }
+
+        public void Add(Func<IChunkData<B>, IChunkData<B>> func) => Funcs.Add(func);
+
         public IChunkData<B> Apply(IChunkData<B> data) => Funcs.Aggregate(data, (current, func) => current == null ? null : func(current));
      
         public static class Functions {
