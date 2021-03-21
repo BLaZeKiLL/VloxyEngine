@@ -11,7 +11,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
         public SingleThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) : base(chunkBehaviourPool) { }
         
-        public override void Process(List<MeshBuildJobData<B>> jobs) {
+        public override void Schedule(List<MeshBuildJobData<B>> jobs) {
             var mesher = VoxelProvider<B>.Current.MeshBuilder();
             var watch = new Stopwatch();
             
@@ -30,9 +30,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             GC.Collect();
         }
 
-        protected override void Render(Chunk<B> chunk, MeshData meshData) {
-            ChunkBehaviourPool.Claim(chunk.Name(), chunk.Position).Render(meshData);
-        }
+        protected override void Render(Chunk<B> chunk, MeshData meshData) => ChunkBehaviourPool.Claim(chunk).Render(meshData);
 
     }
 

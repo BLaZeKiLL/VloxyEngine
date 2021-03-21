@@ -18,12 +18,12 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             _batchSize = batchSize;
         }
         
-        public override void Process(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();
+        public override void Schedule(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
-            ChunkBehaviourPool.Claim(chunk.Name(), chunk.Position).Render(meshData);
+            if (chunk.State == ChunkState.PROCESSING) ChunkBehaviourPool.Claim(chunk).Render(meshData);
         }
-        
+
         private async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
             PreProcess(jobs);
 
@@ -45,6 +45,10 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"{jobs.Count} Jobs processed in : {watch.Elapsed.TotalMilliseconds:0.###} ms");
 
             PostProcess(jobs);
+        }
+
+        protected override void PreProcess(List<MeshBuildJobData<B>> jobs) {
+            jobs.ForEach(x => x.Chunk.State = ChunkState.PROCESSING);
         }
 
     }

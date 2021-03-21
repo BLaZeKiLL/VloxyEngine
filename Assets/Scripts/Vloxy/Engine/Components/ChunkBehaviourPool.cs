@@ -15,19 +15,12 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         private IObjectPool<ChunkBehaviour> _pool;
 
         private Dictionary<Vector3Int, ChunkBehaviour> _active;
-        
-        public int Size { get; }
-        
-        public ChunkBehaviourPool(Transform transform) {
-            Size = 
-                (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1) *
-                (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1) *
-                (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1);
-            
-            _active = new Dictionary<Vector3Int, ChunkBehaviour>(Size);
+
+        public ChunkBehaviourPool(Transform transform, int viewRegionSize) {
+            _active = new Dictionary<Vector3Int, ChunkBehaviour>(viewRegionSize);
             
             _pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
-                Size,
+                viewRegionSize,
                 index => {
                     var go = new GameObject("Chunk", typeof(ChunkBehaviour));
                     go.transform.parent = transform;
@@ -41,51 +34,25 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 chunkRenderer => chunkRenderer.gameObject.SetActive(true),
                 chunkRenderer => chunkRenderer.gameObject.SetActive(false)
             );
-            CBSL.Logging.Logger.Info<ChunkBehaviourPool<B>>("Initialized Size : " + Size);
+            CBSL.Logging.Logger.Info<ChunkBehaviourPool<B>>("Initialized Size : " + viewRegionSize);
         }
-
-        public List<Vector3Int> PoolUpdate(Vector3Int focus) {
-            var current = new List<Vector3Int>(Size);
-
-            var world = VoxelProvider<B>.Current.Settings.Chunk;
-            
-            for (int x = -world.DrawDistance; x <= world.DrawDistance; x++) {
-                for (int z = -world.DrawDistance; z <= world.DrawDistance; z++) {
-                    for (int y = -world.DrawDistance; y <= world.DrawDistance; y++) {
-                        current.Add(focus + new Vector3Int(x, y, z) * world.ChunkSize);
-                    }
-                }
-            }
-
-            var reclaim = _active.Keys.Where(x => !current.Contains(x)).ToList();
-            var claim = current.Where(x => !_active.Keys.Contains(x)).ToList();
-            
-            CBSL.Logging.Logger.Info<ChunkBehaviourPool<B>>($"Reclaim : {reclaim.Count}, Claim : {reclaim.Count}");
-            
-            Reclaim(reclaim);
-
-            return claim;
-        }
-
-        public IEnumerable<Vector3Int> Active => _active.Keys;
-
-        public ChunkBehaviour Claim(string name, Vector3Int position) {
+        
+        public ChunkBehaviour Claim(Chunk<B> chunk) {
             var behaviour = _pool.Claim();
 
-            behaviour.transform.position = position;
-            behaviour.name = name;
-            
-            _active.Add(position, behaviour);
+            behaviour.transform.position = chunk.Position;
+            behaviour.name = chunk.Name();
+
+            chunk.State = ChunkState.ACTIVE;
+            _active.Add(chunk.Position, behaviour);
             
             return behaviour;
         }
 
-        public void Reclaim(IEnumerable<Vector3Int> positions) {
-            foreach (var position in positions) {
-                _pool.Reclaim(_active[position]);
-
-                _active.Remove(position);
-            }
+        public void Reclaim(Chunk<B> chunk) {
+            chunk.State = ChunkState.INACTIVE;
+            _pool.Reclaim(_active[chunk.Position]);
+            _active.Remove(chunk.Position);
         }
 
     }

@@ -13,7 +13,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             ChunkBehaviourPool = chunkBehaviourPool;
         }
 
-        public abstract void Process(List<MeshBuildJobData<B>> jobs);
+        public abstract void Schedule(List<MeshBuildJobData<B>> jobs);
         
         protected abstract void Render(Chunk<B> chunk, MeshData meshData);
         
