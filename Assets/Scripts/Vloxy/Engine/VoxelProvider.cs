@@ -32,7 +32,7 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual INoiseProfile<B> NoiseProfile() => null;
 
-        public virtual ChunkBehaviourPool<B> ChunkPool(Transform transform) => new ChunkBehaviourPool<B>(transform);
+        public virtual ChunkBehaviourPool<B> ChunkPool(Transform transform, int viewRegionSize) => new ChunkBehaviourPool<B>(transform, viewRegionSize);
 
         public virtual IMeshBuilder<B> MeshBuilder() => new GreedyMeshBuilder<B>(Settings.Chunk.ChunkSize);
         

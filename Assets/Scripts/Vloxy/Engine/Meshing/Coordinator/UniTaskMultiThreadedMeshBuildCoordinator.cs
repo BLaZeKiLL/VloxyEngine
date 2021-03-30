@@ -18,12 +18,12 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             _batchSize = batchSize;
         }
         
-        public override void Process(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();
+        public override void Schedule(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
-            ChunkBehaviourPool.Claim(chunk.Name(), chunk.Position).Render(meshData);
+            if (chunk.State == ChunkState.PROCESSING) ChunkBehaviourPool.Claim(chunk).Render(meshData);
         }
-        
+
         private async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
             PreProcess(jobs);
 

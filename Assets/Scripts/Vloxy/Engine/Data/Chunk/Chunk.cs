@@ -9,6 +9,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         
         public Vector3Int Position { get; }
         
+        internal ChunkState State { get; set; }
+        
         public Chunk(Vector3Int position) {
             Position = position;
         }
