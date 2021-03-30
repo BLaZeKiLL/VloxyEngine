@@ -14,9 +14,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
         private int _index;
         private Vector3Int _size;
 
-        public GreedyMeshBuilder(Vector3Int size) {
+        public GreedyMeshBuilder() {
             MeshData = new MeshData();
-            _size = size;
+            _size = VoxelProvider<B>.Current.Settings.Chunk.ChunkSize;
         }
 
         protected virtual B EmptyBlock() => default;

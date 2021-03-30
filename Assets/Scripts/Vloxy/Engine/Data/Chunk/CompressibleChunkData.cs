@@ -15,8 +15,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         private CompressedNodeList<B> _data;
         
-        public CompressibleChunkData(B[] data, Vector3Int chunkSize) {
-            _chunkSize = chunkSize;
+        public CompressibleChunkData(B[] data) {
+            _chunkSize = VoxelProvider<B>.Current.Settings.Chunk.ChunkSize;
             _data = new CompressedNodeList<B>(data);
         }
 

@@ -25,8 +25,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private ChunkSettings _chunkSettings;
 
-        private int _viewRegionSize;
-
         #region Virtual
 
         protected virtual VoxelProvider<B> Provider() => new VoxelProvider<B>();
@@ -48,14 +46,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 WorldInitialize();
             });
 
-            _viewRegionSize = 
-                (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1) *
-                (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1) *
-                (2 * VoxelProvider<B>.Current.Settings.Chunk.DrawDistance + 1);
-
             _chunkSettings = VoxelProvider<B>.Current.Settings.Chunk;
             NoiseProfile = VoxelProvider<B>.Current.NoiseProfile();
-            ChunkBehaviourPool = VoxelProvider<B>.Current.ChunkPool(transform, _viewRegionSize);
+            ChunkBehaviourPool = VoxelProvider<B>.Current.ChunkPool(transform);
             BuildCoordinator = VoxelProvider<B>.Current.MeshBuildCoordinator(ChunkBehaviourPool);
             
             ChunkStore = VoxelProvider<B>.Current.ChunkStore(NoiseProfile);

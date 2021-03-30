@@ -21,9 +21,9 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
         private int _ViewRegionSize;
 
-        public ChunkStore(INoiseProfile<B> noiseProfile, ChunkSettings chunkSettings) {
+        public ChunkStore(INoiseProfile<B> noiseProfile) {
             _NoiseProfile = noiseProfile;
-            _ChunkSettings = chunkSettings;
+            _ChunkSettings = VoxelProvider<B>.Current.Settings.Chunk;
             
             _ViewRegionSize = 
                 (2 *  _ChunkSettings.DrawDistance + 1) *

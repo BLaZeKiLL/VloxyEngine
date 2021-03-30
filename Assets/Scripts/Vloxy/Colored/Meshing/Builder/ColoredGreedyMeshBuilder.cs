@@ -7,7 +7,7 @@ namespace CodeBlaze.Vloxy.Colored.Meshing.Builder {
 
     public class ColoredGreedyMeshBuilder : GreedyMeshBuilder<ColoredBlock> {
         
-        public ColoredGreedyMeshBuilder(Vector3Int size) : base(size) { }
+        public ColoredGreedyMeshBuilder(Vector3Int size) : base() { }
         
         protected override void CreateQuad(ColoredBlock block, Vector3Int normal) {
             MeshData.Colors.Add(block.Color);

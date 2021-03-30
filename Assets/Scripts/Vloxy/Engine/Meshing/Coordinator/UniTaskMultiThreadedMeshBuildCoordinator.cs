@@ -14,8 +14,8 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
         private int _batchSize;
 
-        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool, int batchSize) : base(chunkBehaviourPool) {
-            _batchSize = batchSize;
+        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) : base(chunkBehaviourPool) {
+            _batchSize = VoxelProvider<B>.Current.Settings.Scheduler.BatchSize;
         }
         
         public override void Schedule(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();

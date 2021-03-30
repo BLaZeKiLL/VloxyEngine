@@ -26,17 +26,17 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual Chunk<B> CreateChunk(Vector3Int position) => new Chunk<B>(position);
 
-        public virtual ChunkStore<B> ChunkStore(INoiseProfile<B> noiseProfile) => new ChunkStore<B>(noiseProfile, Settings.Chunk);
+        public virtual ChunkStore<B> ChunkStore(INoiseProfile<B> noiseProfile) => new ChunkStore<B>(noiseProfile);
 
-        public virtual IChunkData<B> CreateChunkData(B[] blocks) => new CompressibleChunkData<B>(blocks, Settings.Chunk.ChunkSize);
+        public virtual IChunkData<B> CreateChunkData(B[] blocks) => new CompressibleChunkData<B>(blocks);
 
         public virtual INoiseProfile<B> NoiseProfile() => null;
 
-        public virtual ChunkBehaviourPool<B> ChunkPool(Transform transform, int viewRegionSize) => new ChunkBehaviourPool<B>(transform, viewRegionSize);
+        public virtual ChunkBehaviourPool<B> ChunkPool(Transform transform) => new ChunkBehaviourPool<B>(transform);
 
-        public virtual IMeshBuilder<B> MeshBuilder() => new GreedyMeshBuilder<B>(Settings.Chunk.ChunkSize);
+        public virtual IMeshBuilder<B> MeshBuilder() => new GreedyMeshBuilder<B>();
         
-        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(chunkBehaviourPool, Settings.Scheduler.BatchSize);
+        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(chunkBehaviourPool);
 
     }
 
