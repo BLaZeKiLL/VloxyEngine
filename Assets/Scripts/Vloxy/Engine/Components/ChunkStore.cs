@@ -16,38 +16,37 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
         private Dictionary<Vector3Int, Chunk<B>> ActiveChunks;
 
-        private INoiseProfile<B> _noiseProfile;
-        private ChunkSettings _chunkSettings;
-        private int _viewRegionSize;
-        private int _pageSize;
+        private INoiseProfile<B> _NoiseProfile;
+        private ChunkSettings _ChunkSettings;
+
+        private int _ViewRegionSize;
 
         public ChunkStore(INoiseProfile<B> noiseProfile, ChunkSettings chunkSettings) {
-            _noiseProfile = noiseProfile;
-            _chunkSettings = chunkSettings;
+            _NoiseProfile = noiseProfile;
+            _ChunkSettings = chunkSettings;
             
-            _viewRegionSize = 
-                (2 *  _chunkSettings.DrawDistance + 1) *
-                (2 *  _chunkSettings.DrawDistance + 1) *
-                (2 *  _chunkSettings.DrawDistance + 1);
+            _ViewRegionSize = 
+                (2 *  _ChunkSettings.DrawDistance + 1) *
+                (2 *  _ChunkSettings.DrawDistance + 1) *
+                (2 *  _ChunkSettings.DrawDistance + 1);
             
-            _pageSize = 
-                (2 *  _chunkSettings.ChunkPageSize + 1) *
-                (2 *  _chunkSettings.ChunkPageSize + 1) *
-                (2 *  _chunkSettings.ChunkPageSize + 1);
+            var pageSize = (2 *  _ChunkSettings.ChunkPageSize + 1) *
+                (2 *  _ChunkSettings.ChunkPageSize + 1) *
+                (2 *  _ChunkSettings.ChunkPageSize + 1);
             
-            Chunks = new Dictionary<Vector3Int, Chunk<B>>(_pageSize);
-            ActiveChunks = new Dictionary<Vector3Int, Chunk<B>>(_viewRegionSize);
+            Chunks = new Dictionary<Vector3Int, Chunk<B>>(pageSize);
+            ActiveChunks = new Dictionary<Vector3Int, Chunk<B>>(_ViewRegionSize);
         }
 
         public bool ContainsChunk(Vector3Int coord) => Chunks.ContainsKey(coord);
         
         public void GenerateChunks() {
-            for (int x = -_chunkSettings.ChunkPageSize; x < _chunkSettings.ChunkPageSize; x++) {
-                for (int z = -_chunkSettings.ChunkPageSize; z < _chunkSettings.ChunkPageSize; z++) {
-                    for (int y = -_chunkSettings.ChunkPageSize; y < _chunkSettings.ChunkPageSize; y++) {
-                        var pos = new Vector3Int(x, y, z) * _chunkSettings.ChunkSize;
+            for (int x = -_ChunkSettings.ChunkPageSize; x < _ChunkSettings.ChunkPageSize; x++) {
+                for (int z = -_ChunkSettings.ChunkPageSize; z < _ChunkSettings.ChunkPageSize; z++) {
+                    for (int y = -_ChunkSettings.ChunkPageSize; y < _ChunkSettings.ChunkPageSize; y++) {
+                        var pos = new Vector3Int(x, y, z) * _ChunkSettings.ChunkSize;
                         var chunk = VoxelProvider<B>.Current.CreateChunk(pos);
-                        chunk.Data = VoxelProvider<B>.Current.ChunkCreationPipeLine.Apply(_noiseProfile.GenerateChunkData(chunk));
+                        chunk.Data = VoxelProvider<B>.Current.ChunkCreationPipeLine.Apply(_NoiseProfile.GenerateChunkData(chunk));
                         
                         Chunks.Add(pos, chunk);
                     }
@@ -63,13 +62,14 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             }
         }
 
-        public (List<MeshBuildJobData<B>> Claim, List<Chunk<B>> Reclaim) ViewRegionUpdate(Vector3Int focus) {
-            var current = new List<Vector3Int>(_viewRegionSize);
+        public (List<MeshBuildJobData<B>> Claim, List<Chunk<B>> Reclaim) ViewRegionUpdate(Vector3Int newFocus) {
+            var current = new List<Vector3Int>(_ViewRegionSize);
 
-            for (int x = -_chunkSettings.DrawDistance; x <= _chunkSettings.DrawDistance; x++) {
-                for (int z = -_chunkSettings.DrawDistance; z <= _chunkSettings.DrawDistance; z++) {
-                    for (int y = -_chunkSettings.DrawDistance; y <= _chunkSettings.DrawDistance; y++) {
-                        current.Add(focus + new Vector3Int(x, y, z) * _chunkSettings.ChunkSize);
+            // TODO : Remove the need of this re-iteration
+            for (int x = -_ChunkSettings.DrawDistance; x <= _ChunkSettings.DrawDistance; x++) {
+                for (int z = -_ChunkSettings.DrawDistance; z <= _ChunkSettings.DrawDistance; z++) {
+                    for (int y = -_ChunkSettings.DrawDistance; y <= _ChunkSettings.DrawDistance; y++) {
+                        current.Add(newFocus + new Vector3Int(x, y, z) * _ChunkSettings.ChunkSize);
                     }
                 }
             }
@@ -98,15 +98,15 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
         
         private MeshBuildJobData<B> GetChunkJobData(Vector3Int position) {
-            var px = position + Vector3Int.right * _chunkSettings.ChunkSize;
-            var py = position + Vector3Int.up * _chunkSettings.ChunkSize;
-            var pz = position + new Vector3Int(0, 0, 1) * _chunkSettings.ChunkSize;
-            var nx = position + Vector3Int.left * _chunkSettings.ChunkSize;
-            var ny = position + Vector3Int.down * _chunkSettings.ChunkSize;
-            var nz = position + new Vector3Int(0, 0, -1) * _chunkSettings.ChunkSize;
+            var px = position + Vector3Int.right * _ChunkSettings.ChunkSize;
+            var py = position + Vector3Int.up * _ChunkSettings.ChunkSize;
+            var pz = position + new Vector3Int(0, 0, 1) * _ChunkSettings.ChunkSize;
+            var nx = position + Vector3Int.left * _ChunkSettings.ChunkSize;
+            var ny = position + Vector3Int.down * _ChunkSettings.ChunkSize;
+            var nz = position + new Vector3Int(0, 0, -1) * _ChunkSettings.ChunkSize;
             var chunk = Chunks[position];
 
-            chunk.State = ChunkState.QUEUED;
+            chunk.State = ChunkState.PROCESSING;
             
             return new MeshBuildJobData<B> {
                 Chunk = chunk,
@@ -123,37 +123,37 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
         #region Neighbors
         public Chunk<B> GetNeighborPX(Chunk<B> chunk) {
-            var px = chunk.Position + Vector3Int.right * _chunkSettings.ChunkSize;
+            var px = chunk.Position + Vector3Int.right * _ChunkSettings.ChunkSize;
 
             return Chunks.ContainsKey(px) ? Chunks[px] : null;
         }
         
         public Chunk<B> GetNeighborPY(Chunk<B> chunk) {
-            var py = chunk.Position + Vector3Int.up * _chunkSettings.ChunkSize;
+            var py = chunk.Position + Vector3Int.up * _ChunkSettings.ChunkSize;
 
             return Chunks.ContainsKey(py) ? Chunks[py] : null;
         }
         
         public Chunk<B> GetNeighborPZ(Chunk<B> chunk) {
-            var pz = chunk.Position + new Vector3Int(0, 0, 1) * _chunkSettings.ChunkSize;
+            var pz = chunk.Position + new Vector3Int(0, 0, 1) * _ChunkSettings.ChunkSize;
 
             return Chunks.ContainsKey(pz) ? Chunks[pz] : null;
         }
         
         public Chunk<B> GetNeighborNX(Chunk<B> chunk) {
-            var nx = chunk.Position + Vector3Int.left * _chunkSettings.ChunkSize;
+            var nx = chunk.Position + Vector3Int.left * _ChunkSettings.ChunkSize;
 
             return Chunks.ContainsKey(nx) ? Chunks[nx] : null;
         }
         
         public Chunk<B> GetNeighborNY(Chunk<B> chunk) {
-            var ny = chunk.Position + Vector3Int.down * _chunkSettings.ChunkSize;
+            var ny = chunk.Position + Vector3Int.down * _ChunkSettings.ChunkSize;
 
             return Chunks.ContainsKey(ny) ? Chunks[ny] : null;
         }
         
         public Chunk<B> GetNeighborNZ(Chunk<B> chunk) {
-            var nz = chunk.Position + new Vector3Int(0, 0, -1) * _chunkSettings.ChunkSize;
+            var nz = chunk.Position + new Vector3Int(0, 0, -1) * _ChunkSettings.ChunkSize;
 
             return Chunks.ContainsKey(nz) ? Chunks[nz] : null;
         }

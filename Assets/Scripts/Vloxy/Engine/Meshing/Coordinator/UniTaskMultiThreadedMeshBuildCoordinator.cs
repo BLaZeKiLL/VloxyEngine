@@ -47,10 +47,6 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
             PostProcess(jobs);
         }
 
-        protected override void PreProcess(List<MeshBuildJobData<B>> jobs) {
-            jobs.ForEach(x => x.Chunk.State = ChunkState.PROCESSING);
-        }
-
     }
 
 }

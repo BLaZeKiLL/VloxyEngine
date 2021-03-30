@@ -35,7 +35,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected virtual void WorldAwake() { }
         protected virtual void WorldStart() { }
         protected virtual void WorldUpdate() { }
-        protected virtual void WorldChunkPoolUpdate() { }
+        protected virtual void WorldViewRegionUpdate() { }
 
         #endregion
 
@@ -125,11 +125,11 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void ViewRegionUpdate() {
             var (claim, reclaim) = ChunkStore.ViewRegionUpdate(FocusChunkCoord);
 
-            BuildCoordinator.Schedule(claim);
+            if (claim.Count != 0) BuildCoordinator.Schedule(claim);
             
             reclaim.ForEach(x => ChunkBehaviourPool.Reclaim(x));
 
-            WorldChunkPoolUpdate();
+            WorldViewRegionUpdate();
         }
         #endregion
 
