@@ -30,7 +30,8 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 (2 *  _ChunkSettings.DrawDistance + 1) *
                 (2 *  _ChunkSettings.DrawDistance + 1);
             
-            var pageSize = (2 *  _ChunkSettings.ChunkPageSize + 1) *
+            var pageSize = 
+                (2 *  _ChunkSettings.ChunkPageSize + 1) *
                 (2 *  _ChunkSettings.ChunkPageSize + 1) *
                 (2 *  _ChunkSettings.ChunkPageSize + 1);
             
@@ -62,24 +63,15 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             }
         }
 
-        public (List<MeshBuildJobData<B>> Claim, List<Chunk<B>> Reclaim) ViewRegionUpdate(Vector3Int newFocus) {
-            var current = new List<Vector3Int>(_ViewRegionSize);
-
-            // TODO : Remove the need of this re-iteration
-            for (int x = -_ChunkSettings.DrawDistance; x <= _ChunkSettings.DrawDistance; x++) {
-                for (int z = -_ChunkSettings.DrawDistance; z <= _ChunkSettings.DrawDistance; z++) {
-                    for (int y = -_ChunkSettings.DrawDistance; y <= _ChunkSettings.DrawDistance; y++) {
-                        current.Add(newFocus + new Vector3Int(x, y, z) * _ChunkSettings.ChunkSize);
-                    }
-                }
-            }
+        public (List<MeshBuildJobData<B>> Claim, List<Chunk<B>> Reclaim) ViewRegionUpdate(Vector3Int focusChunkCoords) {
+            var current = CurrentViewRegion(focusChunkCoords);
 
             var reclaim = ActiveChunks.Keys
-                        .Where(x => !current.Contains(x))
-                        .Where(ContainsChunk)
-                        .Where(x => Chunks[x].State == ChunkState.ACTIVE)
-                        .Select(GetChunk)
-                        .ToList();
+                                      .Where(x => !current.Contains(x))
+                                      .Where(ContainsChunk)
+                                      .Where(x => Chunks[x].State == ChunkState.ACTIVE)
+                                      .Select(GetChunk)
+                                      .ToList();
 
             var claim = current
                         .Where(x => !ActiveChunks.Keys.Contains(x))
@@ -96,7 +88,22 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
             return (claim, reclaim);
         }
-        
+
+        private List<Vector3Int> CurrentViewRegion(Vector3Int focusChunkCoords) {
+            var current = new List<Vector3Int>(_ViewRegionSize);
+
+            // TODO : Remove the need of this re-iteration
+            for (int x = -_ChunkSettings.DrawDistance; x <= _ChunkSettings.DrawDistance; x++) {
+                for (int z = -_ChunkSettings.DrawDistance; z <= _ChunkSettings.DrawDistance; z++) {
+                    for (int y = -_ChunkSettings.DrawDistance; y <= _ChunkSettings.DrawDistance; y++) {
+                        current.Add(focusChunkCoords + new Vector3Int(x, y, z) * _ChunkSettings.ChunkSize);
+                    }
+                }
+            }
+
+            return current;
+        }
+
         private MeshBuildJobData<B> GetChunkJobData(Vector3Int position) {
             var px = position + Vector3Int.right * _ChunkSettings.ChunkSize;
             var py = position + Vector3Int.up * _ChunkSettings.ChunkSize;
