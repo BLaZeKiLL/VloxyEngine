@@ -63,8 +63,8 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             }
         }
 
-        public (List<MeshBuildJobData<B>> Claim, List<Chunk<B>> Reclaim) ViewRegionUpdate(Vector3Int focusChunkCoords) {
-            var current = CurrentViewRegion(focusChunkCoords);
+        public (List<MeshBuildJobData<B>> Claim, List<Chunk<B>> Reclaim) ViewRegionUpdate(Vector3Int focus, Vector3Int direction) {
+            var current = CurrentViewRegion(focus);
 
             var reclaim = ActiveChunks.Keys
                                       .Where(x => !current.Contains(x))
@@ -89,14 +89,14 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             return (claim, reclaim);
         }
 
-        private List<Vector3Int> CurrentViewRegion(Vector3Int focusChunkCoords) {
+        private List<Vector3Int> CurrentViewRegion(Vector3Int focus) {
             var current = new List<Vector3Int>(_ViewRegionSize);
 
             // TODO : Remove the need of this re-iteration
             for (int x = -_ChunkSettings.DrawDistance; x <= _ChunkSettings.DrawDistance; x++) {
                 for (int z = -_ChunkSettings.DrawDistance; z <= _ChunkSettings.DrawDistance; z++) {
                     for (int y = -_ChunkSettings.DrawDistance; y <= _ChunkSettings.DrawDistance; y++) {
-                        current.Add(focusChunkCoords + new Vector3Int(x, y, z) * _ChunkSettings.ChunkSize);
+                        current.Add(focus + new Vector3Int(x, y, z) * _ChunkSettings.ChunkSize);
                     }
                 }
             }

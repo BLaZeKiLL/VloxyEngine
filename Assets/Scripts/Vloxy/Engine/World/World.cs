@@ -79,9 +79,11 @@ namespace CodeBlaze.Vloxy.Engine.World {
             
             if (coords.x == FocusChunkCoord.x && coords.y == FocusChunkCoord.y && coords.z == FocusChunkCoord.z) return;
 
+            var direction = FocusChunkCoord - coords;
+            
             FocusChunkCoord = coords;
             
-            ViewRegionUpdate();
+            ViewRegionUpdate(direction);
         }
         
         #endregion
@@ -114,8 +116,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         #region Private
         
-        private void ViewRegionUpdate() {
-            var (claim, reclaim) = ChunkStore.ViewRegionUpdate(FocusChunkCoord);
+        private void ViewRegionUpdate(Vector3Int direction) {
+            var (claim, reclaim) = ChunkStore.ViewRegionUpdate(FocusChunkCoord, direction);
 
             if (claim.Count != 0) BuildCoordinator.Schedule(claim);
 
