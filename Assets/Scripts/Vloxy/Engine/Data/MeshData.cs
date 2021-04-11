@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Engine.Meshing {
+namespace CodeBlaze.Vloxy.Engine.Data {
 
     public class MeshData {
         
@@ -25,7 +25,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing {
             mesh.SetUVs(1, UV2);
             mesh.SetUVs(2, UV3);
             mesh.SetUVs(3, UV4);
-            
+
             mesh.SetColors(Colors);
 
             if (Normals.Count > 0)

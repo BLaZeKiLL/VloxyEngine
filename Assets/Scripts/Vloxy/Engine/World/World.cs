@@ -65,7 +65,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             NoiseProfile.Clear();
             
-            FocusChunkCoord = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+            FocusChunkCoord = Vector3Int.one * int.MinValue;
 
             WorldStart();
         }
@@ -76,14 +76,12 @@ namespace CodeBlaze.Vloxy.Engine.World {
             WorldUpdate();
 
             ChunkStore.ActiveChunkUpdate();
-            
+
             if (coords.x == FocusChunkCoord.x && coords.y == FocusChunkCoord.y && coords.z == FocusChunkCoord.z) return;
 
-            var direction = FocusChunkCoord - coords;
-            
+            ViewRegionUpdate(coords);
+
             FocusChunkCoord = coords;
-            
-            ViewRegionUpdate(direction);
         }
         
         #endregion
@@ -116,12 +114,16 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         #region Private
         
-        private void ViewRegionUpdate(Vector3Int direction) {
-            var (claim, reclaim) = ChunkStore.ViewRegionUpdate(FocusChunkCoord, direction);
+        private void ViewRegionUpdate(Vector3Int newFocusChunkCoord) {
+            if (FocusChunkCoord == Vector3Int.one * int.MinValue) {
+                BuildCoordinator.Schedule(ChunkStore.InitialViewRegion(newFocusChunkCoord));
+            } else {
+                var (claim, reclaim) = ChunkStore.ViewRegionUpdate(newFocusChunkCoord,FocusChunkCoord);
 
-            if (claim.Count != 0) BuildCoordinator.Schedule(claim);
+                if (claim.Count != 0) BuildCoordinator.Schedule(claim);
 
-            reclaim.ForEach(x => ChunkBehaviourPool.Reclaim(x));
+                reclaim.ForEach(x => ChunkBehaviourPool.Reclaim(x));
+            }
 
             WorldViewRegionUpdate();
         }
