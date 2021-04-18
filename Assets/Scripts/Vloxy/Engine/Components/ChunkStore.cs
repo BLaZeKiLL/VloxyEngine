@@ -30,19 +30,17 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
             _ViewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
 
-            var pageSize = _ChunkSettings.ChunkPageSize.CubedSize();
-
-            Chunks = new Dictionary<Vector3Int, Chunk<B>>(pageSize);
+            Chunks = new Dictionary<Vector3Int, Chunk<B>>(_ChunkSettings.ChunkPageSize.CubedSize());
             ActiveChunks = new Dictionary<Vector3Int, Chunk<B>>(_ViewRegionSize);
         }
 
-        public void ActiveChunkUpdate() {
+        internal void ActiveChunkUpdate() {
             foreach (var chunk in ActiveChunks.Values) {
                 chunk.Update();
             }
         }
 
-        public void GenerateChunks() {
+        internal void GenerateChunks() {
             for (int x = -_ChunkSettings.ChunkPageSize; x < _ChunkSettings.ChunkPageSize; x++) {
                 for (int z = -_ChunkSettings.ChunkPageSize; z < _ChunkSettings.ChunkPageSize; z++) {
                     for (int y = -_ChunkSettings.ChunkPageSize; y < _ChunkSettings.ChunkPageSize; y++) {
@@ -60,7 +58,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             CBSL.Logging.Logger.Info<ChunkStore<B>>("Chunks Created : " + Chunks.Count);
         }
 
-        public (List<MeshBuildJobData<B>> Claim, List<Chunk<B>> Reclaim) ViewRegionUpdate(Vector3Int newFocusCoords,
+        internal (List<MeshBuildJobData<B>> Claim, List<Chunk<B>> Reclaim) ViewRegionUpdate(Vector3Int newFocusCoords,
             Vector3Int focusCoords) {
             var initial = focusCoords == Vector3Int.one * int.MinValue;
             var faces = newFocusCoords - focusCoords;
