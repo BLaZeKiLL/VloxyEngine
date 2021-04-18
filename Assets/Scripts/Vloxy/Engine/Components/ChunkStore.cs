@@ -71,7 +71,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             
             var reclaim = GetVectorList(focusCoords, -faces)
                           .Where(ContainsChunk)
-                          .Where(x => Chunks[x].State == ChunkState.ACTIVE)
+                          .Where(x => Chunks[x].State != ChunkState.INACTIVE)
                           .Select(GetChunk)
                           .ToList();
 
@@ -126,8 +126,6 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                     actions.ForEach(action => action(i,j));
                 }
             }
-
-            CBSL.Logging.Logger.Warn<ChunkStore<B>>(list.Count.ToString());
             
             return list;
         }
