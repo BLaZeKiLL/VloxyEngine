@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 using CBSL.Core.Collections.Pools;
 
@@ -55,9 +54,11 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
 
         public void Reclaim(Chunk<B> chunk) {
+            if (chunk.State == ChunkState.ACTIVE) {
+                _pool.Reclaim(_active[chunk.Position]);
+                _active.Remove(chunk.Position);
+            }
             chunk.State = ChunkState.INACTIVE;
-            _pool.Reclaim(_active[chunk.Position]);
-            _active.Remove(chunk.Position);
         }
 
     }

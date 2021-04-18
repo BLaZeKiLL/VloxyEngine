@@ -1,4 +1,4 @@
-﻿using CodeBlaze.Vloxy.Engine.Meshing;
+﻿using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
 
 using UnityEngine;
