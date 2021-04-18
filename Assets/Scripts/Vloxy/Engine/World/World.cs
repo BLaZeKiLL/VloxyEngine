@@ -71,19 +71,29 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void Update() {
-            var coords = _focus != null ? GetChunkCoords(_focus.position) : Vector3Int.zero;
+            var NewFocusChunkCoord = _focus != null ? GetChunkCoords(_focus.position) : Vector3Int.zero;
             
             WorldUpdate();
 
             ChunkStore.ActiveChunkUpdate();
 
-            if (coords.x == FocusChunkCoord.x && coords.y == FocusChunkCoord.y && coords.z == FocusChunkCoord.z) return;
+            if (NewFocusChunkCoord.x == FocusChunkCoord.x && NewFocusChunkCoord.y == FocusChunkCoord.y && NewFocusChunkCoord.z == FocusChunkCoord.z) return;
 
-            ViewRegionUpdate(coords);
-
-            FocusChunkCoord = coords;
+            ViewRegionUpdate(NewFocusChunkCoord);
         }
-        
+
+        private void ViewRegionUpdate(Vector3Int NewFocusChunkCoord) {
+            var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
+
+            if (claim.Count != 0) BuildCoordinator.Schedule(claim);
+
+            reclaim.ForEach(x => ChunkBehaviourPool.Reclaim(x));
+
+            WorldViewRegionUpdate();
+
+            FocusChunkCoord = NewFocusChunkCoord;
+        }
+
         #endregion
 
         #region Utils
@@ -110,24 +120,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
             return new Vector3Int(x,y,z);
         }
 
-        #endregion
-
-        #region Private
-        
-        private void ViewRegionUpdate(Vector3Int newFocusChunkCoord) {
-            if (FocusChunkCoord == Vector3Int.one * int.MinValue) {
-                BuildCoordinator.Schedule(ChunkStore.InitialViewRegion(newFocusChunkCoord));
-            } else {
-                var (claim, reclaim) = ChunkStore.ViewRegionUpdate(newFocusChunkCoord,FocusChunkCoord);
-
-                if (claim.Count != 0) BuildCoordinator.Schedule(claim);
-
-                reclaim.ForEach(x => ChunkBehaviourPool.Reclaim(x));
-            }
-
-            WorldViewRegionUpdate();
-        }
-        
         #endregion
 
     }
