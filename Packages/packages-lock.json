@@ -103,6 +103,13 @@
         "com.unity.modules.imgui": "1.0.0"
       }
     },
+    "com.yasirkula.ingamedebugconsole": {
+      "version": "1.4.8",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
     "io.codeblaze.cbsl": {
       "version": "1.6.0",
       "depth": 0,

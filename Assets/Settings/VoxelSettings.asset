@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NoiseSettings: {fileID: 11400000, guid: c28776072edff5743bd39aa43edd3f85, type: 2}
   Chunk:
-    ChunkPageSize: 8
-    DrawDistance: 4
+    ChunkPageSize: 0
+    DrawDistance: 0
     ChunkSize: {x: 32, y: 32, z: 32}
   Renderer:
     Material: {fileID: 2100000, guid: 104fcd82a3c84694d93fbfb0a9dbf2a1, type: 2}

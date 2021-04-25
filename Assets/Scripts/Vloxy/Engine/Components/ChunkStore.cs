@@ -41,14 +41,12 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
 
         internal void GenerateChunks() {
-            for (int x = -_ChunkSettings.ChunkPageSize; x < _ChunkSettings.ChunkPageSize; x++) {
-                for (int z = -_ChunkSettings.ChunkPageSize; z < _ChunkSettings.ChunkPageSize; z++) {
-                    for (int y = -_ChunkSettings.ChunkPageSize; y < _ChunkSettings.ChunkPageSize; y++) {
+            for (int x = -_ChunkSettings.ChunkPageSize; x <= _ChunkSettings.ChunkPageSize; x++) {
+                for (int z = -_ChunkSettings.ChunkPageSize; z <= _ChunkSettings.ChunkPageSize; z++) {
+                    for (int y = -_ChunkSettings.ChunkPageSize; y <= _ChunkSettings.ChunkPageSize; y++) {
                         var pos = new Vector3Int(x, y, z) * _ChunkSettings.ChunkSize;
                         var chunk = VoxelProvider<B>.Current.CreateChunk(pos);
-                        chunk.Data =
-                            VoxelProvider<B>.Current.ChunkCreationPipeLine.Apply(
-                                _NoiseProfile.GenerateChunkData(chunk));
+                        chunk.Data = VoxelProvider<B>.Current.ChunkCreationPipeLine.Apply(_NoiseProfile.GenerateChunkData(chunk));
 
                         Chunks.Add(pos, chunk);
                     }

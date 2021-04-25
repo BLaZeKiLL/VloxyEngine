@@ -30,7 +30,8 @@ MonoBehaviour:
     m_Scopes:
     - com.tayx.graphy
     - com.cysharp.unitask
-    - io.codeblaze
+    - io.codeblaze.cbsl
+    - com.yasirkula.ingamedebugconsole
     m_IsDefault: 0
     m_Capabilities: 0
   m_UserSelectedRegistryName: Open UPM
@@ -44,7 +45,8 @@ MonoBehaviour:
       m_Scopes:
       - com.tayx.graphy
       - com.cysharp.unitask
-      - io.codeblaze
+      - io.codeblaze.cbsl
+      - com.yasirkula.ingamedebugconsole
       m_IsDefault: 0
       m_Capabilities: 0
     m_Modified: 0
@@ -53,5 +55,6 @@ MonoBehaviour:
     m_Scopes:
     - com.tayx.graphy
     - com.cysharp.unitask
-    - io.codeblaze
+    - io.codeblaze.cbsl
+    - com.yasirkula.ingamedebugconsole
     m_SelectedScopeIndex: 0

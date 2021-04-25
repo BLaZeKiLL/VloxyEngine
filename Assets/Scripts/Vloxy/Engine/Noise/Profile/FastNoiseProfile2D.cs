@@ -38,8 +38,8 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             
             _heightMap = new Dictionary<Vector2Int, int>();
 
-            for (int x = -sizeX; x < sizeX; x++) {
-                for (int z = -sizeZ; z < sizeZ; z++) {
+            for (int x = -sizeX; x <= sizeX + _chunkSettings.ChunkSize.x; x++) {
+                for (int z = -sizeZ; z <= sizeZ + _chunkSettings.ChunkSize.z; z++) {
                     _heightMap.Add(new Vector2Int(x,z), GetHeight(x, z));
                 }
             }
