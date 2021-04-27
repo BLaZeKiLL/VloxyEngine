@@ -176,7 +176,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
             chunk.State = ChunkState.PROCESSING;
 
-            return new MeshBuildJobData<B> {
+            return new MeshBuildJobData<B>(_ChunkSettings.ChunkSize) {
                 Chunk = chunk,
                 ChunkPX = Chunks.ContainsKey(px) ? Chunks[px] : null,
                 ChunkPY = Chunks.ContainsKey(py) ? Chunks[py] : null,

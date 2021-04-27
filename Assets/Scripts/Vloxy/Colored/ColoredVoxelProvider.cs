@@ -15,7 +15,7 @@ namespace CodeBlaze.Vloxy.Colored {
 
     public class ColoredVoxelProvider : VoxelProvider<ColoredBlock> {
         
-        public override IMeshBuilder<ColoredBlock> MeshBuilder() => new ColoredGreedyMeshBuilder(Settings.Chunk.ChunkSize);
+        public override IMesher<ColoredBlock> MeshBuilder() => new ColoredGreedyMesher();
 
         public override INoiseProfile<ColoredBlock> NoiseProfile() => new ColoredNoiseProfile2D(Settings.NoiseSettings as NoiseSettings2D, Settings.Chunk);
 

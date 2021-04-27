@@ -3,7 +3,7 @@ using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
 
 namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
 
-    public interface IMeshBuilder<B> where B : IBlock {
+    public interface IMesher<B> where B : IBlock {
 
         MeshData GenerateMesh(MeshBuildJobData<B> data);
 
