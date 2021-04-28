@@ -61,9 +61,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
                             if (currentBlockOpaque == compareBlockOpaque) {
                                 normalMask[n++] = default;
                             } else if (currentBlockOpaque) {
-                                normalMask[n++] = new Mask(currentBlock, 1);
+                                normalMask[n++] = new Mask(currentBlock, 1, ComputeAOMask(chunkItr + directionMask, axis1, axis2));
                             } else {
-                                normalMask[n++] = new Mask(compareBlock, -1);
+                                normalMask[n++] = new Mask(compareBlock, -1, ComputeAOMask(chunkItr, axis1, axis2));
                             }
                         }
                     }
@@ -146,6 +146,59 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
             MeshData.Clear();
             _index = 0;
         }
+
+        private byte[] ComputeAOMask(Vector3Int coord, int axis1, int axis2) {
+            var L = coord;
+            var R = coord;
+            var B = coord;
+            var T = coord;
+
+            var LBC = coord;
+            var RBC = coord;
+            var LTC = coord;
+            var RTC = coord;
+            
+            L[axis2] -= 1;
+            R[axis2] += 1;
+            B[axis1] -= 1;
+            T[axis1] += 1;
+
+            LBC[axis1] -= 1; LBC[axis2] -= 1;
+            RBC[axis1] -= 1; RBC[axis2] += 1;
+            LTC[axis1] += 1; LTC[axis2] -= 1;
+            RTC[axis1] += 1; RTC[axis2] += 1;
+
+            try {            
+                var LO = JobData.GetBlock(L).IsOpaque() ? 1 : 0;
+                var RO = JobData.GetBlock(R).IsOpaque() ? 1 : 0;
+                var BO = JobData.GetBlock(B).IsOpaque() ? 1 : 0;
+                var TO = JobData.GetBlock(T).IsOpaque() ? 1 : 0;
+
+                var LBCO = JobData.GetBlock(LBC).IsOpaque() ? 1 : 0;
+                var RBCO = JobData.GetBlock(RBC).IsOpaque() ? 1 : 0;
+                var LTCO = JobData.GetBlock(LTC).IsOpaque() ? 1 : 0;
+                var RTCO = JobData.GetBlock(RTC).IsOpaque() ? 1 : 0;
+
+                return new [] {
+                    ComputeAO(LO, BO, LBCO),
+                    ComputeAO(LO, TO, LTCO),
+                    ComputeAO(RO, BO, RBCO),
+                    ComputeAO(RO, TO, RTCO)
+                }; 
+            } catch (IndexOutOfRangeException e) {
+                Console.WriteLine(e);
+
+                throw;
+            }
+        }
+
+        private byte ComputeAO(int s1, int s2, int c) {
+            if (s1 == 1 && s2 == 1) {
+                return 0;
+            }
+
+            return (byte) (3 - (s1 + s2 + c));
+        }
         
         private void CreateQuad(Mask mask, Vector3Int directionMask, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
             var normal = directionMask * mask.Normal;
@@ -162,6 +215,8 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
             MeshData.Triangles.Add(_index + 1 + mask.Normal);   // 2 0
             MeshData.Triangles.Add(_index + 1 - mask.Normal);   // 0 2
 
+            MeshData.AO.AddRange(mask.AO);
+            
             MeshData.Normals.Add(normal);
             MeshData.Normals.Add(normal);
             MeshData.Normals.Add(normal);
@@ -172,16 +227,19 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
             CreateQuad(mask, normal);
         }
 
-        private bool CompareMask(Mask m1, Mask m2) => m1.Normal == m2.Normal && CompareBlock(m1.Block, m2.Block);
+        private bool CompareMask(Mask m1, Mask m2) => CompareBlock(m1.Block, m2.Block) && m1.Normal == m2.Normal && Enumerable.SequenceEqual(m1.AO, m2.AO) ;
 
         protected readonly struct Mask {
 
             public readonly B Block;
+            
             internal readonly sbyte Normal;
+            internal readonly byte[] AO;
 
-            public Mask(B block, sbyte normal) {
+            public Mask(B block, sbyte normal, byte[] ao) {
                 Block = block;
                 Normal = normal;
+                AO = ao;
             }
 
         }

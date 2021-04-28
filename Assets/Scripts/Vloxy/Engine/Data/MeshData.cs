@@ -8,6 +8,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         
         public readonly List<Vector3> Vertices = new List<Vector3>();
         public readonly List<int> Triangles = new List<int>();
+        public readonly List<byte> AO = new List<byte>();
         public readonly List<Vector3> Normals = new List<Vector3>();
         public readonly List<Vector2> UV = new List<Vector2>();
         public readonly List<Vector2> UV2 = new List<Vector2>();
