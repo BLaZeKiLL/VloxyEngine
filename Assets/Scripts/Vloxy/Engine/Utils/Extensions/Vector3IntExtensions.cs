@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Engine.Extensions {
+namespace CodeBlaze.Vloxy.Engine.Utils.Extensions {
 
     public static class Vector3IntExtensions {
 
@@ -18,10 +18,10 @@ namespace CodeBlaze.Vloxy.Engine.Extensions {
 
         public static int Size(this Vector3Int vec) => vec.x * vec.y * vec.z;
 
-        public static void ForEach(this Vector3Int vec, Action<int> action) {
-            action(vec.x);
-            action(vec.y);
-            action(vec.z);
+        public static void ForEach(this Vector3Int vec, Action<int, int> action) {
+            action(vec.x, 0);
+            action(vec.y, 1);
+            action(vec.z, 2);
         }
 
     }

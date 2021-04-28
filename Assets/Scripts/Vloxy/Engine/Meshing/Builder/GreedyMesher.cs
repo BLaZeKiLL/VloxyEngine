@@ -1,4 +1,6 @@
-﻿using CodeBlaze.Vloxy.Engine.Data;
+﻿using System.Linq;
+
+using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
 
 using UnityEngine;
@@ -168,28 +170,24 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
             LTC[axis1] += 1; LTC[axis2] -= 1;
             RTC[axis1] += 1; RTC[axis2] += 1;
 
-            try {            
-                var LO = JobData.GetBlock(L).IsOpaque() ? 1 : 0;
-                var RO = JobData.GetBlock(R).IsOpaque() ? 1 : 0;
-                var BO = JobData.GetBlock(B).IsOpaque() ? 1 : 0;
-                var TO = JobData.GetBlock(T).IsOpaque() ? 1 : 0;
+         
+            var LO = JobData.GetBlock(L).IsOpaque() ? 1 : 0;
+            var RO = JobData.GetBlock(R).IsOpaque() ? 1 : 0;
+            var BO = JobData.GetBlock(B).IsOpaque() ? 1 : 0;
+            var TO = JobData.GetBlock(T).IsOpaque() ? 1 : 0;
 
-                var LBCO = JobData.GetBlock(LBC).IsOpaque() ? 1 : 0;
-                var RBCO = JobData.GetBlock(RBC).IsOpaque() ? 1 : 0;
-                var LTCO = JobData.GetBlock(LTC).IsOpaque() ? 1 : 0;
-                var RTCO = JobData.GetBlock(RTC).IsOpaque() ? 1 : 0;
+            var LBCO = JobData.GetBlock(LBC).IsOpaque() ? 1 : 0;
+            var RBCO = JobData.GetBlock(RBC).IsOpaque() ? 1 : 0;
+            var LTCO = JobData.GetBlock(LTC).IsOpaque() ? 1 : 0;
+            var RTCO = JobData.GetBlock(RTC).IsOpaque() ? 1 : 0;
 
-                return new [] {
-                    ComputeAO(LO, BO, LBCO),
-                    ComputeAO(LO, TO, LTCO),
-                    ComputeAO(RO, BO, RBCO),
-                    ComputeAO(RO, TO, RTCO)
-                }; 
-            } catch (IndexOutOfRangeException e) {
-                Console.WriteLine(e);
+            return new [] {
+                ComputeAO(LO, BO, LBCO),
+                ComputeAO(LO, TO, LTCO),
+                ComputeAO(RO, BO, RBCO),
+                ComputeAO(RO, TO, RTCO)
+            }; 
 
-                throw;
-            }
         }
 
         private byte ComputeAO(int s1, int s2, int c) {

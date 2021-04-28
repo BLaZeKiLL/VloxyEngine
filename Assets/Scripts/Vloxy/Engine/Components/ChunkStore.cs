@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;

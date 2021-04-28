@@ -1,4 +1,4 @@
-﻿namespace CodeBlaze.Vloxy.Engine.Extensions {
+﻿namespace CodeBlaze.Vloxy.Engine.Utils.Extensions {
 
     public static class IntExtensions {
 

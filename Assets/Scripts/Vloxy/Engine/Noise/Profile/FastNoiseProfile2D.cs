@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Noise.Settings;
 using CodeBlaze.Vloxy.Engine.Settings;
 
