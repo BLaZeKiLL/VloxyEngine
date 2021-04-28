@@ -34,7 +34,7 @@ namespace CodeBlaze.Vloxy.Engine.Behaviour {
             Gizmos.DrawWireCube(transform.position + _halfChunkSize, _halfChunkSize * 2);
 
             foreach (var vertex in _meshData.Vertices) {
-                Handles.Label(vertex, $"{_meshData.AO[index++]}", style);
+                Handles.Label(transform.position + vertex, $"{_meshData.AO[index++]}", style);
             }
         }
 #endif

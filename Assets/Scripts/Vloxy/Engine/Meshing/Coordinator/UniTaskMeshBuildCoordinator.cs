@@ -10,11 +10,11 @@ using Cysharp.Threading.Tasks;
 
 namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
 
-    public class UniTaskMultiThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
+    public class UniTaskMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
 
         private int _batchSize;
 
-        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) : base(chunkBehaviourPool) {
+        public UniTaskMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) : base(chunkBehaviourPool) {
             _batchSize = VoxelProvider<B>.Current.Settings.Scheduler.BatchSize;
         }
         

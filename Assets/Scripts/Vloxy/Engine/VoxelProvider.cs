@@ -36,7 +36,7 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual IMesher<B> MeshBuilder() => new GreedyMesher<B>();
         
-        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(chunkBehaviourPool);
+        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) => new UniTaskMeshBuildCoordinator<B>(chunkBehaviourPool);
 
     }
 
