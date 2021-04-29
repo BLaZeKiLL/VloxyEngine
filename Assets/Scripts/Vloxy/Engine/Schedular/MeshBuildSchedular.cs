@@ -3,13 +3,13 @@
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 
-namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
+namespace CodeBlaze.Vloxy.Engine.Schedular {
 
-    public abstract class MeshBuildCoordinator<B> where B : IBlock {
+    public abstract class MeshBuildSchedular<B> where B : IBlock {
 
         protected readonly ChunkBehaviourPool<B> ChunkBehaviourPool;
 
-        protected MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) {
+        protected MeshBuildSchedular(ChunkBehaviourPool<B> chunkBehaviourPool) {
             ChunkBehaviourPool = chunkBehaviourPool;
         }
 

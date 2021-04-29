@@ -8,13 +8,13 @@ using CodeBlaze.Vloxy.Engine.Data;
 
 using Cysharp.Threading.Tasks;
 
-namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
+namespace CodeBlaze.Vloxy.Engine.Schedular {
 
-    public class UniTaskMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
+    public class UniTaskMeshBuildSchedular<B> : MeshBuildSchedular<B> where B : IBlock {
 
         private int _batchSize;
 
-        public UniTaskMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) : base(chunkBehaviourPool) {
+        public UniTaskMeshBuildSchedular(ChunkBehaviourPool<B> chunkBehaviourPool) : base(chunkBehaviourPool) {
             _batchSize = VoxelProvider<B>.Current.Settings.Scheduler.BatchSize;
         }
         
@@ -37,12 +37,12 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
                 null,
                 (batch, meshData) => {
                     for (int i = 0; i < meshData.Length; i++) {
-                        Render(batch.Input[i].Chunk, meshData[i]);
+                        Render(batch.Input[i].GetChunk(), meshData[i]);
                     }
                 });
             watch.Stop();
 
-            CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"{jobs.Count} Jobs processed in : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+            CBSL.Logging.Logger.Info<MeshBuildSchedular<B>>($"{jobs.Count} Jobs processed in : {watch.Elapsed.TotalMilliseconds:0.###} ms");
 
             PostProcess(jobs);
         }

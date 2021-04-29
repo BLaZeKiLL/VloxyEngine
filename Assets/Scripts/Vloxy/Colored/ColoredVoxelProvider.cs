@@ -5,7 +5,7 @@ using CodeBlaze.Vloxy.Colored.Noise;
 
 using CodeBlaze.Vloxy.Engine;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Meshing.Builder;
+using CodeBlaze.Vloxy.Engine.Mesher;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Noise.Settings;
 

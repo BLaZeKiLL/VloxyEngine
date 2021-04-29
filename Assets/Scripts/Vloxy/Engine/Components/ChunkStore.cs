@@ -4,7 +4,7 @@ using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
-using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
+using CodeBlaze.Vloxy.Engine.Schedular;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
 
@@ -75,7 +75,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                         .ToList();
 
             reclaim.ForEach(chunk => ActiveChunks.Remove(chunk.Position));
-            claim.ForEach(jobData => ActiveChunks.Add(jobData.Chunk.Position, jobData.Chunk));
+            claim.ForEach(jobData => ActiveChunks.Add(jobData.GetChunk().Position, jobData.GetChunk()));
 
             CBSL.Logging.Logger.Info<ChunkStore<B>>($"Claim : {claim.Count}, Reclaim : {reclaim.Count}");
 
@@ -166,25 +166,24 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
 
         private MeshBuildJobData<B> GetChunkJobData(Vector3Int position) {
-            var px = position + Vector3Int.right * _ChunkSettings.ChunkSize;
-            var py = position + Vector3Int.up * _ChunkSettings.ChunkSize;
-            var pz = position + new Vector3Int(0, 0, 1) * _ChunkSettings.ChunkSize;
-            var nx = position + Vector3Int.left * _ChunkSettings.ChunkSize;
-            var ny = position + Vector3Int.down * _ChunkSettings.ChunkSize;
-            var nz = position + new Vector3Int(0, 0, -1) * _ChunkSettings.ChunkSize;
-            var chunk = Chunks[position];
+            var base_coord = position - Vector3Int.one;
+            var data = new Chunk<B>[27];
+            var index = 0;
 
-            chunk.State = ChunkState.PROCESSING;
+            for (int y = 0; y < 3; y++) {
+                for (int z = 0; z < 3; z++) {
+                    for (int x = 0; x < 3; x++) {
+                        Chunks.TryGetValue(base_coord + new Vector3Int(x, y, z), out var chunk);
+                        data[index++] = chunk;
+                    }
+                }
+            }
 
-            return new MeshBuildJobData<B>(_ChunkSettings.ChunkSize) {
-                Chunk = chunk,
-                ChunkPX = Chunks.ContainsKey(px) ? Chunks[px] : null,
-                ChunkPY = Chunks.ContainsKey(py) ? Chunks[py] : null,
-                ChunkPZ = Chunks.ContainsKey(pz) ? Chunks[pz] : null,
-                ChunkNX = Chunks.ContainsKey(nx) ? Chunks[nx] : null,
-                ChunkNY = Chunks.ContainsKey(ny) ? Chunks[ny] : null,
-                ChunkNZ = Chunks.ContainsKey(nz) ? Chunks[nz] : null
-            };
+            var job = new MeshBuildJobData<B>(data);
+
+            job.GetChunk().State = ChunkState.PROCESSING;
+            
+            return job;
         }
         
         #endregion

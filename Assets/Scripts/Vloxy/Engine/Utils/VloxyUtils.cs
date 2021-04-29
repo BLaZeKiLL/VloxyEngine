@@ -26,18 +26,6 @@ namespace CodeBlaze.Vloxy.Engine.Utils {
 
     }
 
-    public static class VloxyUtils {
-
-        public static void CubeLoop(Vector3Int size, Action<int, int, int> action) {
-            for (int y = 0; y < size.y; y++) {
-                for (int z = 0; z < size.z; z++) {
-                    for (int x = 0; x < size.x; x++) {
-                        action(x, y, z);
-                    }
-                }
-            }
-        }
-
-    }
+    public static class VloxyUtils { }
 
 }

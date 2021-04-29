@@ -1,11 +1,11 @@
 ﻿using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
+using CodeBlaze.Vloxy.Engine.Schedular;
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
+namespace CodeBlaze.Vloxy.Engine.Mesher {
 
     public class GreedyMesher<B> : IMesher<B> where B : IBlock {
 
