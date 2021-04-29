@@ -11,7 +11,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         
         public readonly List<Vector3> Vertices = new List<Vector3>();
         public readonly List<int> Triangles = new List<int>();
-        public readonly List<int> AO = new List<int>();
         public readonly List<Vector3> Normals = new List<Vector3>();
         public readonly List<Vector2> UV1 = new List<Vector2>();
         public readonly List<Vector2> UV2 = new List<Vector2>();
@@ -31,10 +30,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             mesh.SetUVs(3, UV4);
 
             mesh.SetColors(Colors);
-
-            var ao = new ComputeBuffer(AO.Count, sizeof(int));
-            ao.SetData(AO);
-            material.SetBuffer(Attributes, ao);
 
             if (Normals.Count > 0)
                 mesh.SetNormals(Normals);

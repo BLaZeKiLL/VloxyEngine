@@ -32,7 +32,7 @@ namespace CodeBlaze.Vloxy.Engine.Behaviour {
             var index = 0;
             var style = new GUIStyle {normal = {textColor = Color.magenta}};
             foreach (var vertex in _meshData.Vertices) {
-                Handles.Label(transform.position + vertex, $"{_meshData.AO[index++]}", style);
+                Handles.Label(transform.position + vertex, $"{_meshData.UV2[index++].x}", style);
             }
         }
 #endif

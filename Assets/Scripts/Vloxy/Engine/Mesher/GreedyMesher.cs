@@ -187,7 +187,10 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 MeshData.Triangles.Add(_index + 2 + mask.Normal);   // 3 1
             }
 
-            MeshData.AO.AddRange(mask.AO);
+            MeshData.UV2.Add(new Vector2(mask.AO[0], 0));
+            MeshData.UV2.Add(new Vector2(mask.AO[1], 0));
+            MeshData.UV2.Add(new Vector2(mask.AO[2], 0));
+            MeshData.UV2.Add(new Vector2(mask.AO[3], 0));
             
             MeshData.Normals.Add(normal);
             MeshData.Normals.Add(normal);

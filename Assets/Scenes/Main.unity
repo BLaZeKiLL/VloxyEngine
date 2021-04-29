@@ -480,7 +480,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a83105dc061a4b039ad4cd782e2d854d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _focus: {fileID: 0}
+  _focus: {fileID: 963194228}
   _settings: {fileID: 11400000, guid: 20fafa444fc039b40894e76b38ebfa8f, type: 2}
 --- !u!1 &705507993
 GameObject:
