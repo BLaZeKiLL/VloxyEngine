@@ -28,11 +28,11 @@ namespace CodeBlaze.Vloxy.Engine.Behaviour {
 
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected() {
-            var index = 0;
-            var style = new GUIStyle {normal = {textColor = Color.magenta}};
             Gizmos.color = Color.red;
             Gizmos.DrawWireCube(transform.position + _halfChunkSize, _halfChunkSize * 2);
 
+            var index = 0;
+            var style = new GUIStyle {normal = {textColor = Color.magenta}};
             foreach (var vertex in _meshData.Vertices) {
                 Handles.Label(transform.position + vertex, $"{_meshData.AO[index++]}", style);
             }

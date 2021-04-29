@@ -8,6 +8,8 @@ using CodeBlaze.Vloxy.Engine.Data;
 
 using Cysharp.Threading.Tasks;
 
+using UnityEngine;
+
 namespace CodeBlaze.Vloxy.Engine.Schedular {
 
     public class UniTaskMeshBuildSchedular<B> : MeshBuildSchedular<B> where B : IBlock {
@@ -42,7 +44,7 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
                 });
             watch.Stop();
 
-            CBSL.Logging.Logger.Info<MeshBuildSchedular<B>>($"{jobs.Count} Jobs processed in : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+            CBSL.Logging.Logger.Info<MeshBuildSchedular<B>>($"{jobs.Count} Jobs ({Mathf.CeilToInt((float) jobs.Count / _batchSize)} Batches) processed in : {watch.Elapsed.TotalMilliseconds:0.###} ms");
 
             PostProcess(jobs);
         }
