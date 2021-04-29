@@ -5,8 +5,8 @@ using CBSL.Core.Provider;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Meshing.Builder;
-using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
+using CodeBlaze.Vloxy.Engine.Mesher;
+using CodeBlaze.Vloxy.Engine.Schedular;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
 
@@ -34,9 +34,9 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual ChunkBehaviourPool<B> ChunkPool(Transform transform) => new ChunkBehaviourPool<B>(transform);
 
-        public virtual IMeshBuilder<B> MeshBuilder() => new GreedyMeshBuilder<B>();
+        public virtual IMesher<B> MeshBuilder() => new GreedyMesher<B>();
         
-        public virtual MeshBuildCoordinator<B> MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) => new UniTaskMultiThreadedMeshBuildCoordinator<B>(chunkBehaviourPool);
+        public virtual MeshBuildSchedular<B> MeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) => new UniTaskMeshBuildSchedular<B>(chunkBehaviourPool);
 
     }
 

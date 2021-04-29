@@ -31,7 +31,10 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                     go.SetActive(false);
             
                     var chunkBehaviour = go.GetComponent<ChunkBehaviour>();
-                    chunkBehaviour.SetRenderSettings(VoxelProvider<B>.Current.Settings.Renderer);
+                    chunkBehaviour.SetRenderSettings(
+                        VoxelProvider<B>.Current.Settings.Renderer,
+                        VoxelProvider<B>.Current.Settings.Chunk.ChunkSize / 2
+                    );
 
                     return chunkBehaviour;
                 },

@@ -2,7 +2,7 @@
 
 using CBSL.Core.Collections.Compressed;
 
-using CodeBlaze.Vloxy.Engine.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
 using UnityEngine;
 

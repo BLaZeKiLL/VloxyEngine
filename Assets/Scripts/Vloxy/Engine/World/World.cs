@@ -1,8 +1,9 @@
 ﻿using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
+using CodeBlaze.Vloxy.Engine.Schedular;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
+using CodeBlaze.Vloxy.Engine.Utils;
 
 using UnityEngine;
 
@@ -14,7 +15,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         [SerializeField] private VoxelSettings _settings;
 
         protected ChunkBehaviourPool<B> ChunkBehaviourPool;
-        protected MeshBuildCoordinator<B> BuildCoordinator;
+        protected MeshBuildSchedular<B> BuildSchedular;
         protected INoiseProfile<B> NoiseProfile;
         protected ChunkStore<B> ChunkStore;
         protected Vector3Int FocusChunkCoord;
@@ -52,7 +53,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void ConstructVloxyComponents() {
             NoiseProfile = VoxelProvider<B>.Current.NoiseProfile();
             ChunkBehaviourPool = VoxelProvider<B>.Current.ChunkPool(transform);
-            BuildCoordinator = VoxelProvider<B>.Current.MeshBuildCoordinator(ChunkBehaviourPool);
+            BuildSchedular = VoxelProvider<B>.Current.MeshBuildCoordinator(ChunkBehaviourPool);
             ChunkStore = VoxelProvider<B>.Current.ChunkStore(NoiseProfile);
             
             CBSL.Logging.Logger.Info<World<B>>("Vloxy Components Constructed");
@@ -71,7 +72,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void Update() {
-            var NewFocusChunkCoord = _focus != null ? GetChunkCoords(_focus.position) : Vector3Int.zero;
+            var NewFocusChunkCoord = _focus != null ? VloxyUtils<B>.GetChunkCoords(_focus.position) : Vector3Int.zero;
             
             WorldUpdate();
 
@@ -85,39 +86,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void ViewRegionUpdate(Vector3Int NewFocusChunkCoord) {
             var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
 
-            if (claim.Count != 0) BuildCoordinator.Schedule(claim);
+            if (claim.Count != 0) BuildSchedular.Schedule(claim);
 
             reclaim.ForEach(x => ChunkBehaviourPool.Reclaim(x));
 
             WorldViewRegionUpdate();
 
             FocusChunkCoord = NewFocusChunkCoord;
-        }
-
-        #endregion
-
-        #region Utils
-
-        public Vector3Int GetChunkCoords(Vector3 Position) {
-            var pos = Vector3Int.FloorToInt(Position);
-
-            var x = pos.x - pos.x % _chunkSettings.ChunkSize.x;
-            var y = pos.y - pos.y % _chunkSettings.ChunkSize.y;
-            var z = pos.z - pos.z % _chunkSettings.ChunkSize.z;
-
-            x = pos.x < 0 ? x - _chunkSettings.ChunkSize.x : x;
-            y = pos.y < 0 ? y - _chunkSettings.ChunkSize.y : y;
-            z = pos.z < 0 ? z - _chunkSettings.ChunkSize.z : z;
-            
-            return new Vector3Int(x,y,z);
-        }
-        
-        public Vector3Int GetChunkCoords(Vector3Int Position) {
-            var x = Position.x - Position.x % _chunkSettings.ChunkSize.x;
-            var y = Position.y - Position.y % _chunkSettings.ChunkSize.y;
-            var z = Position.z - Position.z % _chunkSettings.ChunkSize.z;
-            
-            return new Vector3Int(x,y,z);
         }
 
         #endregion

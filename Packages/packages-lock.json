@@ -1,14 +1,14 @@
 {
   "dependencies": {
     "com.cysharp.unitask": {
-      "version": "2.2.4",
+      "version": "2.2.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
     "com.tayx.graphy": {
-      "version": "2.0.1",
+      "version": "2.1.3",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -102,6 +102,13 @@
         "com.unity.modules.ui": "1.0.0",
         "com.unity.modules.imgui": "1.0.0"
       }
+    },
+    "com.yasirkula.ingamedebugconsole": {
+      "version": "1.4.8",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
     },
     "io.codeblaze.cbsl": {
       "version": "1.6.0",

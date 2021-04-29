@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b2e488ee8f4f838bfbe8664412fa7b, type: 3}
   m_Name: NoiseSettings2D
   m_EditorClassIdentifier: 
-  Height: 512
-  Seed: 123456789
+  Height: 256
+  Seed: 1331
   NoiseType: 3
   Frequency: 0.003
   FractalType: 1

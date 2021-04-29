@@ -1,11 +1,12 @@
-﻿using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Meshing.Coordinator;
+﻿using System.Linq;
+
+using CodeBlaze.Vloxy.Engine.Data;
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
+namespace CodeBlaze.Vloxy.Engine.Mesher {
 
-    public class GreedyMeshBuilder<B> : IMeshBuilder<B> where B : IBlock {
+    public class GreedyMesher<B> : IMesher<B> where B : IBlock {
 
         protected readonly MeshData MeshData;
 
@@ -14,24 +15,35 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
         private int _index;
         private Vector3Int _size;
 
-        public GreedyMeshBuilder() {
+        public GreedyMesher() {
             MeshData = new MeshData();
             _size = VoxelProvider<B>.Current.Settings.Chunk.ChunkSize;
         }
 
-        protected virtual B EmptyBlock() => default;
-        
-        protected virtual void CreateQuad(B block, Vector3Int normal) { }
+        protected virtual void CreateQuad(Mask mask, Vector3Int normal) { }
 
         protected virtual bool CompareBlock(B block1, B block2) => block1.Equals(block2);
+        
+        protected readonly struct Mask {
+
+            public readonly B Block;
+            
+            internal readonly sbyte Normal;
+            internal readonly int[] AO;
+
+            public Mask(B block, sbyte normal, int[] ao) {
+                Block = block;
+                Normal = normal;
+                AO = ao;
+            }
+
+        }
         
         public MeshData GenerateMesh(MeshBuildJobData<B> data) {
             JobData = data;
             
             // Sweep over each axis (X, Y and Z)
             for (int direction = 0; direction < 3; direction++) {
-                int i, j, k, l, width, height;
-
                 // 2 Perpendicular axis
                 int axis1 = (direction + 1) % 3;
                 int axis2 = (direction + 2) % 3;
@@ -56,8 +68,8 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
                     // Compute the mask
                     for (chunkItr[axis2] = 0; chunkItr[axis2] < axis2Limit; ++chunkItr[axis2]) {
                         for (chunkItr[axis1] = 0; chunkItr[axis1] < axis1Limit; ++chunkItr[axis1]) {
-                            var currentBlock = GetBlock(chunkItr, mainAxisLimit);
-                            var compareBlock = GetBlock(chunkItr + directionMask, mainAxisLimit);
+                            var currentBlock = JobData.GetBlock(chunkItr);
+                            var compareBlock = JobData.GetBlock(chunkItr + directionMask);
 
                             var currentBlockOpaque = currentBlock.IsOpaque();
                             var compareBlockOpaque = compareBlock.IsOpaque(); 
@@ -65,9 +77,9 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
                             if (currentBlockOpaque == compareBlockOpaque) {
                                 normalMask[n++] = default;
                             } else if (currentBlockOpaque) {
-                                normalMask[n++] = new Mask(currentBlock, 1);
+                                normalMask[n++] = new Mask(currentBlock, 1, ComputeAOMask(chunkItr + directionMask, axis1, axis2));
                             } else {
-                                normalMask[n++] = new Mask(compareBlock, -1);
+                                normalMask[n++] = new Mask(compareBlock, -1, ComputeAOMask(chunkItr, axis1, axis2));
                             }
                         }
                     }
@@ -77,8 +89,8 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
 
                     // Generate a mesh from the mask using lexicographic ordering,      
                     // by looping over each block in this slice of the chunk
-                    for (j = 0; j < axis2Limit; j++) {
-                        for (i = 0; i < axis1Limit;) {
+                    for (int j = 0; j < axis2Limit; j++) {
+                        for (int i = 0; i < axis1Limit;) {
                             if (normalMask[n].Normal != 0) {
                                 // Current Stuff
                                 var currentMask = normalMask[n];
@@ -87,6 +99,8 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
 
                                 // Compute the width of this quad and store it in w                        
                                 // This is done by searching along the current axis until mask[n + w] is false
+                                int width;
+
                                 for (width = 1; i + width < axis1Limit && CompareMask(normalMask[n + width] , currentMask); width++) { }
 
                                 // Compute the height of this quad and store it in h                        
@@ -94,11 +108,12 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
                                 // For example, if w is 5 we currently have a quad of dimensions 1 x 5. To reduce triangle count,
                                 // greedy meshing will attempt to expand this quad out to CHUNK_SIZE x 5, but will stop if it reaches a hole in the mask
 
+                                int height;
                                 bool done = false;
-
+                                
                                 for (height = 1; j + height < axis2Limit; height++) {
                                     // Check each block next to this quad
-                                    for (k = 0; k < width; ++k) {
+                                    for (int k = 0; k < width; ++k) {
                                         if (CompareMask(normalMask[n + k + height * axis1Limit] , currentMask)) continue;
 
                                         done = true;
@@ -113,7 +128,7 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
 
                                 // create quad
                                 CreateQuad(
-                                    currentMask.Normal, currentMask.Block, directionMask,
+                                    currentMask, directionMask,
                                     chunkItr,
                                     chunkItr + deltaAxis1,
                                     chunkItr + deltaAxis2,
@@ -124,8 +139,8 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
                                 deltaAxis2 = Vector3Int.zero;
                                 
                                 // Clear this part of the mask, so we don't add duplicate faces
-                                for (l = 0; l < height; ++l)
-                                    for (k = 0; k < width; ++k)
+                                for (int l = 0; l < height; ++l)
+                                    for (int k = 0; k < width; ++k)
                                         normalMask[n + k + l * axis1Limit] = default;
 
                                 i += width;
@@ -148,78 +163,96 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Builder {
             _index = 0;
         }
 
-        private B GetBlock(Vector3Int pos, int limit) {
-            int x = pos.x, y = pos.y, z = pos.z;
+        private void CreateQuad(Mask mask, Vector3Int directionMask, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
+            var normal = directionMask * mask.Normal;
             
-            if (x < 0) return JobData.ChunkNX?.Data == null ? EmptyBlock() : JobData.ChunkNX.Data.GetBlock(x + limit, y, z);
-            if (x >= limit) return JobData.ChunkPX?.Data == null ? EmptyBlock() : JobData.ChunkPX.Data.GetBlock(x - limit,y,z);
-            
-            if (y < 0) return JobData.ChunkNY?.Data == null ? EmptyBlock() : JobData.ChunkNY.Data.GetBlock(x, y + limit, z);
-            if (y >= limit) return JobData.ChunkPY?.Data == null ? EmptyBlock() : JobData.ChunkPY.Data.GetBlock(x,y - limit,z);
-            
-            if (z < 0) return JobData.ChunkNZ?.Data == null ? EmptyBlock() : JobData.ChunkNZ.Data.GetBlock(x, y, z + limit);
-            if (z >= limit) return JobData.ChunkPZ?.Data == null ? EmptyBlock() : JobData.ChunkPZ.Data.GetBlock(x,y,z - limit);
+            MeshData.Vertices.Add(v1);                              // 0 Bottom Left
+            MeshData.Vertices.Add(v2);                              // 1 Top Left
+            MeshData.Vertices.Add(v3);                              // 2 Bottom Right
+            MeshData.Vertices.Add(v4);                              // 3 Top Right
 
-            return JobData.Chunk.Data.GetBlock(x, y, z);
-        }
-
-        // v1 -> BL
-        // v2 -> TL
-        // v3 -> BR
-        // v4 -> TR
-        private void CreateQuad(sbyte normalMask, B block, Vector3Int directionMask, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
-            MeshData.Vertices.Add(v1);
-            MeshData.Vertices.Add(v2);
-            MeshData.Vertices.Add(v3);
-            MeshData.Vertices.Add(v4);
-
-            switch (normalMask) {
-                case 1:
-                    MeshData.Triangles.Add(_index);
-                    MeshData.Triangles.Add(_index + 1);
-                    MeshData.Triangles.Add(_index + 3);
-                    MeshData.Triangles.Add(_index);
-                    MeshData.Triangles.Add(_index + 3);
-                    MeshData.Triangles.Add(_index + 2);
-
-                    break;
-                case -1:
-                    MeshData.Triangles.Add(_index);
-                    MeshData.Triangles.Add(_index + 3);
-                    MeshData.Triangles.Add(_index + 1);
-                    MeshData.Triangles.Add(_index);
-                    MeshData.Triangles.Add(_index + 2);
-                    MeshData.Triangles.Add(_index + 3);
-
-                    break;
+            if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) {    // + -
+                MeshData.Triangles.Add(_index);                         // 0 0
+                MeshData.Triangles.Add(_index + 2 - mask.Normal);   // 1 3
+                MeshData.Triangles.Add(_index + 2 + mask.Normal);   // 3 1
+                MeshData.Triangles.Add(_index + 3);                 // 3 3
+                MeshData.Triangles.Add(_index + 1 + mask.Normal);   // 2 0
+                MeshData.Triangles.Add(_index + 1 - mask.Normal);   // 0 2
+            } else {                                                    // + -
+                MeshData.Triangles.Add(_index + 1);                 // 1 1
+                MeshData.Triangles.Add(_index + 1 + mask.Normal);   // 2 0
+                MeshData.Triangles.Add(_index + 1 - mask.Normal);   // 0 2
+                MeshData.Triangles.Add(_index + 2);                 // 2 2
+                MeshData.Triangles.Add(_index + 2 - mask.Normal);   // 1 3
+                MeshData.Triangles.Add(_index + 2 + mask.Normal);   // 3 1
             }
+
+            MeshData.UV2.Add(new Vector2(mask.AO[0], 0));
+            MeshData.UV2.Add(new Vector2(mask.AO[1], 0));
+            MeshData.UV2.Add(new Vector2(mask.AO[2], 0));
+            MeshData.UV2.Add(new Vector2(mask.AO[3], 0));
+            
+            MeshData.Normals.Add(normal);
+            MeshData.Normals.Add(normal);
+            MeshData.Normals.Add(normal);
+            MeshData.Normals.Add(normal);
 
             _index += 4;
-
-            var normal = directionMask * normalMask;
-
-            MeshData.Normals.Add(normal);
-            MeshData.Normals.Add(normal);
-            MeshData.Normals.Add(normal);
-            MeshData.Normals.Add(normal);
-
-            CreateQuad(block, normal);
+            
+            CreateQuad(mask, normal);
         }
 
-        private bool CompareMask(Mask m1, Mask m2) => m1.Normal == m2.Normal && CompareBlock(m1.Block, m2.Block);
+        private bool CompareMask(Mask m1, Mask m2) => CompareBlock(m1.Block, m2.Block) && m1.Normal == m2.Normal && Enumerable.SequenceEqual(m1.AO, m2.AO) ;
 
-        private readonly struct Mask {
+        private int[] ComputeAOMask(Vector3Int coord, int axis1, int axis2) {
+            var L = coord;
+            var R = coord;
+            var B = coord;
+            var T = coord;
 
-            public readonly B Block;
-            public readonly sbyte Normal;
+            var LBC = coord;
+            var RBC = coord;
+            var LTC = coord;
+            var RTC = coord;
+            
+            L[axis2] -= 1;
+            R[axis2] += 1;
+            B[axis1] -= 1;
+            T[axis1] += 1;
 
-            public Mask(B block, sbyte normal) {
-                Block = block;
-                Normal = normal;
+            LBC[axis1] -= 1; LBC[axis2] -= 1;
+            RBC[axis1] -= 1; RBC[axis2] += 1;
+            LTC[axis1] += 1; LTC[axis2] -= 1;
+            RTC[axis1] += 1; RTC[axis2] += 1;
+
+         
+            var LO = JobData.GetBlock(L).IsOpaque() ? 1 : 0;
+            var RO = JobData.GetBlock(R).IsOpaque() ? 1 : 0;
+            var BO = JobData.GetBlock(B).IsOpaque() ? 1 : 0;
+            var TO = JobData.GetBlock(T).IsOpaque() ? 1 : 0;
+
+            var LBCO = JobData.GetBlock(LBC).IsOpaque() ? 1 : 0;
+            var RBCO = JobData.GetBlock(RBC).IsOpaque() ? 1 : 0;
+            var LTCO = JobData.GetBlock(LTC).IsOpaque() ? 1 : 0;
+            var RTCO = JobData.GetBlock(RTC).IsOpaque() ? 1 : 0;
+
+            return new [] {
+                ComputeAO(LO, BO, LBCO),
+                ComputeAO(LO, TO, LTCO),
+                ComputeAO(RO, BO, RBCO),
+                ComputeAO(RO, TO, RTCO)
+            }; 
+
+        }
+
+        private int ComputeAO(int s1, int s2, int c) {
+            if (s1 == 1 && s2 == 1) {
+                return 0;
             }
 
+            return (3 - (s1 + s2 + c));
         }
-        
+
     }
 
 }

@@ -8,20 +8,22 @@ using CodeBlaze.Vloxy.Engine.Data;
 
 using Cysharp.Threading.Tasks;
 
-namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
+using UnityEngine;
 
-    public class UniTaskMultiThreadedMeshBuildCoordinator<B> : MeshBuildCoordinator<B> where B : IBlock {
+namespace CodeBlaze.Vloxy.Engine.Schedular {
+
+    public class UniTaskMeshBuildSchedular<B> : MeshBuildSchedular<B> where B : IBlock {
 
         private int _batchSize;
 
-        public UniTaskMultiThreadedMeshBuildCoordinator(ChunkBehaviourPool<B> chunkBehaviourPool) : base(chunkBehaviourPool) {
+        public UniTaskMeshBuildSchedular(ChunkBehaviourPool<B> chunkBehaviourPool) : base(chunkBehaviourPool) {
             _batchSize = VoxelProvider<B>.Current.Settings.Scheduler.BatchSize;
         }
         
         public override void Schedule(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
-            if (chunk.State == ChunkState.PROCESSING) ChunkBehaviourPool.Claim(chunk).Render(meshData);
+            if (chunk.State == ChunkState.PROCESSING && meshData.Vertices.Count != 0) ChunkBehaviourPool.Claim(chunk).Render(meshData);
         }
 
         private async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {
@@ -37,12 +39,12 @@ namespace CodeBlaze.Vloxy.Engine.Meshing.Coordinator {
                 null,
                 (batch, meshData) => {
                     for (int i = 0; i < meshData.Length; i++) {
-                        Render(batch.Input[i].Chunk, meshData[i]);
+                        Render(batch.Input[i].GetChunk(), meshData[i]);
                     }
                 });
             watch.Stop();
 
-            CBSL.Logging.Logger.Info<MeshBuildCoordinator<B>>($"{jobs.Count} Jobs processed in : {watch.Elapsed.TotalMilliseconds:0.###} ms");
+            CBSL.Logging.Logger.Info<MeshBuildSchedular<B>>($"{jobs.Count} Jobs ({Mathf.CeilToInt((float) jobs.Count / _batchSize)} Batches) processed in : {watch.Elapsed.TotalMilliseconds:0.###} ms");
 
             PostProcess(jobs);
         }

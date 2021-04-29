@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de6253de127543aeb23d6596fc20fad2, type: 3}
-  m_Name: VoxelSettings
+  m_Name: SingleChunk
   m_EditorClassIdentifier: 
   NoiseSettings: {fileID: 11400000, guid: c28776072edff5743bd39aa43edd3f85, type: 2}
   Chunk:
-    ChunkPageSize: 8
-    DrawDistance: 4
-    ChunkSize: {x: 32, y: 32, z: 32}
+    ChunkPageSize: 0
+    DrawDistance: 0
+    ChunkSize: {x: 16, y: 16, z: 16}
   Renderer:
-    Material: {fileID: 2100000, guid: 104fcd82a3c84694d93fbfb0a9dbf2a1, type: 2}
+    Material: {fileID: 2100000, guid: bb8cbee354271b14eaf30a34312e1b67, type: 2}
     CastShadows: 0
   Scheduler:
     BatchSize: 32
