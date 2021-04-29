@@ -24,6 +24,21 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
 
         protected virtual bool CompareBlock(B block1, B block2) => block1.Equals(block2);
         
+        protected readonly struct Mask {
+
+            public readonly B Block;
+            
+            internal readonly sbyte Normal;
+            internal readonly int[] AO;
+
+            public Mask(B block, sbyte normal, int[] ao) {
+                Block = block;
+                Normal = normal;
+                AO = ao;
+            }
+
+        }
+        
         public MeshData GenerateMesh(MeshBuildJobData<B> data) {
             JobData = data;
             
@@ -148,7 +163,45 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             _index = 0;
         }
 
-        private byte[] ComputeAOMask(Vector3Int coord, int axis1, int axis2) {
+        private void CreateQuad(Mask mask, Vector3Int directionMask, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
+            var normal = directionMask * mask.Normal;
+            
+            MeshData.Vertices.Add(v1);                              // 0 Bottom Left
+            MeshData.Vertices.Add(v2);                              // 1 Top Left
+            MeshData.Vertices.Add(v3);                              // 2 Bottom Right
+            MeshData.Vertices.Add(v4);                              // 3 Top Right
+
+            if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) {    // + -
+                MeshData.Triangles.Add(_index);                         // 0 0
+                MeshData.Triangles.Add(_index + 2 - mask.Normal);   // 1 3
+                MeshData.Triangles.Add(_index + 2 + mask.Normal);   // 3 1
+                MeshData.Triangles.Add(_index + 3);                 // 3 3
+                MeshData.Triangles.Add(_index + 1 + mask.Normal);   // 2 0
+                MeshData.Triangles.Add(_index + 1 - mask.Normal);   // 0 2
+            } else {                                                    // + -
+                MeshData.Triangles.Add(_index + 1);                 // 1 1
+                MeshData.Triangles.Add(_index + 1 + mask.Normal);   // 2 0
+                MeshData.Triangles.Add(_index + 1 - mask.Normal);   // 0 2
+                MeshData.Triangles.Add(_index + 2);                 // 2 2
+                MeshData.Triangles.Add(_index + 2 - mask.Normal);   // 1 3
+                MeshData.Triangles.Add(_index + 2 + mask.Normal);   // 3 1
+            }
+
+            MeshData.AO.AddRange(mask.AO);
+            
+            MeshData.Normals.Add(normal);
+            MeshData.Normals.Add(normal);
+            MeshData.Normals.Add(normal);
+            MeshData.Normals.Add(normal);
+
+            _index += 4;
+            
+            CreateQuad(mask, normal);
+        }
+
+        private bool CompareMask(Mask m1, Mask m2) => CompareBlock(m1.Block, m2.Block) && m1.Normal == m2.Normal && Enumerable.SequenceEqual(m1.AO, m2.AO) ;
+
+        private int[] ComputeAOMask(Vector3Int coord, int axis1, int axis2) {
             var L = coord;
             var R = coord;
             var B = coord;
@@ -189,58 +242,14 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
 
         }
 
-        private byte ComputeAO(int s1, int s2, int c) {
+        private int ComputeAO(int s1, int s2, int c) {
             if (s1 == 1 && s2 == 1) {
                 return 0;
             }
 
-            return (byte) (3 - (s1 + s2 + c));
-        }
-        
-        private void CreateQuad(Mask mask, Vector3Int directionMask, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
-            var normal = directionMask * mask.Normal;
-            
-            MeshData.Vertices.Add(v1);                              // 0 Bottom Left
-            MeshData.Vertices.Add(v2);                              // 1 Top Left
-            MeshData.Vertices.Add(v3);                              // 2 Bottom Right
-            MeshData.Vertices.Add(v4);                              // 3 Top Right
-                                                                    // + -
-            MeshData.Triangles.Add(_index);                         // 0 0
-            MeshData.Triangles.Add(_index + 2 - mask.Normal);   // 1 3
-            MeshData.Triangles.Add(_index + 2 + mask.Normal);   // 3 1
-            MeshData.Triangles.Add(_index + 3);                 // 3 3
-            MeshData.Triangles.Add(_index + 1 + mask.Normal);   // 2 0
-            MeshData.Triangles.Add(_index + 1 - mask.Normal);   // 0 2
-
-            MeshData.AO.AddRange(mask.AO);
-            
-            MeshData.Normals.Add(normal);
-            MeshData.Normals.Add(normal);
-            MeshData.Normals.Add(normal);
-            MeshData.Normals.Add(normal);
-
-            _index += 4;
-            
-            CreateQuad(mask, normal);
+            return (3 - (s1 + s2 + c));
         }
 
-        private bool CompareMask(Mask m1, Mask m2) => CompareBlock(m1.Block, m2.Block) && m1.Normal == m2.Normal && Enumerable.SequenceEqual(m1.AO, m2.AO) ;
-
-        protected readonly struct Mask {
-
-            public readonly B Block;
-            
-            internal readonly sbyte Normal;
-            internal readonly byte[] AO;
-
-            public Mask(B block, sbyte normal, byte[] ao) {
-                Block = block;
-                Normal = normal;
-                AO = ao;
-            }
-
-        }
-        
     }
 
 }

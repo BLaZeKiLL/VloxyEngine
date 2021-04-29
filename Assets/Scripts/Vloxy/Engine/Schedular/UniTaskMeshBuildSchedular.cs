@@ -23,7 +23,7 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
         public override void Schedule(List<MeshBuildJobData<B>> jobs) => InternalProcess(jobs).Forget();
 
         protected override void Render(Chunk<B> chunk, MeshData meshData) {
-            if (chunk.State == ChunkState.PROCESSING) ChunkBehaviourPool.Claim(chunk).Render(meshData);
+            if (chunk.State == ChunkState.PROCESSING && meshData.Vertices.Count != 0) ChunkBehaviourPool.Claim(chunk).Render(meshData);
         }
 
         private async UniTaskVoid InternalProcess(List<MeshBuildJobData<B>> jobs) {

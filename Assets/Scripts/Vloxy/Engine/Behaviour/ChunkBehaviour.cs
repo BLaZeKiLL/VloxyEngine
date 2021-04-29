@@ -47,7 +47,7 @@ namespace CodeBlaze.Vloxy.Engine.Behaviour {
 #if UNITY_EDITOR
             _meshData = meshData;
 #endif
-            meshData.Apply(_mesh);
+            meshData.Apply(_mesh, _renderer.material);
         }
 
     }
