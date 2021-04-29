@@ -166,14 +166,15 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
 
         private MeshBuildJobData<B> GetChunkJobData(Vector3Int position) {
-            var base_coord = position - Vector3Int.one;
+            var size = _ChunkSettings.ChunkSize;
+            var base_coord = position - size;
             var data = new Chunk<B>[27];
             var index = 0;
 
             for (int y = 0; y < 3; y++) {
                 for (int z = 0; z < 3; z++) {
                     for (int x = 0; x < 3; x++) {
-                        Chunks.TryGetValue(base_coord + new Vector3Int(x, y, z), out var chunk);
+                        Chunks.TryGetValue(base_coord + new Vector3Int(x * size.x, y * size.y, z * size.z), out var chunk);
                         data[index++] = chunk;
                     }
                 }

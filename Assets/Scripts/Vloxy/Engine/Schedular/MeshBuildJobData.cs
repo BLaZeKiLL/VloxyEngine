@@ -19,6 +19,8 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
 
         public Chunk<B> GetChunk() => Data[13];
         
+        // ChunkSize = 2 then anything mod 1 becomes 0 hence it does not work
+        // ChunkSize = 1 then divie by zero error occurs
         public B GetBlock(Vector3Int pos) { // -1 to ChunkSize
             var key = Vector3Int.zero;
 
@@ -29,8 +31,7 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
                 pos[index] = pos[index] - key[index] * ChunkSize[index];
             }
 
-            var cindex = KeySize.Flatten(key + Vector3Int.one);
-            var chunk = Data[cindex];
+            var chunk = Data[KeySize.Flatten(key + Vector3Int.one)];
 
             return chunk?.Data == null ? default : chunk.Data.GetBlock(pos.x, pos.y, pos.z);
         }
