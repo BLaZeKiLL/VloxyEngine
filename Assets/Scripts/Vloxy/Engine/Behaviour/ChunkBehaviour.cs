@@ -1,6 +1,4 @@
-﻿using System;
-
-using CodeBlaze.Vloxy.Engine.Data;
+﻿using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
 
 using UnityEditor;

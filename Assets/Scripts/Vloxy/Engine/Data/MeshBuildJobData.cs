@@ -1,11 +1,8 @@
-﻿using System;
-
-using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+﻿using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Engine.Schedular {
+namespace CodeBlaze.Vloxy.Engine.Data {
 
     public class MeshBuildJobData<B> where B : IBlock {
 
