@@ -187,10 +187,17 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 MeshData.Triangles.Add(_index + 2 + mask.Normal);   // 3 1
             }
 
-            MeshData.UV2.Add(new Vector2(mask.AO[0], 0));
-            MeshData.UV2.Add(new Vector2(mask.AO[1], 0));
-            MeshData.UV2.Add(new Vector2(mask.AO[2], 0));
-            MeshData.UV2.Add(new Vector2(mask.AO[3], 0));
+            // Required for circular AO
+            MeshData.UV1.Add(Vector2.zero);
+            MeshData.UV1.Add(Vector2.up);
+            MeshData.UV1.Add(Vector2.right);
+            MeshData.UV1.Add(Vector2.one);
+
+            // Each vertex needs to know all the AO values of the face for bilinear interpolation
+            MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
+            MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
+            MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
+            MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
             
             MeshData.Normals.Add(normal);
             MeshData.Normals.Add(normal);

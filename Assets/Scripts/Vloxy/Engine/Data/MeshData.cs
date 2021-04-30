@@ -13,7 +13,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         public readonly List<int> Triangles = new List<int>();
         public readonly List<Vector3> Normals = new List<Vector3>();
         public readonly List<Vector2> UV1 = new List<Vector2>();
-        public readonly List<Vector2> UV2 = new List<Vector2>();
+        public readonly List<Vector4> UV2 = new List<Vector4>();
         public readonly List<Vector2> UV3 = new List<Vector2>();
         public readonly List<Vector2> UV4 = new List<Vector2>();
         public readonly List<Color32> Colors = new List<Color32>();
