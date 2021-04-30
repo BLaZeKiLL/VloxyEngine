@@ -188,22 +188,16 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             }
 
             // Required for circular AO
-            // MeshData.UV1.Add(Vector2.zero);
-            // MeshData.UV1.Add(Vector2.up);
-            // MeshData.UV1.Add(Vector2.right);
-            // MeshData.UV1.Add(Vector2.one);
+            MeshData.UV1.Add(Vector2.zero);
+            MeshData.UV1.Add(Vector2.up);
+            MeshData.UV1.Add(Vector2.right);
+            MeshData.UV1.Add(Vector2.one);
 
-            // Linear AO
-            MeshData.UV2.Add(new Vector2(mask.AO[0], 0));
-            MeshData.UV2.Add(new Vector2(mask.AO[1], 0));
-            MeshData.UV2.Add(new Vector2(mask.AO[2], 0));
-            MeshData.UV2.Add(new Vector2(mask.AO[3], 0));
-            
-            // Circular AO
-            // MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
-            // MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
-            // MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
-            // MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
+            // Each vertex needs to know all the AO values of the face for bilinear interpolation
+            MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
+            MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
+            MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
+            MeshData.UV2.Add(new Vector4(mask.AO[0], mask.AO[1],mask.AO[2],mask.AO[3]));
             
             MeshData.Normals.Add(normal);
             MeshData.Normals.Add(normal);

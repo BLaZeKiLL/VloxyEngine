@@ -18,9 +18,8 @@
 
         struct Input {
             float4 color : COLOR;
-            float ao;
-            // float2 aocoords;
-            // float4 aovector;
+            float2 aocoords;
+            float4 aovector;
         };
 
         half _Glossiness;
@@ -37,17 +36,16 @@
         
         void vert (inout appdata_full v, out Input o) {
             UNITY_INITIALIZE_OUTPUT(Input, o);
-            // o.aocoords = v.texcoord.xy;
-            // o.aovector = float4(compute_ao(v.texcoord1.x), compute_ao(v.texcoord1.y), compute_ao(v.texcoord1.z), compute_ao(v.texcoord1.w));
-            o.ao = compute_ao(v.texcoord1.x);
+            o.aocoords = v.texcoord.xy;
+            o.aovector = float4(compute_ao(v.texcoord1.x), compute_ao(v.texcoord1.y), compute_ao(v.texcoord1.z), compute_ao(v.texcoord1.w));
         }
         
         void surf (Input IN, inout SurfaceOutputStandard o) {
-            // float ao1 = lerp(IN.aovector.x, IN.aovector.z, IN.aocoords.x);
-            // float ao2 = lerp(IN.aovector.y, IN.aovector.w, IN.aocoords.x);
-            // float ao = lerp(ao1, ao2, IN.aocoords.y);
+            float ao1 = lerp(IN.aovector.x, IN.aovector.z, IN.aocoords.x);
+            float ao2 = lerp(IN.aovector.y, IN.aovector.w, IN.aocoords.x);
+            float ao = lerp(ao1, ao2, IN.aocoords.y);
         
-            o.Albedo = lerp(IN.color.rgb, _AOColor.rgb, IN.ao);
+            o.Albedo = lerp(IN.color.rgb, _AOColor.rgb, ao);
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
             o.Alpha = IN.color.a;
