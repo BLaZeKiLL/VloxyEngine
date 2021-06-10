@@ -3,9 +3,9 @@
         _Glossiness ("Smoothness", Range(0,1)) = 0.0
         _Metallic ("Metallic", Range(0,1)) = 0.0
         _AOColor ("AO Color", Color) = (0,0,0,1)
-        _AOCurve ("AO Curve", Vector) = (0.25, 0.175, 0.1, 0)
+        _AOCurve ("AO Curve", Vector) = (0.75, 0.825, 0.9, 1.0)
         _AOIntensity ("AO Intensity", Range(0, 1)) = 1.0
-		_AOPower ("AO Power", Range(0, 1)) = 0.5
+		_AOPower ("AO Power", Range(0, 1)) = 1.0
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -31,7 +31,7 @@
 		float _AOPower;
 
         float compute_ao(float index) {
-            return pow(_AOCurve[index] * _AOIntensity, 1 - _AOPower);
+            return pow(_AOCurve[index] * _AOIntensity, _AOPower);
         }
         
         void vert (inout appdata_full v, out Input o) {
@@ -45,7 +45,8 @@
             float ao2 = lerp(IN.aovector.y, IN.aovector.w, IN.aocoords.x);
             float ao = lerp(ao1, ao2, IN.aocoords.y);
         
-            o.Albedo = lerp(IN.color.rgb, _AOColor.rgb, ao);
+            // o.Albedo = IN.color.rgb * ao;
+            o.Albedo = lerp(_AOColor.rgb, IN.color.rgb, ao);
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
             o.Alpha = IN.color.a;
