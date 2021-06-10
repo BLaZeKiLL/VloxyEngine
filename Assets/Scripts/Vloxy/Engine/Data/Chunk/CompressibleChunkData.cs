@@ -12,14 +12,18 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         private Vector3Int _chunkSize;
 
-        private CompressedNodeList<B> _data;
+        private CompressedNodeArray<B> _data;
         
         public CompressibleChunkData(B[] data) {
             _chunkSize = VoxelProvider<B>.Current.Settings.Chunk.ChunkSize;
-            _data = new CompressedNodeList<B>(data);
+            _data = new CompressedNodeArray<B>(data);
         }
 
         public DataState State => _data.State;
+
+        public int CompressedLength => _data.CompressedLength;
+
+        public int Length => _data.Length;
 
         public void Compress() {
             if (State == DataState.COMPRESSED) return;

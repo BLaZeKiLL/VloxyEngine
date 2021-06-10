@@ -20,8 +20,8 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual ChunkDataPipeline<B> ChunkCreationPipeLine { get; } =
             new ChunkDataPipeline<B>(new List<Func<IChunkData<B>, IChunkData<B>>> {
-                ChunkDataPipeline<B>.Functions.EmptyChunkRemover,
-                ChunkDataPipeline<B>.Functions.ChunkDataCompressor
+                ChunkDataPipeline<B>.Functions.ChunkDataCompressor,
+                ChunkDataPipeline<B>.Functions.EmptyChunkRemover
             });
 
         public virtual Chunk<B> CreateChunk(Vector3Int position) => new Chunk<B>(position);
