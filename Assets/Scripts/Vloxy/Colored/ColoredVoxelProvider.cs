@@ -19,7 +19,7 @@ namespace CodeBlaze.Vloxy.Colored {
 
         public override INoiseProfile<ColoredBlock> NoiseProfile() => new ColoredNoiseProfile2D(Settings.NoiseSettings as NoiseSettings2D, Settings.Chunk);
 
-        public override Chunk<ColoredBlock> CreateChunk(Vector3Int position) => new ColoredChunk(position, Color.red);
+        public override Chunk<ColoredBlock> CreateChunk(Vector3Int position) => new ColoredChunk(position, ColoredBlockTypes.RandomSolid().Color);
 
     }
 

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using UnityEngine;
+
 namespace CodeBlaze.Vloxy.Engine.Data {
 
     public class ChunkDataPipeline<B> where B : IBlock {
@@ -21,13 +23,13 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         public IChunkData<B> Apply(IChunkData<B> data) => Funcs.Aggregate(data, (current, func) => current == null ? null : func(current));
      
         public static class Functions {
-
+            
             public static readonly Func<IChunkData<B>, IChunkData<B>> EmptyChunkRemover = data => {
-                var empty = true;
-
-                data.ForEach(block => empty &= block.IsTransparent());
-
-                return !empty ? data : null;
+                var ChunkSize = VoxelProvider<B>.Current.Settings.Chunk.ChunkSize;
+                return ((CompressibleChunkData<B>) data).CompressedLength == 1 &&
+                    data.GetBlock(ChunkSize.x - 1, ChunkSize.y - 1, ChunkSize.z - 1).IsTransparent()
+                        ? null
+                        : data;
             };
 
             public static readonly Func<IChunkData<B>, IChunkData<B>> ChunkDataCompressor = data => {
