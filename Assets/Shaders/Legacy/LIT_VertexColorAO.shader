@@ -45,7 +45,6 @@
             float ao2 = lerp(IN.aovector.y, IN.aovector.w, IN.aocoords.x);
             float ao = lerp(ao1, ao2, IN.aocoords.y);
         
-            // o.Albedo = IN.color.rgb * ao;
             o.Albedo = lerp(_AOColor.rgb, IN.color.rgb, ao);
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
