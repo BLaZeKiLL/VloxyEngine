@@ -49,6 +49,8 @@ namespace CodeBlaze.Vloxy.Colored.Data.Block {
         public static ColoredBlock Green() => new ColoredBlock(new Color32(0, 255, 0, 255));
 
         public static ColoredBlock Blue() => new ColoredBlock(new Color32(0, 0, 255, 255));
+
+        public static ColoredBlock LightGrey() => new ColoredBlock(new Color32(200, 200, 200, 255));
         
         public static ColoredBlock Null() => new ColoredBlock(new Color32(255,0,255,255));
 
