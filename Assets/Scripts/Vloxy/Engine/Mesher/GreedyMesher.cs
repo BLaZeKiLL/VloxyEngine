@@ -11,9 +11,12 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         protected readonly MeshData MeshData;
 
         protected MeshBuildJobData<B> JobData;
-        
+
         private int _index;
         private Vector3Int _size;
+
+        private readonly float[] AO_CURVE = { 0.75f, 0.825f, 0.9f, 1.0f };
+        // private readonly float[] AO_CURVE = { 1.0f, 1.0f, 1.0f, 1.0f };
 
         public GreedyMesher() {
             MeshData = new MeshData();
@@ -29,9 +32,9 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             public readonly B Block;
             
             internal readonly sbyte Normal;
-            internal readonly int[] AO;
+            internal readonly float[] AO;
 
-            public Mask(B block, sbyte normal, int[] ao) {
+            public Mask(B block, sbyte normal, float[] ao) {
                 Block = block;
                 Normal = normal;
                 AO = ao;
@@ -211,7 +214,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
 
         private bool CompareMask(Mask m1, Mask m2) => CompareBlock(m1.Block, m2.Block) && m1.Normal == m2.Normal && Enumerable.SequenceEqual(m1.AO, m2.AO) ;
 
-        private int[] ComputeAOMask(Vector3Int coord, int axis1, int axis2) {
+        private float[] ComputeAOMask(Vector3Int coord, int axis1, int axis2) {
             var L = coord;
             var R = coord;
             var B = coord;
@@ -244,10 +247,10 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             var RTCO = JobData.GetBlock(RTC).IsOpaque() ? 1 : 0;
 
             return new [] {
-                ComputeAO(LO, BO, LBCO),
-                ComputeAO(LO, TO, LTCO),
-                ComputeAO(RO, BO, RBCO),
-                ComputeAO(RO, TO, RTCO)
+                AO_CURVE[ComputeAO(LO, BO, LBCO)],
+                AO_CURVE[ComputeAO(LO, TO, LTCO)],
+                AO_CURVE[ComputeAO(RO, BO, RBCO)],
+                AO_CURVE[ComputeAO(RO, TO, RTCO)]
             }; 
 
         }
@@ -257,7 +260,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 return 0;
             }
 
-            return (3 - (s1 + s2 + c));
+            return 3 - (s1 + s2 + c);
         }
 
     }

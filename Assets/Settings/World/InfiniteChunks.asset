@@ -15,10 +15,10 @@ MonoBehaviour:
   NoiseSettings: {fileID: 11400000, guid: c28776072edff5743bd39aa43edd3f85, type: 2}
   Chunk:
     ChunkPageSize: 6
-    DrawDistance: 6
+    DrawDistance: 4
     ChunkSize: {x: 32, y: 32, z: 32}
   Renderer:
-    Material: {fileID: 2100000, guid: bb8cbee354271b14eaf30a34312e1b67, type: 2}
+    Material: {fileID: 2100000, guid: 01164a26920f79044b9a4c1cb1479691, type: 2}
     CastShadows: 0
   Scheduler:
     BatchSize: 32

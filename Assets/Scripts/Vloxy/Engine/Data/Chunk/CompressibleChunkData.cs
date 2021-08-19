@@ -17,6 +17,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         public CompressibleChunkData(B[] data) {
             _chunkSize = VoxelProvider<B>.Current.Settings.Chunk.ChunkSize;
             _data = new CompressedNodeArray<B>(data);
+            
         }
 
         public DataState State => _data.State;

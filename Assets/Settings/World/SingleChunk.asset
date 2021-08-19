@@ -18,7 +18,7 @@ MonoBehaviour:
     DrawDistance: 0
     ChunkSize: {x: 16, y: 16, z: 16}
   Renderer:
-    Material: {fileID: 2100000, guid: bb8cbee354271b14eaf30a34312e1b67, type: 2}
+    Material: {fileID: 2100000, guid: 01164a26920f79044b9a4c1cb1479691, type: 2}
     CastShadows: 0
   Scheduler:
     BatchSize: 32
