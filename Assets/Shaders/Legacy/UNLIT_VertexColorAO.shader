@@ -1,9 +1,8 @@
 ﻿Shader "VloxyEngine/Unlit/VertexColorAO" {
     Properties {
         _AOColor ("AO Color", Color) = (0,0,0,1)
-        _AOCurve ("AO Curve", Vector) = (0.25, 0.175, 0.1, 0)
         _AOIntensity ("AO Intensity", Range(0, 1)) = 1.0
-		_AOPower ("AO Power", Range(0, 1)) = 0.5
+		_AOPower ("AO Power", Range(0, 1)) = 1.0
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -21,12 +20,11 @@
         };
         
         half4 _AOColor;
-        float4 _AOCurve;
         float _AOIntensity;
 		float _AOPower;
 
-        float compute_ao(float index) {
-            return pow(_AOCurve[index] * _AOIntensity, 1 - _AOPower);
+        float compute_ao(float ao) {
+            return pow(ao * _AOIntensity, _AOPower);
         }
         
         void vert (inout appdata_full v, out Input o) {
