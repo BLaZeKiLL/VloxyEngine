@@ -10,29 +10,25 @@ using CodeBlaze.Vloxy.Engine.Schedular;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
 
+using Unity.Mathematics;
+
 using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine {
 
-    public class VoxelProvider<B> : Provider<VoxelProvider<B>> where B : IBlock {
+    public class VoxelProvider : Provider<VoxelProvider> {
 
         public VoxelSettings Settings { get; set; }
 
-        public virtual ChunkDataPipeline<B> ChunkCreationPipeLine { get; } =
-            new ChunkDataPipeline<B>(new List<Func<IChunkData<B>, IChunkData<B>>> {
-                ChunkDataPipeline<B>.Functions.ChunkDataCompressor,
-                ChunkDataPipeline<B>.Functions.EmptyChunkRemover
-            });
+        public virtual Chunk CreateChunk(int3 position) => new(position);
 
-        public virtual Chunk<B> CreateChunk(Vector3Int position) => new Chunk<B>(position);
+        public virtual NativeChunkStore ChunkStore(INoiseProfile noiseProfile) => new(noiseProfile, Settings.Chunk);
 
-        public virtual ChunkStore<B> ChunkStore(INoiseProfile<B> noiseProfile) => new ChunkStore<B>(noiseProfile);
+        public virtual IChunkData CreateChunkData() => new NativeChunkData();
 
-        public virtual IChunkData<B> CreateChunkData(B[] blocks) => new CompressibleChunkData<B>(blocks);
+        public virtual INoiseProfile NoiseProfile() => null;
 
-        public virtual INoiseProfile<B> NoiseProfile() => null;
-
-        public virtual ChunkBehaviourPool<B> ChunkPool(Transform transform) => new ChunkBehaviourPool<B>(transform);
+        public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
 
         public virtual IMesher<B> MeshBuilder() => new GreedyMesher<B>();
         

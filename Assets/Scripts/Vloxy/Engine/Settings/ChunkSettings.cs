@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Unity.Mathematics;
+
 using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Settings {
@@ -17,7 +19,7 @@ namespace CodeBlaze.Vloxy.Engine.Settings {
         public int DrawDistance = 4;
 
         [Tooltip("Chunk dimensions")]
-        public Vector3Int ChunkSize = 32 * Vector3Int.one;
+        public int3 ChunkSize = 32 * new int3(1,1,1);
 
     }
 

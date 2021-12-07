@@ -23,6 +23,8 @@ namespace CodeBlaze.Vloxy.Colored.Data.Block {
         public bool IsTranslucent() => throw new System.NotImplementedException();
 
         public byte[] GetBytes() => new[] { Color.r, Color.g, Color.b, Color.a };
+        
+        
 
         public bool Equals(ColoredBlock other) {
             var color2 = other.Color;

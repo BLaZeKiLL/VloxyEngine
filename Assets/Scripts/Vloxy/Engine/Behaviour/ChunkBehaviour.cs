@@ -1,5 +1,8 @@
 ﻿using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+
+using Unity.Mathematics;
 
 using UnityEditor;
 
@@ -13,7 +16,7 @@ namespace CodeBlaze.Vloxy.Engine.Behaviour {
         
         private Mesh _mesh;
         private MeshRenderer _renderer;
-        private Vector3Int _halfChunkSize;
+        private int3 _halfChunkSize;
 
 #if UNITY_EDITOR
         private MeshData _meshData;
@@ -27,7 +30,7 @@ namespace CodeBlaze.Vloxy.Engine.Behaviour {
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected() {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(transform.position + _halfChunkSize, _halfChunkSize * 2);
+            Gizmos.DrawWireCube(transform.position + _halfChunkSize.GetVector3Int(), _halfChunkSize.GetVector3Int() * 2);
 
             var index = 0;
             var style = new GUIStyle {normal = {textColor = Color.magenta}};
@@ -37,7 +40,7 @@ namespace CodeBlaze.Vloxy.Engine.Behaviour {
         }
 #endif
         
-        public void SetRenderSettings(RendererSettings settings, Vector3Int halfChunkSize) {
+        public void SetRenderSettings(RendererSettings settings, int3 halfChunkSize) {
             _halfChunkSize = halfChunkSize;
             _renderer.material = settings.Material;
             if (!settings.CastShadows) _renderer.shadowCastingMode = ShadowCastingMode.Off;

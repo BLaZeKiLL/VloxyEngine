@@ -2,11 +2,11 @@
 
 namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
-    public interface INoiseProfile<B> where B : IBlock {
+    public interface INoiseProfile {
 
         void GenerateHeightMap();
         
-        IChunkData<B> GenerateChunkData(Chunk<B> chunk);
+        IChunkData GenerateChunkData(Chunk chunk);
 
         void Clear();
 

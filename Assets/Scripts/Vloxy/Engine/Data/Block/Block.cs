@@ -8,6 +8,10 @@
 
         bool IsTranslucent();
 
+        int GetId();
+
+        IBlock FromId(int id);
+
     }
 
 }

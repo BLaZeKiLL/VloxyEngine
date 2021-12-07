@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
-    public class FastNoiseProfile2D<B> : INoiseProfile<B> where B : IBlock {
+    public class FastNoiseProfile2D<B> : INoiseProfile {
 
         private FastNoiseLite _noise;
         private int _heightHalf;
@@ -17,11 +17,12 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         private Dictionary<Vector2Int, int> _heightMap;
         private ChunkSettings _chunkSettings;
         
-        protected virtual B GetBlock(Chunk<B> chunk, int heightMapValue, int blockHeight) => default;
+        protected virtual int GetBlock(Chunk chunk, int heightMapValue, int blockHeight) => default;
         
         public FastNoiseProfile2D(NoiseSettings2D settings, ChunkSettings chunkSettings) {
             _heightHalf = settings.Height / 2;
             _noise = new FastNoiseLite(settings.Seed);
+            
             _noise.SetNoiseType(settings.NoiseType);
             _noise.SetFrequency(settings.Frequency);
             _noise.SetFractalType(settings.FractalType);
@@ -47,21 +48,31 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             CBSL.Logging.Logger.Info<FastNoiseProfile2D<B>>("Height Map Generated");
         }
 
-        public IChunkData<B> GenerateChunkData(Chunk<B> chunk) {
-            var blocks = new B[_chunkSettings.ChunkSize.Size()];
+        public IChunkData GenerateChunkData(Chunk chunk) {
+            var data = VoxelProvider.Current.CreateChunkData();
             var pos = chunk.Position;
 
-            for (int x = 0; x < _chunkSettings.ChunkSize.x; x++) {
-                for (int z = 0; z < _chunkSettings.ChunkSize.z; z++) {
-                    var height = _heightMap[new Vector2Int(pos.x + x, pos.z + z)];
-                    
-                    for (int y = 0; y < _chunkSettings.ChunkSize.y; y++) {
-                        blocks[_chunkSettings.ChunkSize.Flatten(x, y, z)] = GetBlock(chunk, height, pos.y + y);
+            int current_block = -1;
+            int count = 0;
+
+            for (int y = 0; y < _chunkSettings.ChunkSize.y; y++) {
+                for (int x = 0; x < _chunkSettings.ChunkSize.x; x++) {
+                    for (int z = 0; z < _chunkSettings.ChunkSize.z; z++) {
+                        var height = _heightMap[new Vector2Int(pos.x + x, pos.z + z)];
+                        var block = GetBlock(chunk, height, pos.y + y);
+
+                        if (block == current_block) {
+                            count++;
+                        } else {
+                            data.AddBlocks(current_block, count);
+                            current_block = block;
+                            count = 1;
+                        }
                     }
                 }
             }
 
-            return VoxelProvider<B>.Current.CreateChunkData(blocks);
+            return data;
         }
 
         public void Clear() {

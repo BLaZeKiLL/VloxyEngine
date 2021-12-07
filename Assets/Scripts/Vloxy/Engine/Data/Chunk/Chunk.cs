@@ -1,25 +1,25 @@
-﻿using UnityEngine;
+﻿using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Data {
 
-    public class Chunk<B> where B : IBlock {
+    public struct Chunk {
 
         // TODO : initialize chunk data
-        public IChunkData<B> Data { get; set; }
+        public IChunkData Data { get; set; }
         
-        public Vector3Int Position { get; }
+        public int3 Position { get; }
         
         internal ChunkState State { get; set; }
         
-        public Chunk(Vector3Int position) {
+        public Chunk(int3 position) {
             Position = position;
+            Data = null;
+            State = ChunkState.INACTIVE;
         }
 
-        public virtual string Name() {
+        public string Name() {
             return $"Chunk {Position}";
         }
-        
-        public virtual void Update() {}
 
     }
 
