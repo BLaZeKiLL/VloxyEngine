@@ -37,6 +37,12 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
 #endif
         }
 
+        public override void Dispose() {
+#if UNITY_EDITOR
+            Recorder.Dispose();
+#endif
+        }
+
         // Call early in frame
         public override void Schedule(NativeArray<int3> jobs, NativeChunkStoreAccessor accessor) {
 #if UNITY_EDITOR

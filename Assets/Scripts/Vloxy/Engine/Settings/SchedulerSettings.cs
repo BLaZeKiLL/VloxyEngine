@@ -8,7 +8,7 @@ namespace CodeBlaze.Vloxy.Engine.Settings {
     public class SchedulerSettings {
 
         [Tooltip("Scheduler Batch Size")]
-        public int BatchSize = 32;
+        public int BatchSize = 1;
 
     }
 

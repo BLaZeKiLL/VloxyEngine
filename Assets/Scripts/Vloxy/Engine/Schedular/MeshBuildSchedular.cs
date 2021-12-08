@@ -19,6 +19,8 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
         
         //protected abstract void Render(Chunk chunk, MeshData meshData);
 
+        public virtual void Dispose() { }
+
     }
 
 }

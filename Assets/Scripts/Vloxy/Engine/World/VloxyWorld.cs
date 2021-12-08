@@ -1,4 +1,6 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
+﻿using System;
+
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Schedular;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -73,8 +75,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void Update() {
-            Schedular.Complete(); // Fix Postion
-            
             var NewFocusChunkCoord = _focus != null ? VloxyUtils.GetChunkCoords(_focus.position) : int3.zero;
 
             if (NewFocusChunkCoord.x == FocusChunkCoord.x && NewFocusChunkCoord.y == FocusChunkCoord.y && NewFocusChunkCoord.z == FocusChunkCoord.z) return;
@@ -86,8 +86,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
             // ChunkStore.ActiveChunkUpdate();
         }
 
+        private void LateUpdate() {
+            Schedular.Complete();
+        }
+
         private void OnDestroy() {
             ChunkStore.Dispose();
+            Schedular.Dispose();
         }
 
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
