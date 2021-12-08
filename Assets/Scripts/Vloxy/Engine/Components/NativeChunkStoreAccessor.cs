@@ -27,7 +27,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 block_pos[index] -= key[index] * ChunkSize[index];
             }
 
-            return TryGetChunk(chunk_pos + key, out var chunk) ? chunk.Data.GetBlock(block_pos) : -1;
+            return TryGetChunk(chunk_pos + key, out var chunk) ? chunk.Data.GetBlock(block_pos) : 0;
         }
 
         public bool TryGetChunk(int3 pos, out Chunk chunk) => Chunks.TryGetValue(pos, out chunk);

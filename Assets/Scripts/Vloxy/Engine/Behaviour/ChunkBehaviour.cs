@@ -1,10 +1,4 @@
-﻿using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Settings;
-using CodeBlaze.Vloxy.Engine.Utils.Extensions;
-
-using Unity.Mathematics;
-
-using UnityEditor;
+﻿using CodeBlaze.Vloxy.Engine.Settings;
 
 using UnityEngine;
 using UnityEngine.Rendering;

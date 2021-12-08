@@ -9,7 +9,7 @@ namespace CodeBlaze.Vloxy.Colored.Noise {
         public ColoredNoiseProfile2D(NoiseSettings2D settings, ChunkSettings chunkSettings) : base(settings, chunkSettings) { }
         
         protected override int GetBlock(int heightMapValue, int blockHeight) {
-            return heightMapValue >= blockHeight ? 1 : 0;
+            return blockHeight > heightMapValue ? 0 : 1;
         }
 
     }

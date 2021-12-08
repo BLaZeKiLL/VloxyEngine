@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
 
 using Unity.Collections;
@@ -68,7 +67,7 @@ namespace CodeBlaze.Vloxy.Engine.Unsafe {
         }
 
         public override string ToString() {
-            var sb = new StringBuilder($"Length: {Length}, Compressed: {CompressedLength}");
+            var sb = new StringBuilder($"Length: {Length}, Compressed: {CompressedLength}\n");
             
             foreach (var node in Internal) {
                 sb.AppendLine($"[Data: {node.ID}, Count: {node.Count}]");

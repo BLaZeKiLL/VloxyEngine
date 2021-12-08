@@ -1,9 +1,12 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+﻿using System.Text;
+
+using CodeBlaze.Vloxy.Engine.Components;
 
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
+
+using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Mesher {
 
@@ -56,6 +59,8 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 VertexBuffer = new NativeList<Vertex>(Allocator.Temp),
                 IndexBuffer = new NativeList<int>(Allocator.Temp)
             };
+
+            int vertex_count = 0;
             
             for (int direction = 0; direction < 3; direction++) {
                 int axis1 = (direction + 1) % 3;
@@ -65,8 +70,6 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 int axis1Limit = size[axis1];
                 int axis2Limit = size[axis2];
 
-                int vindex = 0;
-
                 var deltaAxis1 = int3.zero;
                 var deltaAxis2 = int3.zero;
 
@@ -75,7 +78,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 directionMask[direction] = 1;
 
                 // Optimize Allocation
-                var normalMask = new NativeArray<Mask>(axis1Limit * axis2Limit, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                var normalMask = new NativeArray<Mask>(axis1Limit * axis2Limit, Allocator.Temp);
 
                 for (chunkItr[direction] = -1; chunkItr[direction] < mainAxisLimit;) {
                     var n = 0;
@@ -86,8 +89,8 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                             var currentBlock = accessor.GetBlockInChunk(pos, chunkItr);
                             var compareBlock = accessor.GetBlockInChunk(pos, chunkItr + directionMask);
 
-                            var currentBlockOpaque = currentBlock == 0;
-                            var compareBlockOpaque = compareBlock == 0; 
+                            var currentBlockOpaque = currentBlock != 0;
+                            var compareBlockOpaque = compareBlock != 0; 
 
                             if (currentBlockOpaque == compareBlockOpaque) {
                                 normalMask[n++] = default;
@@ -141,15 +144,14 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
 
                                 // create quad
                                 CreateQuad(
-                                    mesh, vindex, currentMask, directionMask,
+                                    mesh, vertex_count, currentMask, directionMask,
                                     chunkItr,
                                     chunkItr + deltaAxis1,
                                     chunkItr + deltaAxis2,
                                     chunkItr + deltaAxis1 + deltaAxis2
                                 );
 
-                                // update indexes
-                                vindex += 4;
+                                vertex_count += 4;
 
                                 // reset delta's
                                 deltaAxis1 = int3.zero;
@@ -178,7 +180,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         }
         
         [BurstCompile]
-        private static void CreateQuad(MeshBuffer mesh, int vindex, Mask mask, int3 directionMask, int3 v1, int3 v2, int3 v3, int3 v4) {
+        private static void CreateQuad(MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, int3 v1, int3 v2, int3 v3, int3 v4) {
             var normal = directionMask * mask.Normal;
             var ao = new float4(AO_CURVE[mask.AO[0]], AO_CURVE[mask.AO[1]], AO_CURVE[mask.AO[2]], AO_CURVE[mask.AO[3]]);
             
@@ -218,21 +220,22 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 UV1 = ao
             });
 
+            
             if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) {    // + -
-                mesh.IndexBuffer.Add(vindex);                           // 0 0
-                mesh.IndexBuffer.Add(vindex + 2 - mask.Normal);         // 1 3
-                mesh.IndexBuffer.Add(vindex + 2 + mask.Normal);         // 3 1
-                mesh.IndexBuffer.Add(vindex + 3);                       // 3 3
-                mesh.IndexBuffer.Add(vindex + 1 + mask.Normal);         // 2 0
-                mesh.IndexBuffer.Add(vindex + 1 - mask.Normal);         // 0 2
+                mesh.IndexBuffer.Add(vertex_count);                           // 0 0
+                mesh.IndexBuffer.Add(vertex_count + 2 - mask.Normal);         // 1 3
+                mesh.IndexBuffer.Add(vertex_count + 2 + mask.Normal);         // 3 1
+                mesh.IndexBuffer.Add(vertex_count + 3);                       // 3 3
+                mesh.IndexBuffer.Add(vertex_count + 1 + mask.Normal);         // 2 0
+                mesh.IndexBuffer.Add(vertex_count + 1 - mask.Normal);         // 0 2
             } else {                                                    // + -
-                mesh.IndexBuffer.Add(vindex + 1);                       // 1 1
-                mesh.IndexBuffer.Add(vindex + 1 + mask.Normal);         // 2 0
-                mesh.IndexBuffer.Add(vindex + 1 - mask.Normal);         // 0 2
-                mesh.IndexBuffer.Add(vindex + 2);                       // 2 2
-                mesh.IndexBuffer.Add(vindex + 2 - mask.Normal);         // 1 3
-                mesh.IndexBuffer.Add(vindex + 2 + mask.Normal);         // 3 1
-            }
+                mesh.IndexBuffer.Add(vertex_count + 1);                       // 1 1
+                mesh.IndexBuffer.Add(vertex_count + 1 + mask.Normal);         // 2 0
+                mesh.IndexBuffer.Add(vertex_count + 1 - mask.Normal);         // 0 2
+                mesh.IndexBuffer.Add(vertex_count + 2);                       // 2 2
+                mesh.IndexBuffer.Add(vertex_count + 2 - mask.Normal);         // 1 3
+                mesh.IndexBuffer.Add(vertex_count + 2 + mask.Normal);         // 3 1
+            };
         }
         
         [BurstCompile] // TODO : Figure out generic compare mask (Burst Function Pointers)
