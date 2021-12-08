@@ -15,7 +15,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         private FastNoiseLite _noise;
         private int _heightHalf;
 
-        private Dictionary<Vector2Int, int> _heightMap;
+        private Dictionary<int2, int> _heightMap;
         private ChunkSettings _chunkSettings;
         
         protected virtual int GetBlock(int heightMapValue, int blockHeight) => default;
@@ -38,11 +38,11 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             var sizeX = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.x;
             var sizeZ = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.z;
             
-            _heightMap = new Dictionary<Vector2Int, int>();
+            _heightMap = new Dictionary<int2, int>();
 
             for (int x = -sizeX; x <= sizeX + _chunkSettings.ChunkSize.x; x++) {
                 for (int z = -sizeZ; z <= sizeZ + _chunkSettings.ChunkSize.z; z++) {
-                    _heightMap.Add(new Vector2Int(x,z), GetHeight(x, z));
+                    _heightMap.Add(new int2(x,z), GetHeight(x, z));
                 }
             }
 
@@ -52,13 +52,13 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         public NativeChunkData GenerateChunkData(int3 pos) {
             var data = VoxelProvider.Current.CreateChunkData();
 
-            int current_block = -1;
+            int current_block = GetBlock(_heightMap[new int2(pos.x, pos.z)], pos.y);
             int count = 0;
 
             for (int y = 0; y < _chunkSettings.ChunkSize.y; y++) {
                 for (int x = 0; x < _chunkSettings.ChunkSize.x; x++) {
                     for (int z = 0; z < _chunkSettings.ChunkSize.z; z++) {
-                        var height = _heightMap[new Vector2Int(pos.x + x, pos.z + z)];
+                        var height = _heightMap[new int2(pos.x + x, pos.z + z)];
                         var block = GetBlock(height, pos.y + y);
 
                         if (block == current_block) {
@@ -71,6 +71,8 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
                     }
                 }
             }
+            
+            data.AddBlocks(current_block, count); // Finale interval
 
             return data;
         }

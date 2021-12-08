@@ -20,7 +20,7 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual NativeChunkStore ChunkStore(INoiseProfile noiseProfile) => new(noiseProfile, Settings.Chunk);
 
-        public virtual NativeChunkData CreateChunkData() => new NativeChunkData();
+        public virtual NativeChunkData CreateChunkData() => new(Settings.Chunk.ChunkSize);
 
         public virtual INoiseProfile NoiseProfile() => null;
 

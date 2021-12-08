@@ -17,10 +17,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             State = ChunkState.INACTIVE;
         }
 
-        public string Name() {
-            return $"Chunk {Position}";
-        }
-
     }
 
 }

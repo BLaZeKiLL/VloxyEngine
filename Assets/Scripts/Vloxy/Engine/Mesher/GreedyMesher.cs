@@ -1,10 +1,9 @@
 ﻿using CodeBlaze.Vloxy.Engine.Components;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
-
-using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Mesher {
 
@@ -12,6 +11,28 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
     public static class GreedyMesher {
 
         private static readonly float4 AO_CURVE = new(0.75f, 0.825f, 0.9f, 1.0f);
+        
+        public struct MeshBuffer {
+
+            public NativeList<Vertex> VertexBuffer;
+            public NativeList<int> IndexBuffer;
+
+            public void Dispose() {
+                VertexBuffer.Dispose();
+                IndexBuffer.Dispose();
+            }
+
+        }
+        
+        public struct Vertex {
+
+            public float3 Position;
+            public float3 Normal;
+            public float4 Color;
+            public uint2 UV0;
+            public float4 UV1;
+
+        }
         
         [BurstCompile]
         private readonly struct Mask {
@@ -30,7 +51,12 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         }
 
         [BurstCompile]
-        public static void GenerateMesh(NativeChunkStoreAccessor accessor, int3 pos, Mesh.MeshData mesh, int3 size) {
+        public static MeshBuffer GenerateMesh(NativeChunkStoreAccessor accessor, int3 pos, int3 size) {
+            var mesh = new MeshBuffer {
+                VertexBuffer = new NativeList<Vertex>(Allocator.Temp),
+                IndexBuffer = new NativeList<int>(Allocator.Temp)
+            };
+            
             for (int direction = 0; direction < 3; direction++) {
                 int axis1 = (direction + 1) % 3;
                 int axis2 = (direction + 2) % 3;
@@ -40,8 +66,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 int axis2Limit = size[axis2];
 
                 int vindex = 0;
-                int tindex = 0;
-                
+
                 var deltaAxis1 = int3.zero;
                 var deltaAxis2 = int3.zero;
 
@@ -50,7 +75,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 directionMask[direction] = 1;
 
                 // Optimize Allocation
-                var normalMask = new NativeArray<Mask>(axis1Limit * axis2Limit, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                var normalMask = new NativeArray<Mask>(axis1Limit * axis2Limit, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
                 for (chunkItr[direction] = -1; chunkItr[direction] < mainAxisLimit;) {
                     var n = 0;
@@ -116,7 +141,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
 
                                 // create quad
                                 CreateQuad(
-                                    mesh, vindex, tindex, currentMask, directionMask,
+                                    mesh, vindex, currentMask, directionMask,
                                     chunkItr,
                                     chunkItr + deltaAxis1,
                                     chunkItr + deltaAxis2,
@@ -125,8 +150,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
 
                                 // update indexes
                                 vindex += 4;
-                                tindex += 6;
-                                
+
                                 // reset delta's
                                 deltaAxis1 = int3.zero;
                                 deltaAxis2 = int3.zero;
@@ -149,60 +173,65 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 
                 normalMask.Dispose();
             }
+
+            return mesh;
         }
         
         [BurstCompile]
-        private static void CreateQuad(Mesh.MeshData mesh, int vindex, int tindex, Mask mask, int3 directionMask, int3 v1, int3 v2, int3 v3, int3 v4) {
+        private static void CreateQuad(MeshBuffer mesh, int vindex, Mask mask, int3 directionMask, int3 v1, int3 v2, int3 v3, int3 v4) {
             var normal = directionMask * mask.Normal;
             var ao = new float4(AO_CURVE[mask.AO[0]], AO_CURVE[mask.AO[1]], AO_CURVE[mask.AO[2]], AO_CURVE[mask.AO[3]]);
-
-            var vertices = mesh.GetVertexData<int3>();
-            var normals = mesh.GetVertexData<int3>(1);
-            var colors = mesh.GetVertexData<float3>(2);
-            var uv0 = mesh.GetVertexData<int2>(3);
-            var uv1 = mesh.GetVertexData<float4>(4);
-
-            var triangles = mesh.GetIndexData<int>();
             
-            vertices[vindex]     = v1;                              // 0 Bottom Left
-            vertices[vindex + 1] = v2;                              // 1 Top Left
-            vertices[vindex + 2] = v3;                              // 2 Bottom Right
-            vertices[vindex + 3] = v4;                              // 3 Top Right
-
-            normals[vindex]     = normal;
-            normals[vindex + 1] = normal;
-            normals[vindex + 2] = normal;
-            normals[vindex + 3] = normal;
+            // 0 Bottom Left
+            mesh.VertexBuffer.Add(new Vertex { 
+                Position = v1,
+                Normal = normal,
+                Color = new float4(0.8f, 0.8f, 0.8f, 1.0f),
+                UV0 = new uint2(0, 0),
+                UV1 = ao
+            });
             
-            colors[vindex]     = new float3(0.8f, 0.8f, 0.8f);
-            colors[vindex + 1] = new float3(0.8f, 0.8f, 0.8f);
-            colors[vindex + 2] = new float3(0.8f, 0.8f, 0.8f);
-            colors[vindex + 3] = new float3(0.8f, 0.8f, 0.8f);
-
-            uv0[vindex]     = new int2(0, 0);
-            uv0[vindex + 1] = new int2(0, 1);
-            uv0[vindex + 2] = new int2(1, 0);
-            uv0[vindex + 3] = new int2(1, 1);
+            // 1 Top Left
+            mesh.VertexBuffer.Add(new Vertex { 
+                Position = v2,
+                Normal = normal,
+                Color = new float4(0.8f, 0.8f, 0.8f, 1.0f),
+                UV0 = new uint2(0, 1),
+                UV1 = ao
+            });
             
-            uv1[vindex]     = ao;
-            uv1[vindex + 1] = ao;
-            uv1[vindex + 2] = ao;
-            uv1[vindex + 3] = ao;
+            // 2 Bottom Right
+            mesh.VertexBuffer.Add(new Vertex { 
+                Position = v3,
+                Normal = normal,
+                Color = new float4(0.8f, 0.8f, 0.8f, 1.0f),
+                UV0 = new uint2(1, 0),
+                UV1 = ao
+            });
+            
+            // 3 Top Right
+            mesh.VertexBuffer.Add(new Vertex { 
+                Position = v4,
+                Normal = normal,
+                Color = new float4(0.8f, 0.8f, 0.8f, 1.0f),
+                UV0 = new uint2(1, 1),
+                UV1 = ao
+            });
 
             if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) {    // + -
-                triangles[tindex]     = vindex;                         // 0 0
-                triangles[tindex + 1] = vindex + 2 - mask.Normal;       // 1 3
-                triangles[tindex + 2] = vindex + 2 + mask.Normal;       // 3 1
-                triangles[tindex + 3] = vindex + 3;                     // 3 3
-                triangles[tindex + 4] = vindex + 1 + mask.Normal;       // 2 0
-                triangles[tindex + 5] = vindex + 1 - mask.Normal;       // 0 2
+                mesh.IndexBuffer.Add(vindex);                           // 0 0
+                mesh.IndexBuffer.Add(vindex + 2 - mask.Normal);         // 1 3
+                mesh.IndexBuffer.Add(vindex + 2 + mask.Normal);         // 3 1
+                mesh.IndexBuffer.Add(vindex + 3);                       // 3 3
+                mesh.IndexBuffer.Add(vindex + 1 + mask.Normal);         // 2 0
+                mesh.IndexBuffer.Add(vindex + 1 - mask.Normal);         // 0 2
             } else {                                                    // + -
-                triangles[tindex]     = vindex + 1;                     // 1 1
-                triangles[tindex + 1] = vindex + 1 + mask.Normal;       // 2 0
-                triangles[tindex + 2] = vindex + 1 - mask.Normal;       // 0 2
-                triangles[tindex + 3] = vindex + 2;                     // 2 2
-                triangles[tindex + 4] = vindex + 2 - mask.Normal;       // 1 3
-                triangles[tindex + 5] = vindex + 2 + mask.Normal;       // 3 1
+                mesh.IndexBuffer.Add(vindex + 1);                       // 1 1
+                mesh.IndexBuffer.Add(vindex + 1 + mask.Normal);         // 2 0
+                mesh.IndexBuffer.Add(vindex + 1 - mask.Normal);         // 0 2
+                mesh.IndexBuffer.Add(vindex + 2);                       // 2 2
+                mesh.IndexBuffer.Add(vindex + 2 - mask.Normal);         // 1 3
+                mesh.IndexBuffer.Add(vindex + 2 + mask.Normal);         // 3 1
             }
         }
         

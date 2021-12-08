@@ -1,5 +1,6 @@
 ﻿using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Mesher;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
 using Unity.Burst;
 using Unity.Collections;
@@ -51,10 +52,17 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
             if (!Scheduled) return;
 
             Handle.Complete();
+
+            var meshes = new Mesh[Jobs.Length];
+
+            for (int i = 0; i < Jobs.Length; i++) {
+                meshes[i] = ChunkBehaviourPool.Claim(Jobs[i]).Mesh();
+            }
             
-            // Render
+            CBSL.Logging.Logger.Info<MeshBuildJobSchedular>($"Meshes built : {meshes.Length}");
             
-            MeshDataArray.Dispose();
+            Mesh.ApplyAndDisposeWritableMeshData(MeshDataArray, meshes);
+
             Results.Dispose();
             Jobs.Dispose();
 
@@ -68,27 +76,36 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
             [ReadOnly] public int3 ChunkSize;
             [ReadOnly] public NativeArray<int3> Jobs;
             
-            [WriteOnly] public Mesh.MeshDataArray MeshDataArray;
             [WriteOnly] public NativeHashMap<int3, int>.ParallelWriter Results;
+            
+            public Mesh.MeshDataArray MeshDataArray;
 
             public void Execute(int index) {
                 var mesh = MeshDataArray[index];
                 var position = Jobs[index];
-                var vertex_params = new NativeArray<VertexAttributeDescriptor>(5, Allocator.TempJob);
                 
-                vertex_params[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.SInt32);
-                vertex_params[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.SInt32, 3, 1);
-                vertex_params[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float16, 3, 2);
-                vertex_params[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.UInt8, 2, 3);
-                vertex_params[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float16, 4, 4);
+                var buffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize);
                 
-                // TODO : Figure out lengths (max from chunk size)
-                mesh.SetVertexBufferParams(int.MaxValue, vertex_params);
-                mesh.SetIndexBufferParams(int.MaxValue, IndexFormat.UInt32);
+                var vertex_params = new NativeArray<VertexAttributeDescriptor>(5, Allocator.Temp);
+                
+                vertex_params[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
+                vertex_params[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3);
+                vertex_params[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
+                vertex_params[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.UInt32, 2);
+                vertex_params[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4);
 
-                GreedyMesher.GenerateMesh(Accessor, position, mesh, ChunkSize);
+                mesh.SetVertexBufferParams(buffer.VertexBuffer.Length, vertex_params);
+                mesh.SetIndexBufferParams(buffer.IndexBuffer.Length, IndexFormat.UInt32);
 
+                mesh.GetVertexData<GreedyMesher.Vertex>().CopyFrom(buffer.VertexBuffer);
+                mesh.GetIndexData<int>().CopyFrom(buffer.IndexBuffer);
+                
+                mesh.subMeshCount = 1;
+                mesh.SetSubMesh(0, new SubMeshDescriptor(0, buffer.IndexBuffer.Length));
+                
                 Results.TryAdd(position, index);
+                
+                buffer.Dispose();
             }
 
         }

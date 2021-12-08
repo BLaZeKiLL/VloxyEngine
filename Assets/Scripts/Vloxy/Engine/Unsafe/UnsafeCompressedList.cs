@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Text;
 
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -34,11 +36,13 @@ namespace CodeBlaze.Vloxy.Engine.Unsafe {
         }
 
         public void AddNode(int id, int count) {
-            Internal.Add(new Node(id, count));
             Length += count;
+            Internal.Add(new Node(id, Length));
         }
 
         public int Get(int index) {
+            if (index >= Length) throw new IndexOutOfRangeException($"{index} is out of range for the given data of length {Length}");
+            
             return Internal[BinarySearch(index)].ID;
         }
 
@@ -64,10 +68,13 @@ namespace CodeBlaze.Vloxy.Engine.Unsafe {
         }
 
         public override string ToString() {
-            return Internal.Aggregate(
-                $"Length: {Length}, Compressed: {CompressedLength}, Elements", 
-                (result, node) => $"{result} : [Data: {node.ID}, Count: {node.Count}]"
-            );
+            var sb = new StringBuilder($"Length: {Length}, Compressed: {CompressedLength}");
+            
+            foreach (var node in Internal) {
+                sb.AppendLine($"[Data: {node.ID}, Count: {node.Count}]");
+            }
+
+            return sb.ToString();
         }
 
     }

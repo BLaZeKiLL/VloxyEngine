@@ -32,7 +32,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                     go.SetActive(false);
             
                     var chunkBehaviour = go.GetComponent<ChunkBehaviour>();
-                    chunkBehaviour.SetRenderSettings(settings.Renderer, settings.Chunk.ChunkSize / 2);
+                    chunkBehaviour.SetRenderSettings(settings.Renderer);
 
                     return chunkBehaviour;
                 },
@@ -43,14 +43,13 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             CBSL.Logging.Logger.Info<ChunkBehaviourPool>("Initialized Size : " + viewRegionSize);
         }
         
-        public ChunkBehaviour Claim(Chunk chunk) {
+        public ChunkBehaviour Claim(int3 pos) {
             var behaviour = _pool.Claim();
 
-            behaviour.transform.position = chunk.Position.GetVector3();
-            behaviour.name = chunk.Name();
+            behaviour.transform.position = pos.GetVector3();
+            behaviour.name = $"Chunk({pos})";
 
-            chunk.State = ChunkState.ACTIVE;
-            _active.Add(chunk.Position, behaviour);
+            _active.Add(pos, behaviour);
             
             return behaviour;
         }

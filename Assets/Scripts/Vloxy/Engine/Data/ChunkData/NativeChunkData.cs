@@ -36,6 +36,10 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             Data.Dispose();
         }
 
+        public override string ToString() {
+            return $"Chunk Data : {Data.ToString()}";
+        }
+
     }
 
 }
