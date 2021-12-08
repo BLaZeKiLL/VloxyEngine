@@ -54,12 +54,9 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             return behaviour;
         }
 
-        public void Reclaim(Chunk chunk) {
-            if (chunk.State == ChunkState.ACTIVE) {
-                _pool.Reclaim(_active[chunk.Position]);
-                _active.Remove(chunk.Position);
-            }
-            chunk.State = ChunkState.INACTIVE;
+        public void Reclaim(int3 pos) {
+            _pool.Reclaim(_active[pos]);
+            _active.Remove(pos);
         }
 
     }

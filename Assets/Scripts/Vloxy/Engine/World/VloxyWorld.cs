@@ -95,11 +95,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             if (claim.Length != 0) Schedular.Schedule(claim, ChunkStore.Accessor);
 
-            reclaim.ForEach(x => {
-                if (ChunkStore.Accessor.TryGetChunk(x, out var chunk)) {
-                    ChunkBehaviourPool.Reclaim(chunk);
-                }
-            });
+            reclaim.ForEach(pos => ChunkBehaviourPool.Reclaim(pos));
 
             WorldViewRegionUpdate();
 

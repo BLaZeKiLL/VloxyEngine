@@ -182,13 +182,14 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         [BurstCompile]
         private static void CreateQuad(MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, int3 v1, int3 v2, int3 v3, int3 v4) {
             var normal = directionMask * mask.Normal;
+            var color = new float4(1f, 1f, 1f, 1.0f);
             var ao = new float4(AO_CURVE[mask.AO[0]], AO_CURVE[mask.AO[1]], AO_CURVE[mask.AO[2]], AO_CURVE[mask.AO[3]]);
             
             // 0 Bottom Left
             mesh.VertexBuffer.Add(new Vertex { 
                 Position = v1,
                 Normal = normal,
-                Color = new float4(0.8f, 0.8f, 0.8f, 1.0f),
+                Color = new float4(1f, 1f, 1f, 1.0f),
                 UV0 = new uint2(0, 0),
                 UV1 = ao
             });
@@ -197,7 +198,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             mesh.VertexBuffer.Add(new Vertex { 
                 Position = v2,
                 Normal = normal,
-                Color = new float4(0.8f, 0.8f, 0.8f, 1.0f),
+                Color = color,
                 UV0 = new uint2(0, 1),
                 UV1 = ao
             });
@@ -206,7 +207,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             mesh.VertexBuffer.Add(new Vertex { 
                 Position = v3,
                 Normal = normal,
-                Color = new float4(0.8f, 0.8f, 0.8f, 1.0f),
+                Color = color,
                 UV0 = new uint2(1, 0),
                 UV1 = ao
             });
@@ -215,20 +216,19 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             mesh.VertexBuffer.Add(new Vertex { 
                 Position = v4,
                 Normal = normal,
-                Color = new float4(0.8f, 0.8f, 0.8f, 1.0f),
+                Color = color,
                 UV0 = new uint2(1, 1),
                 UV1 = ao
             });
 
-            
-            if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) {    // + -
+            if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) {          // + -
                 mesh.IndexBuffer.Add(vertex_count);                           // 0 0
                 mesh.IndexBuffer.Add(vertex_count + 2 - mask.Normal);         // 1 3
                 mesh.IndexBuffer.Add(vertex_count + 2 + mask.Normal);         // 3 1
                 mesh.IndexBuffer.Add(vertex_count + 3);                       // 3 3
                 mesh.IndexBuffer.Add(vertex_count + 1 + mask.Normal);         // 2 0
                 mesh.IndexBuffer.Add(vertex_count + 1 - mask.Normal);         // 0 2
-            } else {                                                    // + -
+            } else {                                                          // + -
                 mesh.IndexBuffer.Add(vertex_count + 1);                       // 1 1
                 mesh.IndexBuffer.Add(vertex_count + 1 + mask.Normal);         // 2 0
                 mesh.IndexBuffer.Add(vertex_count + 1 - mask.Normal);         // 0 2

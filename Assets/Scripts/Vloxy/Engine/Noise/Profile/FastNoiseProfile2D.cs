@@ -74,8 +74,6 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             
             data.AddBlocks(current_block, count); // Finale interval
             
-            CBSL.Logging.Logger.Info<FastNoiseProfile2D>(data.ToString());
-
             return data;
         }
 

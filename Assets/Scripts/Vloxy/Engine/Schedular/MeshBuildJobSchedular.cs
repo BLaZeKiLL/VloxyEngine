@@ -5,6 +5,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Profiling;
 
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -13,6 +14,11 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
 
     public class MeshBuildJobSchedular : MeshBuildSchedular {
 
+#if UNITY_EDITOR
+        public static ProfilerMarker Marker = new("MeshBuildJob");
+        private ProfilerRecorder Recorder;
+#endif
+        
         private bool Scheduled;
         private int BatchSize;
         private int3 ChunkSize;
@@ -25,10 +31,18 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
         public MeshBuildJobSchedular(int batchSize, int3 chunkSize, ChunkBehaviourPool chunkBehaviourPool) : base(chunkBehaviourPool) {
             BatchSize = batchSize;
             ChunkSize = chunkSize;
+
+#if UNITY_EDITOR
+            Recorder = ProfilerRecorder.StartNew(Marker);
+#endif
         }
 
         // Call early in frame
         public override void Schedule(NativeArray<int3> jobs, NativeChunkStoreAccessor accessor) {
+#if UNITY_EDITOR
+            Marker.Begin();
+#endif
+            
             Jobs = jobs;
             MeshDataArray = Mesh.AllocateWritableMeshData(Jobs.Length);
             Results = new NativeHashMap<int3, int>(Jobs.Length, Allocator.TempJob);
@@ -57,15 +71,23 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
             for (int i = 0; i < Jobs.Length; i++) {
                 meshes[Results[Jobs[i]]] = ChunkBehaviourPool.Claim(Jobs[i]).Mesh();
             }
-            
-            CBSL.Logging.Logger.Info<MeshBuildJobSchedular>($"Meshes built : {meshes.Length}");
-            
+
             Mesh.ApplyAndDisposeWritableMeshData(MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices | MeshUpdateFlags.DontNotifyMeshUsers);
 
+            foreach (var mesh in meshes) {
+                mesh.RecalculateBounds();
+            }
+            
             Results.Dispose();
             Jobs.Dispose();
 
             Scheduled = false;
+            
+#if UNITY_EDITOR
+            Marker.End();
+            
+            CBSL.Logging.Logger.Info<MeshBuildJobSchedular>($"Meshes built : {meshes.Length}, In : {Recorder.CurrentValueAsDouble * (1e-6f):F}ms");
+#endif
         }
         
         [BurstCompile]
