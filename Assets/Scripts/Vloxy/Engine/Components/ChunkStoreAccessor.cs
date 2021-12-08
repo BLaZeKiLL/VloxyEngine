@@ -7,12 +7,12 @@ using Unity.Mathematics;
 namespace CodeBlaze.Vloxy.Engine.Components {
 
     [BurstCompile]
-    public struct NativeChunkStoreAccessor {
+    public struct ChunkStoreAccessor {
 
         private NativeHashMap<int3, Chunk> Chunks;
         private int3 ChunkSize;
 
-        public NativeChunkStoreAccessor(NativeHashMap<int3, Chunk> chunks, int3 chunkSize) {
+        public ChunkStoreAccessor(NativeHashMap<int3, Chunk> chunks, int3 chunkSize) {
             Chunks = chunks;
             ChunkSize = chunkSize;
         }

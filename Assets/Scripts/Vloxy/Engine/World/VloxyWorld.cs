@@ -1,5 +1,5 @@
 ﻿using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Schedular;
+using CodeBlaze.Vloxy.Engine.Scheduler;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils;
@@ -16,9 +16,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
         [SerializeField] private VoxelSettings _settings;
 
         protected ChunkBehaviourPool ChunkBehaviourPool;
-        protected MeshBuildSchedular Schedular;
+        protected IMeshBuildScheduler Scheduler;
         protected INoiseProfile NoiseProfile;
-        protected NativeChunkStore ChunkStore;
+        protected ChunkStore ChunkStore;
         protected int3 FocusChunkCoord;
 
         private ChunkSettings _chunkSettings;
@@ -54,7 +54,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void ConstructVloxyComponents() {
             NoiseProfile = VoxelProvider.Current.NoiseProfile();
             ChunkBehaviourPool = VoxelProvider.Current.ChunkPool(transform);
-            Schedular = VoxelProvider.Current.MeshBuildSchedular(ChunkBehaviourPool);
+            Scheduler = VoxelProvider.Current.MeshBuildScheduler(ChunkBehaviourPool);
             ChunkStore = VoxelProvider.Current.ChunkStore(NoiseProfile);
             
             CBSL.Logging.Logger.Info<VloxyWorld>("Vloxy Components Constructed");
@@ -85,18 +85,18 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void LateUpdate() {
-            Schedular.Complete();
+            Scheduler.Complete();
         }
 
         private void OnDestroy() {
             ChunkStore.Dispose();
-            Schedular.Dispose();
+            Scheduler.Dispose();
         }
 
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
             var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
 
-            if (claim.Length != 0) Schedular.Schedule(claim, ChunkStore.Accessor);
+            if (claim.Length != 0) Scheduler.Schedule(claim, ChunkStore.Accessor);
 
             reclaim.ForEach(pos => ChunkBehaviourPool.Reclaim(pos));
 

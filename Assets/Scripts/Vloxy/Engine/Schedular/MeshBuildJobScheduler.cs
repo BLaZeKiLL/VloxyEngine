@@ -12,41 +12,45 @@ using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace CodeBlaze.Vloxy.Engine.Schedular {
+namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
-    public class MeshBuildJobSchedular : MeshBuildSchedular {
+    public class MeshBuildJobScheduler : IMeshBuildScheduler {
 
 #if UNITY_EDITOR
         public static ProfilerMarker Marker = new("MeshBuildJob");
         private ProfilerRecorder Recorder;
 #endif
+        private ChunkBehaviourPool ChunkBehaviourPool;
         
-        private bool Scheduled;
         private int BatchSize;
         private int3 ChunkSize;
+        
         private JobHandle Handle;
-
         private Mesh.MeshDataArray MeshDataArray;
         private NativeHashMap<int3, int> Results;
         private NativeArray<int3> Jobs;
+        
+        private bool Scheduled;
 
-        public MeshBuildJobSchedular(int batchSize, int3 chunkSize, ChunkBehaviourPool chunkBehaviourPool) : base(chunkBehaviourPool) {
+
+        public MeshBuildJobScheduler(int batchSize, int3 chunkSize, ChunkBehaviourPool chunkBehaviourPool) {
             BatchSize = batchSize;
             ChunkSize = chunkSize;
+            ChunkBehaviourPool = chunkBehaviourPool;
 
 #if UNITY_EDITOR
             Recorder = ProfilerRecorder.StartNew(Marker);
 #endif
         }
 
-        public override void Dispose() {
+        public void Dispose() {
 #if UNITY_EDITOR
             Recorder.Dispose();
 #endif
         }
 
         // Call early in frame
-        public override void Schedule(NativeArray<int3> jobs, NativeChunkStoreAccessor accessor) {
+        public void Schedule(NativeArray<int3> jobs, ChunkStoreAccessor accessor) {
 #if UNITY_EDITOR
             Marker.Begin();
 #endif
@@ -69,7 +73,7 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
         }
 
         // Call late in frame
-        public override void Complete() {
+        public void Complete() {
             if (!Scheduled) return;
 
             Handle.Complete();
@@ -94,14 +98,14 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
 #if UNITY_EDITOR
             Marker.End();
             
-            CBSL.Logging.Logger.Info<MeshBuildJobSchedular>($"Meshes built : {meshes.Length}, In : {Recorder.CurrentValueAsDouble * (1e-6f):F}ms");
+            CBSL.Logging.Logger.Info<MeshBuildJobScheduler>($"Meshes built : {meshes.Length}, In : {Recorder.CurrentValueAsDouble * (1e-6f):F}ms");
 #endif
         }
         
         [BurstCompile]
         private struct ChunkMeshJob : IJobParallelFor {
 
-            [ReadOnly] public NativeChunkStoreAccessor Accessor;
+            [ReadOnly] public ChunkStoreAccessor Accessor;
             [ReadOnly] public int3 ChunkSize;
             [ReadOnly] public NativeArray<int3> Jobs;
             

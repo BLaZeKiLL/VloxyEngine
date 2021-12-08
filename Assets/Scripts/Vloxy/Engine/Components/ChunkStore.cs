@@ -10,30 +10,29 @@ using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Components {
 
-    public class NativeChunkStore {
+    public class ChunkStore {
 
-        public NativeChunkStoreAccessor Accessor { get; }
+        public ChunkStoreAccessor Accessor { get; }
         
-        protected NativeHashMap<int3, Chunk> Chunks;
+        private NativeHashMap<int3, Chunk> _Chunks;
         
         private INoiseProfile _NoiseProfile;
         private ChunkSettings _ChunkSettings;
-        private int _ViewRegionSize;
 
         private NativeHashSet<int3> _Claim;
         private List<int3> _Reclaim;
 
-        public NativeChunkStore(INoiseProfile noiseProfile, ChunkSettings chunkSettings) {
+        public ChunkStore(INoiseProfile noiseProfile, ChunkSettings chunkSettings) {
             _NoiseProfile = noiseProfile;
             _ChunkSettings = chunkSettings;
 
-            _ViewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
-            Chunks = new NativeHashMap<int3, Chunk>(_ChunkSettings.ChunkPageSize.CubedSize(), Allocator.Persistent);
+            var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
+            _Chunks = new NativeHashMap<int3, Chunk>(_ChunkSettings.ChunkPageSize.CubedSize(), Allocator.Persistent);
             
-            Accessor = new NativeChunkStoreAccessor(Chunks, _ChunkSettings.ChunkSize);
+            Accessor = new ChunkStoreAccessor(_Chunks, _ChunkSettings.ChunkSize);
 
-            _Claim = new NativeHashSet<int3>(_ViewRegionSize, Allocator.Persistent);
-            _Reclaim = new List<int3>(_ViewRegionSize);
+            _Claim = new NativeHashSet<int3>(viewRegionSize, Allocator.Persistent);
+            _Reclaim = new List<int3>(viewRegionSize);
         }
 
         internal void GenerateChunks() {
@@ -44,12 +43,12 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                         var data = _NoiseProfile.GenerateChunkData(pos);
                         var chunk = VoxelProvider.Current.CreateChunk(pos, data);
 
-                        Chunks.Add(pos, chunk);
+                        _Chunks.Add(pos, chunk);
                     }
                 }
             }
 
-            CBSL.Logging.Logger.Info<NativeChunkStore>("Chunks Created : " + Chunks.Count());
+            CBSL.Logging.Logger.Info<ChunkStore>("Chunks Created : " + _Chunks.Count());
         }
 
 
@@ -67,7 +66,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 InitialRegion(newFocusChunkCoord);
             }
             
-            CBSL.Logging.Logger.Info<NativeChunkStore>($"Claim : {_Claim.Count()}, Reclaim : {_Reclaim.Count}");
+            CBSL.Logging.Logger.Info<ChunkStore>($"Claim : {_Claim.Count()}, Reclaim : {_Reclaim.Count}");
             
             return (_Claim.ToNativeArray(Allocator.TempJob), _Reclaim);
         }
@@ -75,11 +74,11 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         public void Dispose() {
             _Claim.Dispose();
 
-            foreach (var pair in Chunks) {
+            foreach (var pair in _Chunks) {
                 pair.Value.Data.Dispose();
             }
             
-            Chunks.Dispose();
+            _Chunks.Dispose();
         }
 
         private void InitialRegion(int3 focus) {

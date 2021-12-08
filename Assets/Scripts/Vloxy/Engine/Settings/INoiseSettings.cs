@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Engine.Noise.Settings {
+namespace CodeBlaze.Vloxy.Engine.Settings {
 
     public abstract class INoiseSettings : ScriptableObject { }
 

@@ -4,7 +4,7 @@ using System.Text;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace CodeBlaze.Vloxy.Engine.Unsafe {
+namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
     public struct UnsafeCompressedList {
 

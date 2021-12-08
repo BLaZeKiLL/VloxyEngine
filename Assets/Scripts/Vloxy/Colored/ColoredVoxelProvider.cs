@@ -2,7 +2,7 @@
 
 using CodeBlaze.Vloxy.Engine;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
-using CodeBlaze.Vloxy.Engine.Noise.Settings;
+using CodeBlaze.Vloxy.Engine.Settings;
 
 namespace CodeBlaze.Vloxy.Colored {
 

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Noise.Settings;
 using CodeBlaze.Vloxy.Engine.Settings;
 
 using Unity.Mathematics;
@@ -49,7 +48,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             CBSL.Logging.Logger.Info<FastNoiseProfile2D>("Height Map Generated");
         }
 
-        public NativeChunkData GenerateChunkData(int3 pos) {
+        public ChunkData GenerateChunkData(int3 pos) {
             var data = VoxelProvider.Current.CreateChunkData();
 
             int current_block = GetBlock(_heightMap[new int2(pos.x, pos.z)], pos.y);

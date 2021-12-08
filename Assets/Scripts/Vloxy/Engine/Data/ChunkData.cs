@@ -1,4 +1,4 @@
-﻿using CodeBlaze.Vloxy.Engine.Unsafe;
+﻿using CodeBlaze.Vloxy.Engine.Utils.Collections;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
 using Unity.Collections;
@@ -6,12 +6,12 @@ using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Data {
 
-    public struct NativeChunkData {
+    public struct ChunkData {
 
         private int3 ChunkSize;
         private UnsafeCompressedList Data;
 
-        public NativeChunkData(int3 chunkSize) {
+        public ChunkData(int3 chunkSize) {
             ChunkSize = chunkSize;
             Data = new UnsafeCompressedList(32, Allocator.Persistent);
         }

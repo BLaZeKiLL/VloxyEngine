@@ -54,7 +54,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         }
 
         [BurstCompile]
-        public static MeshBuffer GenerateMesh(NativeChunkStoreAccessor accessor, int3 pos, int3 size) {
+        public static MeshBuffer GenerateMesh(ChunkStoreAccessor accessor, int3 pos, int3 size) {
             var mesh = new MeshBuffer {
                 VertexBuffer = new NativeList<Vertex>(Allocator.Temp),
                 IndexBuffer = new NativeList<int>(Allocator.Temp)
@@ -250,7 +250,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         }
 
         [BurstCompile]
-        private static int4 ComputeAOMask(NativeChunkStoreAccessor accessor, int3 pos, int3 coord, int axis1, int axis2) {
+        private static int4 ComputeAOMask(ChunkStoreAccessor accessor, int3 pos, int3 coord, int axis1, int axis2) {
             var L = coord;
             var R = coord;
             var B = coord;

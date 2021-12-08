@@ -4,11 +4,11 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
     public struct Chunk {
 
-        public NativeChunkData Data { get; }
+        public ChunkData Data { get; }
         
         public int3 Position { get; }
         
-        public Chunk(int3 position, NativeChunkData data) {
+        public Chunk(int3 position, ChunkData data) {
             Position = position;
             Data = data;
         }
