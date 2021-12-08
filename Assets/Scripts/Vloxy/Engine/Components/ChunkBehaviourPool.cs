@@ -3,7 +3,6 @@
 using CBSL.Core.Collections.Pools;
 
 using CodeBlaze.Vloxy.Engine.Behaviour;
-using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 

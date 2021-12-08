@@ -1,4 +1,6 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
+﻿using System.Collections.Generic;
+
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Mesher;
 
 using Unity.Burst;
@@ -78,7 +80,7 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
                 meshes[Results[Jobs[i]]] = ChunkBehaviourPool.Claim(Jobs[i]).Mesh();
             }
 
-            Mesh.ApplyAndDisposeWritableMeshData(MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices | MeshUpdateFlags.DontNotifyMeshUsers);
+            Mesh.ApplyAndDisposeWritableMeshData(MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds);
 
             foreach (var mesh in meshes) {
                 mesh.RecalculateBounds();
@@ -117,10 +119,11 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
                 
                 var vertex_params = new NativeArray<VertexAttributeDescriptor>(5, Allocator.Temp);
                 
+                // int's cause issues
                 vertex_params[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
                 vertex_params[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3);
                 vertex_params[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
-                vertex_params[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.UInt32, 2);
+                vertex_params[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2);
                 vertex_params[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4);
 
                 mesh.SetVertexBufferParams(vertex_count, vertex_params);
@@ -131,7 +134,7 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
                 
                 mesh.subMeshCount = 1;
                 mesh.SetSubMesh(0, new SubMeshDescriptor(0, index_count));
-                
+
                 Results.TryAdd(position, index);
                 
                 buffer.Dispose();

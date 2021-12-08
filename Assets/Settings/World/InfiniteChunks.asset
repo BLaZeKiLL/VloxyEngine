@@ -21,7 +21,7 @@ MonoBehaviour:
       y: 32
       z: 32
   Renderer:
-    Material: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+    Material: {fileID: 2100000, guid: 01164a26920f79044b9a4c1cb1479691, type: 2}
     CastShadows: 0
   Scheduler:
-    BatchSize: 32
+    BatchSize: 1

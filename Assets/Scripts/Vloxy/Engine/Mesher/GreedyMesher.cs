@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-using CodeBlaze.Vloxy.Engine.Components;
+﻿using CodeBlaze.Vloxy.Engine.Components;
 
 using Unity.Burst;
 using Unity.Collections;
@@ -15,6 +13,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
 
         private static readonly float4 AO_CURVE = new(0.75f, 0.825f, 0.9f, 1.0f);
         
+        [BurstCompile]
         public struct MeshBuffer {
 
             public NativeList<Vertex> VertexBuffer;
@@ -27,12 +26,13 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
 
         }
         
+        [BurstCompile]
         public struct Vertex {
 
             public float3 Position;
             public float3 Normal;
             public float4 Color;
-            public uint2 UV0;
+            public float2 UV0;
             public float4 UV1;
 
         }
@@ -182,15 +182,15 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         [BurstCompile]
         private static void CreateQuad(MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, int3 v1, int3 v2, int3 v3, int3 v4) {
             var normal = directionMask * mask.Normal;
-            var color = new float4(1f, 1f, 1f, 1.0f);
+            var color = new float4(0.8f, 0.8f, 0.8f ,1f);
             var ao = new float4(AO_CURVE[mask.AO[0]], AO_CURVE[mask.AO[1]], AO_CURVE[mask.AO[2]], AO_CURVE[mask.AO[3]]);
-            
+
             // 0 Bottom Left
             mesh.VertexBuffer.Add(new Vertex { 
                 Position = v1,
                 Normal = normal,
-                Color = new float4(1f, 1f, 1f, 1.0f),
-                UV0 = new uint2(0, 0),
+                Color = color,
+                UV0 = new float2(0f, 0f),
                 UV1 = ao
             });
             
@@ -199,7 +199,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 Position = v2,
                 Normal = normal,
                 Color = color,
-                UV0 = new uint2(0, 1),
+                UV0 = new float2(0f, 1f),
                 UV1 = ao
             });
             
@@ -208,7 +208,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 Position = v3,
                 Normal = normal,
                 Color = color,
-                UV0 = new uint2(1, 0),
+                UV0 = new float2(1f, 0f),
                 UV1 = ao
             });
             
@@ -217,7 +217,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 Position = v4,
                 Normal = normal,
                 Color = color,
-                UV0 = new uint2(1, 1),
+                UV0 = new float2(1f, 1f),
                 UV1 = ao
             });
 
@@ -235,7 +235,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 mesh.IndexBuffer.Add(vertex_count + 2);                       // 2 2
                 mesh.IndexBuffer.Add(vertex_count + 2 - mask.Normal);         // 1 3
                 mesh.IndexBuffer.Add(vertex_count + 2 + mask.Normal);         // 3 1
-            };
+            }
         }
         
         [BurstCompile] // TODO : Figure out generic compare mask (Burst Function Pointers)
@@ -271,15 +271,15 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             LTC[axis1] += 1; LTC[axis2] -= 1;
             RTC[axis1] += 1; RTC[axis2] += 1;
             
-            var LO = accessor.GetBlockInChunk(pos, L) == 0 ? 1 : 0;
-            var RO = accessor.GetBlockInChunk(pos, R) == 0 ? 1 : 0;
-            var BO = accessor.GetBlockInChunk(pos, B) == 0 ? 1 : 0;
-            var TO = accessor.GetBlockInChunk(pos, T) == 0 ? 1 : 0;
+            var LO = accessor.GetBlockInChunk(pos, L) != 0 ? 1 : 0;
+            var RO = accessor.GetBlockInChunk(pos, R) != 0 ? 1 : 0;
+            var BO = accessor.GetBlockInChunk(pos, B) != 0 ? 1 : 0;
+            var TO = accessor.GetBlockInChunk(pos, T) != 0 ? 1 : 0;
 
-            var LBCO = accessor.GetBlockInChunk(pos, LBC) == 0 ? 1 : 0;
-            var RBCO = accessor.GetBlockInChunk(pos, RBC) == 0 ? 1 : 0;
-            var LTCO = accessor.GetBlockInChunk(pos, LTC) == 0 ? 1 : 0;
-            var RTCO = accessor.GetBlockInChunk(pos, RTC) == 0 ? 1 : 0;
+            var LBCO = accessor.GetBlockInChunk(pos, LBC) != 0 ? 1 : 0;
+            var RBCO = accessor.GetBlockInChunk(pos, RBC) != 0 ? 1 : 0;
+            var LTCO = accessor.GetBlockInChunk(pos, LTC) != 0 ? 1 : 0;
+            var RTCO = accessor.GetBlockInChunk(pos, RTC) != 0 ? 1 : 0;
             
             return new int4(
                 ComputeAO(LO, BO, LBCO), 

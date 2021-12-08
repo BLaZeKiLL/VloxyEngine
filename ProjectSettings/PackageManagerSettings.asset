@@ -30,33 +30,14 @@ MonoBehaviour:
     m_Url: https://package.openupm.com
     m_Scopes:
     - com.tayx.graphy
-    - com.cysharp.unitask
     - io.codeblaze.cbsl
-    - com.yasirkula.ingamedebugconsole
     m_IsDefault: 0
     m_Capabilities: 0
   m_UserSelectedRegistryName: Open UPM
   m_UserAddingNewScopedRegistry: 0
   m_RegistryInfoDraft:
-    m_ErrorMessage: 
-    m_Original:
-      m_Id: scoped:Open UPM
-      m_Name: Open UPM
-      m_Url: https://package.openupm.com
-      m_Scopes:
-      - com.tayx.graphy
-      - com.cysharp.unitask
-      - io.codeblaze.cbsl
-      - com.yasirkula.ingamedebugconsole
-      m_IsDefault: 0
-      m_Capabilities: 0
     m_Modified: 0
-    m_Name: Open UPM
-    m_Url: https://package.openupm.com
-    m_Scopes:
-    - com.tayx.graphy
-    - com.cysharp.unitask
-    - io.codeblaze.cbsl
-    - com.yasirkula.ingamedebugconsole
-    m_SelectedScopeIndex: 0
+    m_ErrorMessage: 
+    m_UserModificationsInstanceId: -824
+    m_OriginalInstanceId: -828
   m_LoadAssets: 0
