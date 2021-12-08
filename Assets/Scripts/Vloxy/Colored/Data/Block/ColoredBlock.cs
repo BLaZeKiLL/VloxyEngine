@@ -1,10 +1,8 @@
-﻿using CodeBlaze.Vloxy.Engine.Data;
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Colored.Data.Block {
 
-    public readonly struct ColoredBlock : IBlock {
+    public readonly struct ColoredBlock {
 
         public Color32 Color { get; }
 

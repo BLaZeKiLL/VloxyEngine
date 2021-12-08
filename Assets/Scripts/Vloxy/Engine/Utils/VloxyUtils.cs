@@ -1,16 +1,16 @@
-﻿using CodeBlaze.Vloxy.Engine.Data;
+﻿using Unity.Mathematics;
 
 using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Utils {
 
-    public static class VloxyUtils<B> where B : IBlock {
+    public static class VloxyUtils {
 
-        private static Vector3Int ChunkSize = VoxelProvider<B>.Current.Settings.Chunk.ChunkSize;
+        private static int3 ChunkSize = VoxelProvider.Current.Settings.Chunk.ChunkSize;
 
-        public static Vector3Int GetChunkCoords(Vector3 Position) => GetChunkCoords(Vector3Int.FloorToInt(Position));
+        public static int3 GetChunkCoords(Vector3 Position) => GetChunkCoords(Vector3Int.FloorToInt(Position));
         
-        public static Vector3Int GetChunkCoords(Vector3Int Position) {
+        public static int3 GetChunkCoords(Vector3Int Position) {
             var x = Position.x - Position.x % ChunkSize.x;
             var y = Position.y - Position.y % ChunkSize.y;
             var z = Position.z - Position.z % ChunkSize.z;
@@ -19,11 +19,9 @@ namespace CodeBlaze.Vloxy.Engine.Utils {
             y = Position.y < 0 ? y - ChunkSize.y : y;
             z = Position.z < 0 ? z - ChunkSize.z : z;
             
-            return new Vector3Int(x,y,z);
+            return new int3(x,y,z);
         }
 
     }
-
-    public static class VloxyUtils { }
 
 }

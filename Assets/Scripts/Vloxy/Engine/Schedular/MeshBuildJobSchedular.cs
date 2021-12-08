@@ -1,5 +1,4 @@
 ﻿using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Mesher;
 
 using Unity.Burst;
@@ -12,44 +11,54 @@ using UnityEngine.Rendering;
 
 namespace CodeBlaze.Vloxy.Engine.Schedular {
 
-    public class MeshBuildJobSchedular {
+    public class MeshBuildJobSchedular : MeshBuildSchedular {
 
+        private bool Scheduled;
         private int BatchSize;
         private int3 ChunkSize;
         private JobHandle Handle;
 
         private Mesh.MeshDataArray MeshDataArray;
         private NativeHashMap<int3, int> Results;
+        private NativeArray<int3> Jobs;
 
-        public MeshBuildJobSchedular(int batchSize, int3 chunkSize) {
+        public MeshBuildJobSchedular(int batchSize, int3 chunkSize, ChunkBehaviourPool chunkBehaviourPool) : base(chunkBehaviourPool) {
             BatchSize = batchSize;
             ChunkSize = chunkSize;
         }
 
         // Call early in frame
-        public void Schedule(NativeArray<int3> jobs, NativeChunkStoreAccessor accessor) {
-            MeshDataArray = Mesh.AllocateWritableMeshData(jobs.Length);
-            Results = new NativeHashMap<int3, int>(jobs.Length, Allocator.TempJob);
+        public override void Schedule(NativeArray<int3> jobs, NativeChunkStoreAccessor accessor) {
+            Jobs = jobs;
+            MeshDataArray = Mesh.AllocateWritableMeshData(Jobs.Length);
+            Results = new NativeHashMap<int3, int>(Jobs.Length, Allocator.TempJob);
 
             var job = new ChunkMeshJob {
                 Accessor = accessor,
                 ChunkSize = ChunkSize,
-                Jobs = jobs,
+                Jobs = Jobs,
                 MeshDataArray = MeshDataArray,
                 Results = Results.AsParallelWriter()
             };
 
-            Handle = job.Schedule(jobs.Length, BatchSize);
+            Handle = job.Schedule(Jobs.Length, BatchSize);
+
+            Scheduled = true;
         }
 
         // Call late in frame
-        public void Complete() {
+        public override void Complete() {
+            if (!Scheduled) return;
+
             Handle.Complete();
             
             // Render
             
             MeshDataArray.Dispose();
             Results.Dispose();
+            Jobs.Dispose();
+
+            Scheduled = false;
         }
         
         [BurstCompile]
@@ -77,7 +86,7 @@ namespace CodeBlaze.Vloxy.Engine.Schedular {
                 mesh.SetVertexBufferParams(int.MaxValue, vertex_params);
                 mesh.SetIndexBufferParams(int.MaxValue, IndexFormat.UInt32);
 
-                GreedyMesherJob.GenerateMesh(Accessor, position, mesh, ChunkSize);
+                GreedyMesher.GenerateMesh(Accessor, position, mesh, ChunkSize);
 
                 Results.TryAdd(position, index);
             }

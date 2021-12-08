@@ -1,25 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using CodeBlaze.Vloxy.Engine.Components;
 
-using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Data;
+using Unity.Collections;
+using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Schedular {
 
-    public abstract class MeshBuildSchedular<B> where B : IBlock {
+    public abstract class MeshBuildSchedular {
 
-        protected readonly ChunkBehaviourPool<B> ChunkBehaviourPool;
+        protected readonly ChunkBehaviourPool ChunkBehaviourPool;
 
-        protected MeshBuildSchedular(ChunkBehaviourPool<B> chunkBehaviourPool) {
+        protected MeshBuildSchedular(ChunkBehaviourPool chunkBehaviourPool) {
             ChunkBehaviourPool = chunkBehaviourPool;
         }
 
-        public abstract void Schedule(List<MeshBuildJobData<B>> jobs);
+        public abstract void Schedule(NativeArray<int3> jobs, NativeChunkStoreAccessor accessor);
+
+        public abstract void Complete();
         
-        protected abstract void Render(Chunk<B> chunk, MeshData meshData);
-        
-        protected virtual void PreProcess(List<MeshBuildJobData<B>> jobs) { }
-        
-        protected virtual void PostProcess(List<MeshBuildJobData<B>> jobs) { }
+        //protected abstract void Render(Chunk chunk, MeshData meshData);
 
     }
 

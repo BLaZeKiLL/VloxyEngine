@@ -6,7 +6,7 @@ using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Data {
 
-    public struct NativeChunkData : IChunkData {
+    public struct NativeChunkData {
 
         private int3 ChunkSize;
         private UnsafeCompressedList Data;
@@ -26,6 +26,10 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         public int GetBlock(int x, int y, int z) {
             return Data.Get(ChunkSize.Flatten(x, y, z));
+        }
+
+        public int GetBlock(int3 pos) {
+            return Data.Get(ChunkSize.Flatten(pos.x, pos.y, pos.z));
         }
 
         public void Dispose() {

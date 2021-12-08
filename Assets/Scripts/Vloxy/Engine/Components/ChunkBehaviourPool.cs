@@ -26,7 +26,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             
             _pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
                 viewRegionSize,
-                index => {
+                _ => {
                     var go = new GameObject("Chunk", typeof(ChunkBehaviour));
                     go.transform.parent = transform;
                     go.SetActive(false);

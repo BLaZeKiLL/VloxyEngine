@@ -64,6 +64,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             return Chunks.TryGetValue(ny, out chunk);
         }
 
+        
         public bool TryGetNeighborNZ(int3 pos, out Chunk chunk) {
             var nz = pos + new int3(0, 0, -1) * ChunkSize;
 

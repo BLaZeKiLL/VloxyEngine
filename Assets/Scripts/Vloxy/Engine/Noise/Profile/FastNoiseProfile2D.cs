@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Noise.Settings;
 using CodeBlaze.Vloxy.Engine.Settings;
+
+using Unity.Mathematics;
 
 using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
-    public class FastNoiseProfile2D<B> : INoiseProfile {
+    public class FastNoiseProfile2D : INoiseProfile {
 
         private FastNoiseLite _noise;
         private int _heightHalf;
@@ -17,7 +18,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         private Dictionary<Vector2Int, int> _heightMap;
         private ChunkSettings _chunkSettings;
         
-        protected virtual int GetBlock(Chunk chunk, int heightMapValue, int blockHeight) => default;
+        protected virtual int GetBlock(int heightMapValue, int blockHeight) => default;
         
         public FastNoiseProfile2D(NoiseSettings2D settings, ChunkSettings chunkSettings) {
             _heightHalf = settings.Height / 2;
@@ -45,12 +46,11 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
                 }
             }
 
-            CBSL.Logging.Logger.Info<FastNoiseProfile2D<B>>("Height Map Generated");
+            CBSL.Logging.Logger.Info<FastNoiseProfile2D>("Height Map Generated");
         }
 
-        public IChunkData GenerateChunkData(Chunk chunk) {
+        public NativeChunkData GenerateChunkData(int3 pos) {
             var data = VoxelProvider.Current.CreateChunkData();
-            var pos = chunk.Position;
 
             int current_block = -1;
             int count = 0;
@@ -59,7 +59,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
                 for (int x = 0; x < _chunkSettings.ChunkSize.x; x++) {
                     for (int z = 0; z < _chunkSettings.ChunkSize.z; z++) {
                         var height = _heightMap[new Vector2Int(pos.x + x, pos.z + z)];
-                        var block = GetBlock(chunk, height, pos.y + y);
+                        var block = GetBlock(height, pos.y + y);
 
                         if (block == current_block) {
                             count++;
