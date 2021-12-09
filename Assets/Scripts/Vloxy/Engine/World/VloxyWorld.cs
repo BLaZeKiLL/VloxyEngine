@@ -1,4 +1,6 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
+﻿using System;
+
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Scheduler;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -7,6 +9,8 @@ using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Mathematics;
+
+using UnityEditor;
 
 using UnityEngine;
 
@@ -87,6 +91,18 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void OnDestroy() {
             ChunkStore.Dispose();
             Scheduler.Dispose();
+        }
+
+        /// <summary>
+        /// Draws the height Map
+        /// </summary>
+        private void OnDrawGizmosSelected() {
+            var heights = ((FastNoiseProfile2D)NoiseProfile).GetHeightMap();
+            var style = new GUIStyle {normal = {textColor = Color.magenta}};
+            
+            foreach (var height in heights) {
+                Handles.Label(height + new Vector3(0.5f, 0f, 0.5f), $"{height.y}", style);
+            }
         }
 
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {

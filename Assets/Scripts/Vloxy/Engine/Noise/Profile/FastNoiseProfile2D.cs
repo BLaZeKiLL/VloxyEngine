@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise.Settings;
@@ -56,9 +57,10 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             int current_block = GetBlock(_heightMap[new int2(pos.x, pos.z)], pos.y);
             int count = 0;
 
+            // Loop order should be same as flatten order for AddBlocks to work properly
             for (int y = 0; y < _chunkSettings.ChunkSize.y; y++) {
-                for (int x = 0; x < _chunkSettings.ChunkSize.x; x++) {
-                    for (int z = 0; z < _chunkSettings.ChunkSize.z; z++) {
+                for (int z = 0; z < _chunkSettings.ChunkSize.z; z++) {
+                    for (int x = 0; x < _chunkSettings.ChunkSize.x; x++) {
                         var height = _heightMap[new int2(pos.x + x, pos.z + z)];
                         var block = GetBlock(height, pos.y + y);
 
@@ -78,8 +80,14 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             return data;
         }
 
+        public List<Vector3> GetHeightMap() {
+            return _heightMap.Select(pair => new Vector3(pair.Key.x, pair.Value, pair.Key.y)).ToList();
+        }
+
         public void Dispose() {
+#if !(UNITY_EDITOR || DEVELOPMENT_BUILD)
             _heightMap.Clear();
+#endif
         }
 
         private int GetHeight(int x, int z) {
