@@ -1,193 +1,138 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
-using UnityEngine;
+using Unity.Collections;
+using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Components {
 
-    public class ChunkStore<B> where B : IBlock {
+    public class ChunkStore {
 
-        protected Dictionary<Vector3Int, Chunk<B>> Chunks;
-
-        private Dictionary<Vector3Int, Chunk<B>> ActiveChunks;
-
-        private INoiseProfile<B> _NoiseProfile;
-
+        public ChunkStoreAccessor Accessor { get; }
+        
+        private NativeHashMap<int3, Chunk> _Chunks;
+        
+        private INoiseProfile _NoiseProfile;
         private ChunkSettings _ChunkSettings;
 
-        private int _ViewRegionSize;
+        private NativeHashSet<int3> _Claim;
+        private List<int3> _Reclaim;
 
-        public ChunkStore(INoiseProfile<B> noiseProfile) {
+        public ChunkStore(INoiseProfile noiseProfile, ChunkSettings chunkSettings) {
             _NoiseProfile = noiseProfile;
-            _ChunkSettings = VoxelProvider<B>.Current.Settings.Chunk;
+            _ChunkSettings = chunkSettings;
 
-            _ViewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
+            var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
+            _Chunks = new NativeHashMap<int3, Chunk>(_ChunkSettings.ChunkPageSize.CubedSize(), Allocator.Persistent);
+            
+            Accessor = new ChunkStoreAccessor(_Chunks, _ChunkSettings.ChunkSize);
 
-            Chunks = new Dictionary<Vector3Int, Chunk<B>>(_ChunkSettings.ChunkPageSize.CubedSize());
-            ActiveChunks = new Dictionary<Vector3Int, Chunk<B>>(_ViewRegionSize);
-        }
-
-        internal void ActiveChunkUpdate() {
-            foreach (var chunk in ActiveChunks.Values) {
-                chunk.Update();
-            }
+            _Claim = new NativeHashSet<int3>(viewRegionSize, Allocator.Persistent);
+            _Reclaim = new List<int3>(viewRegionSize);
         }
 
         internal void GenerateChunks() {
             for (int x = -_ChunkSettings.ChunkPageSize; x <= _ChunkSettings.ChunkPageSize; x++) {
                 for (int z = -_ChunkSettings.ChunkPageSize; z <= _ChunkSettings.ChunkPageSize; z++) {
                     for (int y = -_ChunkSettings.ChunkPageSize; y <= _ChunkSettings.ChunkPageSize; y++) {
-                        var pos = new Vector3Int(x, y, z) * _ChunkSettings.ChunkSize;
-                        var chunk = VoxelProvider<B>.Current.CreateChunk(pos);
-                        chunk.Data = VoxelProvider<B>.Current.ChunkCreationPipeLine.Apply(_NoiseProfile.GenerateChunkData(chunk));
+                        var pos = new int3(x, y, z) * _ChunkSettings.ChunkSize;
+                        var data = _NoiseProfile.GenerateChunkData(pos);
+                        var chunk = VloxyProvider.Current.CreateChunk(pos, data);
 
-                        Chunks.Add(pos, chunk);
+                        _Chunks.Add(pos, chunk);
                     }
                 }
             }
 
-            CBSL.Logging.Logger.Info<ChunkStore<B>>("Chunks Created : " + Chunks.Count);
+            VloxyLogger.Info<ChunkStore>("Chunks Created : " + _Chunks.Count());
         }
-
-        internal (List<MeshBuildJobData<B>> Claim, List<Chunk<B>> Reclaim) ViewRegionUpdate(Vector3Int newFocusCoords,
-            Vector3Int focusCoords) {
-            var initial = focusCoords == Vector3Int.one * int.MinValue;
-            var faces = newFocusCoords - focusCoords;
-
-            var reclaim = (initial ? new List<Vector3Int>() : UpdateVectorList(focusCoords, -faces))
-                          .Where(ContainsChunk)
-                          .Where(x => Chunks[x].State != ChunkState.INACTIVE)
-                          .Select(GetChunk)
-                          .ToList();
-
-            var claim = (initial ? InitialVectorList(newFocusCoords) : UpdateVectorList(newFocusCoords, faces))
-                        .Where(ContainsChunk)
-                        .Where(x => Chunks[x].State == ChunkState.INACTIVE)
-                        .Where(x => Chunks[x].Data != null)
-                        .Select(GetChunkJobData)
-                        .ToList();
-
-            reclaim.ForEach(chunk => ActiveChunks.Remove(chunk.Position));
-            claim.ForEach(jobData => ActiveChunks.Add(jobData.GetChunk().Position, jobData.GetChunk()));
-
-            CBSL.Logging.Logger.Info<ChunkStore<B>>($"Claim : {claim.Count}, Reclaim : {reclaim.Count}");
-
-            return (claim, reclaim);
-        }
-
-        #region ChunkAPI
         
-        public Chunk<B> GetChunk(Vector3Int coord) => Chunks[coord];
-
-        public bool ContainsChunk(Vector3Int coord) => Chunks.ContainsKey(coord);
-
-        public Chunk<B> GetNeighborPX(Chunk<B> chunk) {
-            var px = chunk.Position + Vector3Int.right * _ChunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(px) ? Chunks[px] : null;
+        internal (NativeArray<int3>, List<int3>) ViewRegionUpdate(int3 newFocusChunkCoord, int3 focusChunkCoord) {
+            var initial = focusChunkCoord == new int3(1, 1, 1) * int.MinValue;
+            var diff = newFocusChunkCoord - focusChunkCoord;
+            
+            _Reclaim.Clear();
+            _Claim.Clear();
+            
+            if (!initial.AndReduce()) {
+                UpdateReclaim(focusChunkCoord, -diff);
+                UpdateClaim(newFocusChunkCoord, diff);
+            } else {
+                InitialRegion(newFocusChunkCoord);
+            }
+            
+            VloxyLogger.Info<ChunkStore>($"Claim : {_Claim.Count()}, Reclaim : {_Reclaim.Count}");
+            
+            return (_Claim.ToNativeArray(Allocator.TempJob), _Reclaim);
         }
 
-        public Chunk<B> GetNeighborPY(Chunk<B> chunk) {
-            var py = chunk.Position + Vector3Int.up * _ChunkSettings.ChunkSize;
+        internal void Dispose() {
+            _Claim.Dispose();
 
-            return Chunks.ContainsKey(py) ? Chunks[py] : null;
+            foreach (var pair in _Chunks) {
+                pair.Value.Data.Dispose();
+            }
+            
+            _Chunks.Dispose();
         }
 
-        public Chunk<B> GetNeighborPZ(Chunk<B> chunk) {
-            var pz = chunk.Position + new Vector3Int(0, 0, 1) * _ChunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(pz) ? Chunks[pz] : null;
-        }
-
-        public Chunk<B> GetNeighborNX(Chunk<B> chunk) {
-            var nx = chunk.Position + Vector3Int.left * _ChunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(nx) ? Chunks[nx] : null;
-        }
-
-        public Chunk<B> GetNeighborNY(Chunk<B> chunk) {
-            var ny = chunk.Position + Vector3Int.down * _ChunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(ny) ? Chunks[ny] : null;
-        }
-
-        public Chunk<B> GetNeighborNZ(Chunk<B> chunk) {
-            var nz = chunk.Position + new Vector3Int(0, 0, -1) * _ChunkSettings.ChunkSize;
-
-            return Chunks.ContainsKey(nz) ? Chunks[nz] : null;
-        }
-
-        #endregion
-
-        #region Private
-        
-        private IEnumerable<Vector3Int> InitialVectorList(Vector3Int focus) {
-            var list = new List<Vector3Int>(_ViewRegionSize);
-
+        private void InitialRegion(int3 focus) {
             for (int x = -_ChunkSettings.DrawDistance; x <= _ChunkSettings.DrawDistance; x++) {
                 for (int z = -_ChunkSettings.DrawDistance; z <= _ChunkSettings.DrawDistance; z++) {
                     for (int y = -_ChunkSettings.DrawDistance; y <= _ChunkSettings.DrawDistance; y++) {
-                        list.Add(focus + new Vector3Int(x, y, z) * _ChunkSettings.ChunkSize);
+                        _Claim.Add(focus + new int3(x, y, z) * _ChunkSettings.ChunkSize);
                     }
                 }
             }
-
-            return list;
         }
 
-        private IEnumerable<Vector3Int> UpdateVectorList(Vector3Int center, Vector3Int faces) {
-            var list = new HashSet<Vector3Int>();
+        private void UpdateClaim(int3 focus, int3 diff) {
             var distance = _ChunkSettings.DrawDistance;
             var size = _ChunkSettings.ChunkSize;
-
-            var actions = new List<Action<int, int>>(3);
-
-            if (faces.x != 0)
-                actions.Add((i, j) => list.Add(center + new Vector3Int(faces.x * distance, i * size.y, j * size.z)));
-            if (faces.y != 0)
-                actions.Add((i, j) => list.Add(center + new Vector3Int(i * size.x, faces.y * distance, j * size.z)));
-            if (faces.z != 0)
-                actions.Add((i, j) => list.Add(center + new Vector3Int(i * size.x, j * size.y, faces.z * distance)));
-
+            
             for (int i = -distance; i <= distance; i++) {
                 for (int j = -distance; j <= distance; j++) {
-                    actions.ForEach(action => action(i, j));
-                }
-            }
+                    if (diff.x != 0) {
+                        _Claim.Add(new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z)));
+                    }
 
-            return list;
-        }
+                    if (diff.y != 0) {
+                        _Claim.Add(new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z)));
+                    }
 
-        private MeshBuildJobData<B> GetChunkJobData(Vector3Int position) {
-            var size = _ChunkSettings.ChunkSize;
-            var base_coord = position - size;
-            var data = new Chunk<B>[27];
-            var index = 0;
-
-            for (int y = 0; y < 3; y++) {
-                for (int z = 0; z < 3; z++) {
-                    for (int x = 0; x < 3; x++) {
-                        Chunks.TryGetValue(base_coord + new Vector3Int(x * size.x, y * size.y, z * size.z), out var chunk);
-                        data[index++] = chunk;
+                    if (diff.z != 0) {
+                        _Claim.Add(new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance)));
                     }
                 }
             }
-
-            var job = new MeshBuildJobData<B>(data);
-
-            job.GetChunk().State = ChunkState.PROCESSING;
-            
-            return job;
         }
         
-        #endregion
-        
+        private void UpdateReclaim(int3 focus, int3 diff) {
+            var distance = _ChunkSettings.DrawDistance;
+            var size = _ChunkSettings.ChunkSize;
+            
+            for (int i = -distance; i <= distance; i++) {
+                for (int j = -distance; j <= distance; j++) {
+                    if (diff.x != 0) {
+                        _Reclaim.Add(new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z)));
+                    }
+
+                    if (diff.y != 0) {
+                        _Reclaim.Add(new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z)));
+                    }
+
+                    if (diff.z != 0) {
+                        _Reclaim.Add(new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance)));
+                    }
+                }
+            }
+        }
+
     }
 
 }

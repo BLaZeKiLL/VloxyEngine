@@ -1,14 +1,16 @@
 ﻿using CodeBlaze.Vloxy.Engine.Data;
 
+using Unity.Mathematics;
+
 namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
-    public interface INoiseProfile<B> where B : IBlock {
+    public interface INoiseProfile {
 
         void GenerateHeightMap();
         
-        IChunkData<B> GenerateChunkData(Chunk<B> chunk);
+        ChunkData GenerateChunkData(int3 pos);
 
-        void Clear();
+        void Dispose();
 
     }
     
