@@ -93,6 +93,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             Scheduler.Dispose();
         }
 
+#if UNITY_EDITOR
         /// <summary>
         /// Draws the height Map
         /// </summary>
@@ -104,7 +105,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 Handles.Label(height + new Vector3(0.5f, 0f, 0.5f), $"{height.y}", style);
             }
         }
-
+#endif
+        
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
             var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
 
