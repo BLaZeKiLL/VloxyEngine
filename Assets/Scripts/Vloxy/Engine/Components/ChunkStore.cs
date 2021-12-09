@@ -4,6 +4,7 @@ using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Collections;
 using Unity.Mathematics;
@@ -48,11 +49,10 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 }
             }
 
-            CBSL.Logging.Logger.Info<ChunkStore>("Chunks Created : " + _Chunks.Count());
+            VloxyLogger.Info<ChunkStore>("Chunks Created : " + _Chunks.Count());
         }
-
-
-        public (NativeArray<int3>, List<int3>) ViewRegionUpdate(int3 newFocusChunkCoord, int3 focusChunkCoord) {
+        
+        internal (NativeArray<int3>, List<int3>) ViewRegionUpdate(int3 newFocusChunkCoord, int3 focusChunkCoord) {
             var initial = focusChunkCoord == new int3(1, 1, 1) * int.MinValue;
             var diff = newFocusChunkCoord - focusChunkCoord;
             
@@ -66,12 +66,12 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 InitialRegion(newFocusChunkCoord);
             }
             
-            CBSL.Logging.Logger.Info<ChunkStore>($"Claim : {_Claim.Count()}, Reclaim : {_Reclaim.Count}");
+            VloxyLogger.Info<ChunkStore>($"Claim : {_Claim.Count()}, Reclaim : {_Reclaim.Count}");
             
             return (_Claim.ToNativeArray(Allocator.TempJob), _Reclaim);
         }
 
-        public void Dispose() {
+        internal void Dispose() {
             _Claim.Dispose();
 
             foreach (var pair in _Chunks) {

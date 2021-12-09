@@ -2,6 +2,7 @@
 
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Mathematics;
 
@@ -45,7 +46,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
                 }
             }
 
-            CBSL.Logging.Logger.Info<FastNoiseProfile2D>("Height Map Generated");
+            VloxyLogger.Info<FastNoiseProfile2D>("Height Map Generated");
         }
 
         public ChunkData GenerateChunkData(int3 pos) {

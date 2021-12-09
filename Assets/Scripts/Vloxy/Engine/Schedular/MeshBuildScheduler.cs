@@ -2,6 +2,7 @@
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Mesher;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Burst;
 using Unity.Collections;
@@ -109,7 +110,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Marker.End();
             
-            CBSL.Logging.Logger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {Recorder.CurrentValueAsDouble * (1e-6f):F}ms");
+            VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {Recorder.CurrentValueAsDouble * (1e-6f):F}ms");
 #endif
         }
         

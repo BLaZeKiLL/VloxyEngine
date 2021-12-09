@@ -4,6 +4,7 @@ using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Mathematics;
 
@@ -39,7 +40,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void Awake() {
             VloxyProvider.Initialize(Provider(), provider => {
                 provider.Settings = _settings;
-                CBSL.Logging.Logger.Info<VloxyWorld>("Provider Initialized");
+                VloxyLogger.Info<VloxyWorld>("Provider Initialized");
                 WorldInitialize();
             });
 
@@ -54,7 +55,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             Scheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkBehaviourPool);
             ChunkStore = VloxyProvider.Current.ChunkStore(NoiseProfile);
             
-            CBSL.Logging.Logger.Info<VloxyWorld>("Vloxy Components Constructed");
+            VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
         }
 
         private void Start() {
