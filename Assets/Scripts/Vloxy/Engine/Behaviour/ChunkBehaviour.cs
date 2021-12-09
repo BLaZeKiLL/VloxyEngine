@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-
-using CodeBlaze.Vloxy.Engine.Settings;
-
-using UnityEditor;
+﻿using CodeBlaze.Vloxy.Engine.Settings;
 
 using UnityEngine;
 using UnityEngine.Rendering;

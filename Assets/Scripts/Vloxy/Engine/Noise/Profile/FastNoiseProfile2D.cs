@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Data;
+using CodeBlaze.Vloxy.Engine.Noise.Settings;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
@@ -38,7 +39,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             var sizeX = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.x;
             var sizeZ = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.z;
             
-            _heightMap = new Dictionary<int2, int>();
+            _heightMap = new Dictionary<int2, int>((2 * sizeX + 1) * (2 * sizeZ + 1));
 
             for (int x = -sizeX; x <= sizeX + _chunkSettings.ChunkSize.x; x++) {
                 for (int z = -sizeZ; z <= sizeZ + _chunkSettings.ChunkSize.z; z++) {
@@ -77,7 +78,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             return data;
         }
 
-        public void Clear() {
+        public void Dispose() {
             _heightMap.Clear();
         }
 

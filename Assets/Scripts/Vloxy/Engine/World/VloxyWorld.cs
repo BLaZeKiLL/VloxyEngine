@@ -63,7 +63,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             ChunkStore.GenerateChunks();
 
-            NoiseProfile.Clear();
+            NoiseProfile.Dispose();
             
             FocusChunkCoord = new int3(1,1,1) * int.MinValue;
 

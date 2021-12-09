@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-using CodeBlaze.Vloxy.Engine.Components;
+﻿using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Mesher;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 

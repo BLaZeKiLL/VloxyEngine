@@ -10,7 +10,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         
         ChunkData GenerateChunkData(int3 pos);
 
-        void Clear();
+        void Dispose();
 
     }
     
