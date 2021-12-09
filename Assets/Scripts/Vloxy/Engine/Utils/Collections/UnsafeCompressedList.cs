@@ -40,8 +40,10 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
         }
 
         public int Get(int index) {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (index >= Length) throw new IndexOutOfRangeException($"{index} is out of range for the given data of length {Length}");
-            
+#endif
+
             return Internal[BinarySearch(index)].ID;
         }
 

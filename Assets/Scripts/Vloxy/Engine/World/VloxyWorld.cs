@@ -3,6 +3,7 @@ using CodeBlaze.Vloxy.Engine.Scheduler;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
 using Unity.Mathematics;
 
@@ -16,16 +17,14 @@ namespace CodeBlaze.Vloxy.Engine.World {
         [SerializeField] private VoxelSettings _settings;
 
         protected ChunkBehaviourPool ChunkBehaviourPool;
-        protected IMeshBuildScheduler Scheduler;
+        protected MeshBuildScheduler Scheduler;
         protected INoiseProfile NoiseProfile;
         protected ChunkStore ChunkStore;
         protected int3 FocusChunkCoord;
 
-        private ChunkSettings _chunkSettings;
-
         #region Virtual
 
-        protected virtual VoxelProvider Provider() => new();
+        protected virtual VloxyProvider Provider() => new();
         
         protected virtual void WorldInitialize() { }
         protected virtual void WorldAwake() { }
@@ -38,24 +37,22 @@ namespace CodeBlaze.Vloxy.Engine.World {
         #region Unity
 
         private void Awake() {
-            VoxelProvider.Initialize(Provider(), provider => {
+            VloxyProvider.Initialize(Provider(), provider => {
                 provider.Settings = _settings;
                 CBSL.Logging.Logger.Info<VloxyWorld>("Provider Initialized");
                 WorldInitialize();
             });
 
-            _chunkSettings = VoxelProvider.Current.Settings.Chunk;
-            
             ConstructVloxyComponents();
 
             WorldAwake();
         }
 
         private void ConstructVloxyComponents() {
-            NoiseProfile = VoxelProvider.Current.NoiseProfile();
-            ChunkBehaviourPool = VoxelProvider.Current.ChunkPool(transform);
-            Scheduler = VoxelProvider.Current.MeshBuildScheduler(ChunkBehaviourPool);
-            ChunkStore = VoxelProvider.Current.ChunkStore(NoiseProfile);
+            NoiseProfile = VloxyProvider.Current.NoiseProfile();
+            ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
+            Scheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkBehaviourPool);
+            ChunkStore = VloxyProvider.Current.ChunkStore(NoiseProfile);
             
             CBSL.Logging.Logger.Info<VloxyWorld>("Vloxy Components Constructed");
         }
@@ -75,10 +72,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void Update() {
             var NewFocusChunkCoord = _focus != null ? VloxyUtils.GetChunkCoords(_focus.position) : int3.zero;
 
-            if (NewFocusChunkCoord.x == FocusChunkCoord.x && NewFocusChunkCoord.y == FocusChunkCoord.y && NewFocusChunkCoord.z == FocusChunkCoord.z) return;
+            if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) ViewRegionUpdate(NewFocusChunkCoord);
 
-            ViewRegionUpdate(NewFocusChunkCoord);
-            
             WorldUpdate();
 
             // ChunkStore.ActiveChunkUpdate();
@@ -98,7 +93,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             if (claim.Length != 0) Scheduler.Schedule(claim, ChunkStore.Accessor);
 
-            reclaim.ForEach(pos => ChunkBehaviourPool.Reclaim(pos));
+            for (var index = 0; index < reclaim.Count; index++) {
+                ChunkBehaviourPool.Reclaim(reclaim[index]);
+            }
 
             WorldViewRegionUpdate();
 

@@ -6,7 +6,7 @@ using CodeBlaze.Vloxy.Engine.Settings;
 
 namespace CodeBlaze.Vloxy.Colored {
 
-    public class ColoredVoxelProvider : VoxelProvider {
+    public class ColoredVloxyProvider : VloxyProvider {
 
         public override INoiseProfile NoiseProfile() => new ColoredNoiseProfile2D(Settings.NoiseSettings as NoiseSettings2D, Settings.Chunk);
         

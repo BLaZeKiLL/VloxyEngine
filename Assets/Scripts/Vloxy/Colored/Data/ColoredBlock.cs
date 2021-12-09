@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Colored.Data.Block {
+namespace CodeBlaze.Vloxy.Colored.Data {
 
     public readonly struct ColoredBlock {
 

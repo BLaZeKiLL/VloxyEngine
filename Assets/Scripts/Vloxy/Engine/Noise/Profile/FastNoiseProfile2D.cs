@@ -49,7 +49,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         }
 
         public ChunkData GenerateChunkData(int3 pos) {
-            var data = VoxelProvider.Current.CreateChunkData();
+            var data = VloxyProvider.Current.CreateChunkData();
 
             int current_block = GetBlock(_heightMap[new int2(pos.x, pos.z)], pos.y);
             int count = 0;

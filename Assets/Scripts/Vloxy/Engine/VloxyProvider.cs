@@ -12,25 +12,25 @@ using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine {
 
-    public class VoxelProvider : Provider<VoxelProvider> {
+    public class VloxyProvider : Provider<VloxyProvider> {
 
         public VoxelSettings Settings { get; set; }
 
         public virtual Chunk CreateChunk(int3 position, ChunkData data) => new(position, data);
+        
+        public virtual ChunkData CreateChunkData() => new(Settings.Chunk.ChunkSize);
 
         public virtual ChunkStore ChunkStore(INoiseProfile noiseProfile) => new(noiseProfile, Settings.Chunk);
 
-        public virtual ChunkData CreateChunkData() => new(Settings.Chunk.ChunkSize);
-
-        public virtual INoiseProfile NoiseProfile() => null;
-
         public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
-
-        public virtual IMeshBuildScheduler MeshBuildScheduler(ChunkBehaviourPool chunkBehaviourPool) => new MeshBuildJobScheduler(
+        
+        public virtual MeshBuildScheduler MeshBuildScheduler(ChunkBehaviourPool chunkBehaviourPool) => new(
             Settings.Scheduler.BatchSize, 
             Settings.Chunk.ChunkSize, 
             chunkBehaviourPool
         );
+        
+        public virtual INoiseProfile NoiseProfile() => null;
 
     }
 

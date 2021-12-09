@@ -5,7 +5,7 @@ namespace CodeBlaze.Vloxy.Colored.World {
 
     public class ColoredWorld : VloxyWorld {
 
-        protected override VoxelProvider Provider() => new ColoredVoxelProvider();
+        protected override VloxyProvider Provider() => new ColoredVloxyProvider();
 
     }
 

@@ -14,9 +14,9 @@ using UnityEngine.Rendering;
 
 namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
-    public class MeshBuildJobScheduler : IMeshBuildScheduler {
+    public class MeshBuildScheduler {
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         public static ProfilerMarker Marker = new("MeshBuildJob");
         private ProfilerRecorder Recorder;
 #endif
@@ -29,29 +29,39 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
         private Mesh.MeshDataArray MeshDataArray;
         private NativeHashMap<int3, int> Results;
         private NativeArray<int3> Jobs;
-        
+        private NativeArray<VertexAttributeDescriptor> VertexParams;
+
         private bool Scheduled;
 
 
-        public MeshBuildJobScheduler(int batchSize, int3 chunkSize, ChunkBehaviourPool chunkBehaviourPool) {
+        public MeshBuildScheduler(int batchSize, int3 chunkSize, ChunkBehaviourPool chunkBehaviourPool) {
             BatchSize = batchSize;
             ChunkSize = chunkSize;
             ChunkBehaviourPool = chunkBehaviourPool;
 
-#if UNITY_EDITOR
+            VertexParams = new NativeArray<VertexAttributeDescriptor>(5, Allocator.Persistent);
+            
+            // int's cause issues
+            VertexParams[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
+            VertexParams[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3);
+            VertexParams[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
+            VertexParams[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2);
+            VertexParams[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4);
+            
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             Recorder = ProfilerRecorder.StartNew(Marker);
 #endif
         }
 
         public void Dispose() {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             Recorder.Dispose();
 #endif
         }
 
         // Call early in frame
         public void Schedule(NativeArray<int3> jobs, ChunkStoreAccessor accessor) {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             Marker.Begin();
 #endif
             
@@ -63,6 +73,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
                 Accessor = accessor,
                 ChunkSize = ChunkSize,
                 Jobs = Jobs,
+                VertexParams = VertexParams,
                 MeshDataArray = MeshDataArray,
                 Results = Results.AsParallelWriter()
             };
@@ -95,10 +106,10 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
             Scheduled = false;
             
-#if UNITY_EDITOR
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             Marker.End();
             
-            CBSL.Logging.Logger.Info<MeshBuildJobScheduler>($"Meshes built : {meshes.Length}, In : {Recorder.CurrentValueAsDouble * (1e-6f):F}ms");
+            CBSL.Logging.Logger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {Recorder.CurrentValueAsDouble * (1e-6f):F}ms");
 #endif
         }
         
@@ -108,7 +119,8 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             [ReadOnly] public ChunkStoreAccessor Accessor;
             [ReadOnly] public int3 ChunkSize;
             [ReadOnly] public NativeArray<int3> Jobs;
-            
+            [ReadOnly] public NativeArray<VertexAttributeDescriptor> VertexParams;
+
             [WriteOnly] public NativeHashMap<int3, int>.ParallelWriter Results;
             
             public Mesh.MeshDataArray MeshDataArray;
@@ -120,17 +132,8 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
                 var buffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize);
                 var vertex_count = buffer.VertexBuffer.Length;
                 var index_count = buffer.IndexBuffer.Length;
-                
-                var vertex_params = new NativeArray<VertexAttributeDescriptor>(5, Allocator.Temp);
-                
-                // int's cause issues
-                vertex_params[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
-                vertex_params[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3);
-                vertex_params[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
-                vertex_params[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2);
-                vertex_params[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4);
 
-                mesh.SetVertexBufferParams(vertex_count, vertex_params);
+                mesh.SetVertexBufferParams(vertex_count, VertexParams);
                 mesh.SetIndexBufferParams(index_count, IndexFormat.UInt32);
 
                 mesh.GetVertexData<GreedyMesher.Vertex>().CopyFrom(buffer.VertexBuffer);

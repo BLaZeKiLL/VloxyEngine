@@ -41,7 +41,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                     for (int y = -_ChunkSettings.ChunkPageSize; y <= _ChunkSettings.ChunkPageSize; y++) {
                         var pos = new int3(x, y, z) * _ChunkSettings.ChunkSize;
                         var data = _NoiseProfile.GenerateChunkData(pos);
-                        var chunk = VoxelProvider.Current.CreateChunk(pos, data);
+                        var chunk = VloxyProvider.Current.CreateChunk(pos, data);
 
                         _Chunks.Add(pos, chunk);
                     }

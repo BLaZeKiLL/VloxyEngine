@@ -6,7 +6,7 @@ namespace CodeBlaze.Vloxy.Engine.Utils {
 
     public static class VloxyUtils {
 
-        private static int3 ChunkSize = VoxelProvider.Current.Settings.Chunk.ChunkSize;
+        private static int3 ChunkSize = VloxyProvider.Current.Settings.Chunk.ChunkSize;
 
         public static int3 GetChunkCoords(Vector3 Position) => GetChunkCoords(Vector3Int.FloorToInt(Position));
         
