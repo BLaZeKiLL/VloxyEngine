@@ -53,6 +53,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
         }
 
         public void Dispose() {
+            VertexParams.Dispose();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Recorder.Dispose();
 #endif

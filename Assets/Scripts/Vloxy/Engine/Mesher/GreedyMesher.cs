@@ -180,7 +180,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         [BurstCompile]
         private static void CreateQuad(MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, int3 v1, int3 v2, int3 v3, int3 v4) {
             var normal = directionMask * mask.Normal;
-            var color = new float4(0.8f, 0.8f, 0.8f ,1f);
+            var color = new float4(1f, 1f, 1f ,1f);
             var ao = new float4(AO_CURVE[mask.AO[0]], AO_CURVE[mask.AO[1]], AO_CURVE[mask.AO[2]], AO_CURVE[mask.AO[3]]);
 
             // 0 Bottom Left
