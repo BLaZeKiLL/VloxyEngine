@@ -48,7 +48,9 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
                 }
             }
 
+#if VLOXY_LOGGING
             VloxyLogger.Info<FastNoiseProfile2D>("Height Map Generated");
+#endif
         }
 
         public ChunkData GenerateChunkData(int3 pos) {

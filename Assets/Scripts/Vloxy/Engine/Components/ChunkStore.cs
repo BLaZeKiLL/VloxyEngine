@@ -49,7 +49,9 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 }
             }
 
+#if VLOXY_LOGGING
             VloxyLogger.Info<ChunkStore>("Chunks Created : " + _Chunks.Count());
+#endif
         }
         
         internal (NativeArray<int3>, List<int3>) ViewRegionUpdate(int3 newFocusChunkCoord, int3 focusChunkCoord) {
@@ -66,8 +68,10 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 InitialRegion(newFocusChunkCoord);
             }
             
+#if VLOXY_LOGGING
             VloxyLogger.Info<ChunkStore>($"Claim : {_Claim.Count()}, Reclaim : {_Reclaim.Count}");
-            
+#endif
+
             return (_Claim.ToNativeArray(Allocator.TempJob), _Reclaim);
         }
 

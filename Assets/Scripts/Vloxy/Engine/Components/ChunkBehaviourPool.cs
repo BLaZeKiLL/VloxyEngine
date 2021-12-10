@@ -43,8 +43,9 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 chunkBehaviour => chunkBehaviour.gameObject.SetActive(false),
                 null, false, viewRegionSize, viewRegionSize
             );
-            
+#if VLOXY_LOGGING
             VloxyLogger.Info<ChunkBehaviourPool>("Initialized Size : " + viewRegionSize);
+#endif
         }
         
         public ChunkBehaviour Claim(int3 pos) {
