@@ -182,7 +182,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91e0fc6c411e4742a6ee0c6e077682f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DrawHeightMap: 1
+  DrawHeightMap: 0
   HeightMapBounds:
     x: 0
     y: 0

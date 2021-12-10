@@ -1,4 +1,6 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
+﻿using System.Collections.Generic;
+
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Mesher;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
@@ -26,7 +28,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
         private JobHandle Handle;
         private Mesh.MeshDataArray MeshDataArray;
         private NativeHashMap<int3, int> Results;
-        private NativeArray<int3> Jobs;
+        private NativeList<int3> Jobs;
         private NativeArray<VertexAttributeDescriptor> VertexParams;
 
         private bool Scheduled;
@@ -44,21 +46,27 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             VertexParams[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
             VertexParams[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2);
             VertexParams[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4);
+            
+            Results = new NativeHashMap<int3, int>(1024,Allocator.Persistent);
+            Jobs = new NativeList<int3>(Allocator.Persistent);
         }
 
         public void Dispose() {
             VertexParams.Dispose();
+            Results.Dispose();
+            Jobs.Dispose();
         }
 
         // Call early in frame
-        public void Schedule(NativeArray<int3> jobs, ChunkStoreAccessor accessor) {
+        public void Schedule(List<int3> jobs, ChunkStoreAccessor accessor) {
 #if VLOXY_PROFILING
             VloxyProfiler.MeshBuildJobMarker.Begin();
 #endif
+            for (int i = 0; i < jobs.Count; i++) {
+                Jobs.Add(jobs[i]);
+            }
             
-            Jobs = jobs;
             MeshDataArray = Mesh.AllocateWritableMeshData(Jobs.Length);
-            Results = new NativeHashMap<int3, int>(Jobs.Length, Allocator.TempJob);
 
             var job = new ChunkMeshJob {
                 Accessor = accessor,
@@ -76,7 +84,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
         // Call late in frame
         public void Complete() {
-            if (!Scheduled) return;
+            if (!Scheduled || !Handle.IsCompleted) return;
 
             Handle.Complete();
 
@@ -92,8 +100,8 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
                 mesh.RecalculateBounds();
             }
             
-            Results.Dispose();
-            Jobs.Dispose();
+            Results.Clear();
+            Jobs.Clear();
 
             Scheduled = false;
             
@@ -109,7 +117,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
             [ReadOnly] public ChunkStoreAccessor Accessor;
             [ReadOnly] public int3 ChunkSize;
-            [ReadOnly] public NativeArray<int3> Jobs;
+            [ReadOnly] public NativeList<int3> Jobs;
             [ReadOnly] public NativeArray<VertexAttributeDescriptor> VertexParams;
 
             [WriteOnly] public NativeHashMap<int3, int>.ParallelWriter Results;
