@@ -112,7 +112,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
 #endif
             var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
 
-            if (claim.Length != 0) Scheduler.Schedule(claim, ChunkStore.Accessor);
+            if (claim.Count != 0) Scheduler.Schedule(claim, ChunkStore.Accessor);
 
             for (var index = 0; index < reclaim.Count; index++) {
                 ChunkBehaviourPool.Reclaim(reclaim[index]);

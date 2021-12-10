@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
@@ -20,7 +21,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         private INoiseProfile _NoiseProfile;
         private ChunkSettings _ChunkSettings;
 
-        private NativeHashSet<int3> _Claim;
+        private HashSet<int3> _Claim;
         private List<int3> _Reclaim;
 
         public ChunkStore(INoiseProfile noiseProfile, ChunkSettings chunkSettings) {
@@ -32,7 +33,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             
             Accessor = new ChunkStoreAccessor(_Chunks, _ChunkSettings.ChunkSize);
 
-            _Claim = new NativeHashSet<int3>(viewRegionSize, Allocator.Persistent);
+            _Claim = new HashSet<int3>(viewRegionSize);
             _Reclaim = new List<int3>(viewRegionSize);
         }
 
@@ -54,7 +55,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 #endif
         }
         
-        internal (NativeArray<int3>, List<int3>) ViewRegionUpdate(int3 newFocusChunkCoord, int3 focusChunkCoord) {
+        internal (List<int3>, List<int3>) ViewRegionUpdate(int3 newFocusChunkCoord, int3 focusChunkCoord) {
             var initial = focusChunkCoord == new int3(1, 1, 1) * int.MinValue;
             var diff = newFocusChunkCoord - focusChunkCoord;
             
@@ -72,12 +73,10 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             VloxyLogger.Info<ChunkStore>($"Claim : {_Claim.Count()}, Reclaim : {_Reclaim.Count}");
 #endif
 
-            return (_Claim.ToNativeArray(Allocator.TempJob), _Reclaim);
+            return (_Claim.ToList(), _Reclaim);
         }
 
         internal void Dispose() {
-            _Claim.Dispose();
-
             foreach (var pair in _Chunks) {
                 pair.Value.Data.Dispose();
             }
