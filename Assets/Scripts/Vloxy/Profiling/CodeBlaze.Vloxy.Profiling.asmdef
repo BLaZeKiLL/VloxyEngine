@@ -1,0 +1,16 @@
+{
+    "name": "CodeBlaze.Vloxy.Profiling",
+    "rootNamespace": "CodeBlaze.Vloxy.Profiling",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "VLOXY_PROFILING"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

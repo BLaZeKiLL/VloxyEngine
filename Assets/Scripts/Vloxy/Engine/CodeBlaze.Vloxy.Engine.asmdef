@@ -1,11 +1,11 @@
 {
-    "name": "CodeBlaze.Voxel.Colored",
-    "rootNamespace": "CodeBlaze.Voxel.Colored",
+    "name": "CodeBlaze.Vloxy.Engine",
+    "rootNamespace": "CodeBlaze.Vloxy.Engine",
     "references": [
-        "GUID:3d017d579b2996d4ab609c560edcfc6d",
-        "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:9c1c4c82ebfda8c47bb5892fedda07a7",
-        "GUID:e6a73a9d3bbfb46448a9aafb240b9dd1"
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
+        "GUID:d667758d8b66d3a4eb210294d5c8bc9f"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

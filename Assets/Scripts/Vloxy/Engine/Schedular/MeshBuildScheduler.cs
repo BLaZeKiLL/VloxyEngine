@@ -6,19 +6,18 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Profiling;
 
 using UnityEngine;
 using UnityEngine.Rendering;
 
+#if VLOXY_PROFILING
+using CodeBlaze.Vloxy.Profiling;
+#endif
+
 namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
     public class MeshBuildScheduler {
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        public static ProfilerMarker Marker = new("MeshBuildJob");
-        private ProfilerRecorder Recorder;
-#endif
+        
         private ChunkBehaviourPool ChunkBehaviourPool;
         
         private int BatchSize;
@@ -31,8 +30,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
         private NativeArray<VertexAttributeDescriptor> VertexParams;
 
         private bool Scheduled;
-
-
+        
         public MeshBuildScheduler(int batchSize, int3 chunkSize, ChunkBehaviourPool chunkBehaviourPool) {
             BatchSize = batchSize;
             ChunkSize = chunkSize;
@@ -46,23 +44,16 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             VertexParams[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
             VertexParams[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2);
             VertexParams[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4);
-            
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Recorder = ProfilerRecorder.StartNew(Marker);
-#endif
         }
 
         public void Dispose() {
             VertexParams.Dispose();
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Recorder.Dispose();
-#endif
         }
 
         // Call early in frame
         public void Schedule(NativeArray<int3> jobs, ChunkStoreAccessor accessor) {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Marker.Begin();
+#if VLOXY_PROFILING
+            VloxyProfiler.MeshBuildJobMarker.Begin();
 #endif
             
             Jobs = jobs;
@@ -106,10 +97,10 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
             Scheduled = false;
             
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Marker.End();
+#if VLOXY_PROFILING
+            VloxyProfiler.MeshBuildJobMarker.End();
             
-            VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {Recorder.CurrentValueAsDouble * (1e-6f):F}ms");
+            VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {VloxyProfiler.MeshBuildJobRecorder.TimeMS()}");
 #endif
         }
         

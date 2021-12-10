@@ -1,6 +1,4 @@
-﻿using System;
-
-using CodeBlaze.Vloxy.Engine.Components;
+﻿using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Scheduler;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -10,9 +8,12 @@ using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Mathematics;
 
-using UnityEditor;
 
 using UnityEngine;
+
+#if VLOXY_PROFILING
+using CodeBlaze.Vloxy.Profiling;
+#endif
 
 namespace CodeBlaze.Vloxy.Engine.World {
 
@@ -23,9 +24,10 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         protected ChunkBehaviourPool ChunkBehaviourPool;
         protected MeshBuildScheduler Scheduler;
-        protected INoiseProfile NoiseProfile;
         protected ChunkStore ChunkStore;
         protected int3 FocusChunkCoord;
+        
+        public INoiseProfile NoiseProfile;
 
         #region Virtual
 
@@ -58,6 +60,10 @@ namespace CodeBlaze.Vloxy.Engine.World {
             ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
             Scheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkBehaviourPool);
             ChunkStore = VloxyProvider.Current.ChunkStore(NoiseProfile);
+
+#if VLOXY_PROFILING
+            VloxyProfiler.Initialize();
+#endif
             
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
         }
@@ -91,23 +97,16 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void OnDestroy() {
             ChunkStore.Dispose();
             Scheduler.Dispose();
+
+#if VLOXY_PROFILING
+            VloxyProfiler.Dispose();
+#endif
         }
 
-#if UNITY_EDITOR
-        /// <summary>
-        /// Draws the height Map
-        /// </summary>
-        private void OnDrawGizmosSelected() {
-            var heights = ((FastNoiseProfile2D)NoiseProfile).GetHeightMap();
-            var style = new GUIStyle {normal = {textColor = Color.magenta}};
-            
-            foreach (var height in heights) {
-                Handles.Label(height + new Vector3(0.5f, 0f, 0.5f), $"{height.y}", style);
-            }
-        }
-#endif
-        
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
+#if VLOXY_PROFILING
+            VloxyProfiler.ViewRegionUpdateMarker.Begin();
+#endif
             var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
 
             if (claim.Length != 0) Scheduler.Schedule(claim, ChunkStore.Accessor);
@@ -119,6 +118,10 @@ namespace CodeBlaze.Vloxy.Engine.World {
             WorldViewRegionUpdate();
 
             FocusChunkCoord = NewFocusChunkCoord;
+            
+#if VLOXY_PROFILING
+            VloxyProfiler.ViewRegionUpdateMarker.End();
+#endif
         }
 
         #endregion
