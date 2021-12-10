@@ -46,7 +46,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void Awake() {
             VloxyProvider.Initialize(Provider(), provider => {
                 provider.Settings = _settings;
+#if VLOXY_LOGGING
                 VloxyLogger.Info<VloxyWorld>("Provider Initialized");
+#endif
                 WorldInitialize();
             });
 
@@ -64,8 +66,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
 #if VLOXY_PROFILING
             VloxyProfiler.Initialize();
 #endif
-            
+#if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
+#endif
         }
 
         private void Start() {
