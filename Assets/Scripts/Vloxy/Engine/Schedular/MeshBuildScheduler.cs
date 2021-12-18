@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Mesher;
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -14,6 +11,7 @@ using UnityEngine.Rendering;
 
 #if VLOXY_PROFILING
 using CodeBlaze.Vloxy.Profiling;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 #endif
 
 namespace CodeBlaze.Vloxy.Engine.Scheduler {
@@ -21,6 +19,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
     public class MeshBuildScheduler {
         
         private ChunkBehaviourPool ChunkBehaviourPool;
+        private BurstFunctionPointers BurstFunctionPointers;
         
         private int BatchSize;
         private int3 ChunkSize;
@@ -33,10 +32,12 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
         private bool Scheduled;
         
-        public MeshBuildScheduler(int batchSize, int3 chunkSize, ChunkBehaviourPool chunkBehaviourPool) {
+        public MeshBuildScheduler(int batchSize, int3 chunkSize, ChunkBehaviourPool chunkBehaviourPool, BurstFunctionPointers burstFunctionPointers) {
             BatchSize = batchSize;
             ChunkSize = chunkSize;
+            
             ChunkBehaviourPool = chunkBehaviourPool;
+            BurstFunctionPointers = burstFunctionPointers;
 
             VertexParams = new NativeArray<VertexAttributeDescriptor>(5, Allocator.Persistent);
             
@@ -68,7 +69,8 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             
             MeshDataArray = Mesh.AllocateWritableMeshData(Jobs.Length);
 
-            var job = new ChunkMeshJob {
+            var job = new MeshBuildJob {
+                BurstFunctionPointers = BurstFunctionPointers,
                 Accessor = accessor,
                 ChunkSize = ChunkSize,
                 Jobs = Jobs,
@@ -84,7 +86,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
         // Call late in frame
         public void Complete() {
-            if (!Scheduled || !Handle.IsCompleted) return;
+            if (!Scheduled) return;
 
             Handle.Complete();
 
@@ -110,42 +112,6 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             
             VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {VloxyProfiler.MeshBuildJobRecorder.TimeMS()}");
 #endif
-        }
-        
-        [BurstCompile]
-        private struct ChunkMeshJob : IJobParallelFor {
-
-            [ReadOnly] public ChunkStoreAccessor Accessor;
-            [ReadOnly] public int3 ChunkSize;
-            [ReadOnly] public NativeList<int3> Jobs;
-            [ReadOnly] public NativeArray<VertexAttributeDescriptor> VertexParams;
-
-            [WriteOnly] public NativeHashMap<int3, int>.ParallelWriter Results;
-            
-            public Mesh.MeshDataArray MeshDataArray;
-
-            public void Execute(int index) {
-                var mesh = MeshDataArray[index];
-                var position = Jobs[index];
-                
-                var buffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize);
-                var vertex_count = buffer.VertexBuffer.Length;
-                var index_count = buffer.IndexBuffer.Length;
-
-                mesh.SetVertexBufferParams(vertex_count, VertexParams);
-                mesh.SetIndexBufferParams(index_count, IndexFormat.UInt32);
-
-                mesh.GetVertexData<GreedyMesher.Vertex>().CopyFrom(buffer.VertexBuffer);
-                mesh.GetIndexData<int>().CopyFrom(buffer.IndexBuffer);
-                
-                mesh.subMeshCount = 1;
-                mesh.SetSubMesh(0, new SubMeshDescriptor(0, index_count));
-
-                Results.TryAdd(position, index);
-                
-                buffer.Dispose();
-            }
-
         }
 
     }

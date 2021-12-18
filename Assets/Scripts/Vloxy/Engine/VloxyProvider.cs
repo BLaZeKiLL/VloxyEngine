@@ -16,6 +16,8 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public VoxelSettings Settings { get; set; }
 
+        public virtual BurstFunctionPointers SetupBurstFunctionPointers() => new();
+
         public virtual Chunk CreateChunk(int3 position, ChunkData data) => new(position, data);
         
         public virtual ChunkData CreateChunkData() => new(Settings.Chunk.ChunkSize);
@@ -24,10 +26,11 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
         
-        public virtual MeshBuildScheduler MeshBuildScheduler(ChunkBehaviourPool chunkBehaviourPool) => new(
+        public virtual MeshBuildScheduler MeshBuildScheduler(ChunkBehaviourPool chunkBehaviourPool, BurstFunctionPointers burstFunctionPointers) => new(
             Settings.Scheduler.BatchSize, 
             Settings.Chunk.ChunkSize, 
-            chunkBehaviourPool
+            chunkBehaviourPool,
+            burstFunctionPointers
         );
         
         public virtual INoiseProfile NoiseProfile() => null;
