@@ -29,10 +29,11 @@ namespace CodeBlaze.Vloxy.Engine.World {
         
         public INoiseProfile NoiseProfile;
 
+        private BurstFunctionPointers BurstFunctionPointers;
+
         #region Virtual
 
         protected virtual VloxyProvider Provider() => new();
-        
         protected virtual void WorldInitialize() { }
         protected virtual void WorldAwake() { }
         protected virtual void WorldStart() { }
@@ -53,16 +54,17 @@ namespace CodeBlaze.Vloxy.Engine.World {
             });
 
             ConstructVloxyComponents();
-
+            
             WorldAwake();
         }
 
         private void ConstructVloxyComponents() {
+            BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
             NoiseProfile = VloxyProvider.Current.NoiseProfile();
             ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
-            Scheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkBehaviourPool);
+            Scheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkBehaviourPool, BurstFunctionPointers);
             ChunkStore = VloxyProvider.Current.ChunkStore(NoiseProfile);
-
+            
 #if VLOXY_PROFILING
             VloxyProfiler.Initialize();
 #endif
