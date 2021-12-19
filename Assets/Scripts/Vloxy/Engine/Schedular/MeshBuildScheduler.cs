@@ -86,7 +86,11 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
         // Call late in frame
         public void Complete() {
+#if VLOXY_PROFILING
             if (!Scheduled) return;
+#else
+            if (!Scheduled && !Handle.IsCompleted) return;
+#endif
 
             Handle.Complete();
 
