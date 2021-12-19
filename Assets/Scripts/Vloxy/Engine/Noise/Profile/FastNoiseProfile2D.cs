@@ -10,6 +10,8 @@ using Unity.Mathematics;
 
 using UnityEngine;
 
+using Random = UnityEngine.Random;
+
 namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
     public class FastNoiseProfile2D : INoiseProfile {
@@ -26,6 +28,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             _heightHalf = settings.Height / 2;
             _noise = new FastNoiseLite(settings.Seed);
             
+            _noise.SetSeed(Random.Range(10000, 100000));
             _noise.SetNoiseType(settings.NoiseType);
             _noise.SetFrequency(settings.Frequency);
             _noise.SetFractalType(settings.FractalType);

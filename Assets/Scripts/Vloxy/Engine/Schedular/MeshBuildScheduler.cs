@@ -89,7 +89,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 #if VLOXY_PROFILING
             if (!Scheduled) return;
 #else
-            if (!Scheduled && !Handle.IsCompleted) return;
+            if (!Scheduled || !Handle.IsCompleted) return;
 #endif
 
             Handle.Complete();
