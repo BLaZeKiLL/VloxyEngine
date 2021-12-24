@@ -18,7 +18,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
         private Dictionary<int3, ChunkBehaviour> _active;
 
-        public ChunkBehaviourPool(Transform transform, VoxelSettings settings) {
+        public ChunkBehaviourPool(Transform transform, VloxySettings settings) {
             var viewRegionSize = settings.Chunk.DrawDistance.CubedSize();
             
             _active = new Dictionary<int3, ChunkBehaviour>(viewRegionSize);

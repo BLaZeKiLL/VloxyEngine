@@ -182,12 +182,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91e0fc6c411e4742a6ee0c6e077682f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DrawHeightMap: 0
-  HeightMapBounds:
-    x: 0
-    y: 0
-    width: 32
-    height: 32
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -471,7 +465,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 177638, guid: 0abab5bb77339e4428787a870eb31bd3, type: 3}
       propertyPath: m_Name
-      value: '[Graphy]'
+      value: Debug
       objectReference: {fileID: 0}
     - target: {fileID: 177638, guid: 0abab5bb77339e4428787a870eb31bd3, type: 3}
       propertyPath: m_IsActive

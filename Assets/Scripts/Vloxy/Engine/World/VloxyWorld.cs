@@ -20,7 +20,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
     public class VloxyWorld : MonoBehaviour {
 
         [SerializeField] private Transform _focus;
-        [SerializeField] private VoxelSettings _settings;
+        [SerializeField] private VloxySettings _settings;
 
         protected ChunkBehaviourPool ChunkBehaviourPool;
         protected MeshBuildScheduler Scheduler;
