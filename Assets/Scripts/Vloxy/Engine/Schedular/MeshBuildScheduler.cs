@@ -39,7 +39,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             ChunkBehaviourPool = chunkBehaviourPool;
             BurstFunctionPointers = burstFunctionPointers;
 
-            VertexParams = new NativeArray<VertexAttributeDescriptor>(5, Allocator.Persistent);
+            VertexParams = new NativeArray<VertexAttributeDescriptor>(6, Allocator.Persistent);
             
             // int's cause issues
             VertexParams[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
@@ -47,6 +47,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             VertexParams[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
             VertexParams[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2);
             VertexParams[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4);
+            VertexParams[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 3);
             
             Results = new NativeHashMap<int3, int>(1024,Allocator.Persistent);
             Jobs = new NativeList<int3>(Allocator.Persistent);

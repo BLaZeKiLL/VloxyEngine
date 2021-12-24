@@ -36,7 +36,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             
             _noise = new FastNoiseLite(_settings.Seed);
             
-            _noise.SetSeed(UnityEngine.Random.Range(10000, 100000));
+            //_noise.SetSeed(UnityEngine.Random.Range(10000, 100000));
             _noise.SetNoiseType(_settings.NoiseType);
             _noise.SetFrequency(_settings.Frequency);
             _noise.SetFractalType(_settings.FractalType);

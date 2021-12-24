@@ -199,7 +199,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 UV1 = ao
             };
 
-            if (vertexOverride.IsCreated) vertexOverride.Invoke(mask.Block, ref vertex1, ref vertex2, ref vertex3, ref vertex4);
+            if (vertexOverride.IsCreated) vertexOverride.Invoke(mask.Block, ref normal, ref vertex1, ref vertex2, ref vertex3, ref vertex4);
 
             mesh.VertexBuffer.Add(vertex1);
             mesh.VertexBuffer.Add(vertex2);
