@@ -120,9 +120,6 @@ namespace UnityTemplateProjects
         {
             m_TargetCameraState.SetFromTransform(transform);
             m_InterpolatingCameraState.SetFromTransform(transform);
-            
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = true;
         }
 
         Vector3 GetInputTranslationDirection()
@@ -161,7 +158,7 @@ namespace UnityTemplateProjects
 #endif
             return direction;
         }
-
+        
         void Update()
         {
             // Exit Sample  
@@ -173,15 +170,32 @@ namespace UnityTemplateProjects
 				UnityEditor.EditorApplication.isPlaying = false; 
 				#endif
             }
-            
-            var mouseMovement = GetInputLookRotation() * Time.deltaTime * 5;
-            if (invertY)
-                mouseMovement.y = -mouseMovement.y;
-            
-            var mouseSensitivityFactor = mouseSensitivityCurve.Evaluate(mouseMovement.magnitude);
 
-            m_TargetCameraState.yaw += mouseMovement.x * mouseSensitivityFactor;
-            m_TargetCameraState.pitch += mouseMovement.y * mouseSensitivityFactor;
+            // Hide and lock cursor when right mouse button pressed
+            if (IsRightMouseButtonDown())
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+
+            // Unlock and show cursor when right mouse button released
+            if (IsRightMouseButtonUp())
+            {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            }
+
+            // Rotation
+            if (IsCameraRotationAllowed())
+            {
+                var mouseMovement = GetInputLookRotation() * Time.deltaTime * 5;
+                if (invertY)
+                    mouseMovement.y = -mouseMovement.y;
+                
+                var mouseSensitivityFactor = mouseSensitivityCurve.Evaluate(mouseMovement.magnitude);
+
+                m_TargetCameraState.yaw += mouseMovement.x * mouseSensitivityFactor;
+                m_TargetCameraState.pitch += mouseMovement.y * mouseSensitivityFactor;
+            }
             
             // Translation
             var translation = GetInputTranslationDirection() * Time.deltaTime;

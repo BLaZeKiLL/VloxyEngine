@@ -10,6 +10,8 @@ namespace CodeBlaze.Vloxy.Textured.Noise {
         public TexturedNoiseProfile2D(INoiseSettings settings, ChunkSettings chunkSettings) : base(settings, chunkSettings) { }
 
         protected override int GetBlock(int heightMapValue, int blockHeight) {
+            //return (int)TexturedBlock.GRASS;
+            
             if (blockHeight > heightMapValue ) return (int) TexturedBlock.AIR;
             if (blockHeight == heightMapValue) return (int) TexturedBlock.GRASS;
             if (blockHeight <= heightMapValue - 1 && blockHeight >= heightMapValue - 3) return (int)TexturedBlock.DIRT;
