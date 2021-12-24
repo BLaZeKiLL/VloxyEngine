@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿#if !(UNITY_EDITOR || DEVELOPMENT_BUILD)
+using System;
+#endif
+
+using System.Collections.Generic;
 using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
@@ -25,18 +29,20 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         
         protected virtual int GetBlock(int heightMapValue, int blockHeight) => default;
         
-        public FastNoiseProfile2D(NoiseSettings2D settings, ChunkSettings chunkSettings) {
-            _heightHalf = settings.Height / 2;
+        public FastNoiseProfile2D(INoiseSettings settings, ChunkSettings chunkSettings) {
+            var _settings = (NoiseSettings2D) settings;
             
-            _noise = new FastNoiseLite(settings.Seed);
+            _heightHalf = _settings.Height / 2;
+            
+            _noise = new FastNoiseLite(_settings.Seed);
             
             _noise.SetSeed(UnityEngine.Random.Range(10000, 100000));
-            _noise.SetNoiseType(settings.NoiseType);
-            _noise.SetFrequency(settings.Frequency);
-            _noise.SetFractalType(settings.FractalType);
-            _noise.SetFractalGain(settings.Gain);
-            _noise.SetFractalLacunarity(settings.Lacunarity);
-            _noise.SetFractalOctaves(settings.Octaves);
+            _noise.SetNoiseType(_settings.NoiseType);
+            _noise.SetFrequency(_settings.Frequency);
+            _noise.SetFractalType(_settings.FractalType);
+            _noise.SetFractalGain(_settings.Gain);
+            _noise.SetFractalLacunarity(_settings.Lacunarity);
+            _noise.SetFractalOctaves(_settings.Octaves);
 
             _chunkSettings = chunkSettings;
         }

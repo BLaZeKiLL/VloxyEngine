@@ -9,7 +9,7 @@ namespace CodeBlaze.Vloxy.Colored.Noise {
 
         private static readonly int COLOR = ColoredBlocks.RandomColor();
 
-        public ColoredNoiseProfile3D(NoiseSettings3D settings, ChunkSettings chunkSettings) : base(settings, chunkSettings) { }
+        public ColoredNoiseProfile3D(INoiseSettings settings, ChunkSettings chunkSettings) : base(settings, chunkSettings) { }
 
         protected override int GetBlock(byte value) {
             return value == 0 ? 0 : COLOR;

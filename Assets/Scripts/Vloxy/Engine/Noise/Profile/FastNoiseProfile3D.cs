@@ -22,16 +22,18 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         
         protected virtual int GetBlock(byte value) => default;
 
-        public FastNoiseProfile3D(NoiseSettings3D settings, ChunkSettings chunkSettings) {
-            _noise = new FastNoiseLite(settings.Seed);
+        public FastNoiseProfile3D(INoiseSettings settings, ChunkSettings chunkSettings) {
+            var _settings = (NoiseSettings3D) settings;
+            
+            _noise = new FastNoiseLite(_settings.Seed);
             
             _noise.SetSeed(UnityEngine.Random.Range(10000, 100000));
-            _noise.SetNoiseType(settings.NoiseType);
-            _noise.SetFrequency(settings.Frequency);
-            _noise.SetFractalType(settings.FractalType);
-            _noise.SetFractalGain(settings.Gain);
-            _noise.SetFractalLacunarity(settings.Lacunarity);
-            _noise.SetFractalOctaves(settings.Octaves);
+            _noise.SetNoiseType(_settings.NoiseType);
+            _noise.SetFrequency(_settings.Frequency);
+            _noise.SetFractalType(_settings.FractalType);
+            _noise.SetFractalGain(_settings.Gain);
+            _noise.SetFractalLacunarity(_settings.Lacunarity);
+            _noise.SetFractalOctaves(_settings.Octaves);
 
             _chunkSettings = chunkSettings;
         }

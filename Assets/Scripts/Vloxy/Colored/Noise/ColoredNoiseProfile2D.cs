@@ -9,7 +9,7 @@ namespace CodeBlaze.Vloxy.Colored.Noise {
 
         private static readonly int COLOR = ColoredBlocks.RandomColor();
         
-        public ColoredNoiseProfile2D(NoiseSettings2D settings, ChunkSettings chunkSettings) : base(settings, chunkSettings) { }
+        public ColoredNoiseProfile2D(INoiseSettings settings, ChunkSettings chunkSettings) : base(settings, chunkSettings) { }
         
         protected override int GetBlock(int heightMapValue, int blockHeight) {
             return blockHeight > heightMapValue ? ColoredBlocks.Air() : COLOR;
