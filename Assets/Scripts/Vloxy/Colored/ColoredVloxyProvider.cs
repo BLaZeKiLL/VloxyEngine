@@ -14,7 +14,8 @@ namespace CodeBlaze.Vloxy.Colored {
 
     public class ColoredVloxyProvider : VloxyProvider {
 
-        public override INoiseProfile NoiseProfile() => new ColoredNoiseProfile2D(Settings.NoiseSettings as NoiseSettings2D, Settings.Chunk);
+        public override INoiseProfile NoiseProfile() => new ColoredNoiseProfile2D(Settings.NoiseSettings, Settings.Chunk);
+        // public override INoiseProfile NoiseProfile() => new ColoredNoiseProfile3D(Settings.NoiseSettings, Settings.Chunk);
 
         public override BurstFunctionPointers SetupBurstFunctionPointers() {
             return new BurstFunctionPointers {

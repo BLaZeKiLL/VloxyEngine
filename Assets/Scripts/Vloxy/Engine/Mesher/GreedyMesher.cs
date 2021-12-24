@@ -123,6 +123,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                                 // create quad
                                 CreateQuad(
                                     mesh, vertex_count, currentMask, directionMask,
+                                    width, height,
                                     chunkItr,
                                     chunkItr + deltaAxis1,
                                     chunkItr + deltaAxis2,
@@ -161,45 +162,64 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         [BurstCompile]
         private static void CreateQuad(
             MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
-            int3 v1, int3 v2, int3 v3, int3 v4, 
+            int width, int height, int3 v1, int3 v2, int3 v3, int3 v4, 
             FunctionPointer<MeshExtensions.VertexOverride> vertexOverride
             ) {
             var normal = directionMask * mask.Normal;
             var ao = new float4(AO_CURVE[mask.AO[0]], AO_CURVE[mask.AO[1]], AO_CURVE[mask.AO[2]], AO_CURVE[mask.AO[3]]);
 
+            // Main UV
+            float2 uv1, uv2, uv3, uv4;
+
+            if (normal.x is 1 or -1) {
+                uv1 = new float2(0, 0);
+                uv2 = new float2(0, width);
+                uv3 = new float2(height, 0);
+                uv4 = new float2(height, width);
+            } else {
+                uv1 = new float2(0, 0);
+                uv2 = new float2(width, 0);
+                uv3 = new float2(0, height);
+                uv4 = new float2(width, height);
+            }
+            
             // 1 Bottom Left
             var vertex1 = new Vertex {
                 Position = v1,
                 Normal = normal,
-                UV0 = new float2(0f, 0f),
-                UV1 = ao
+                UV0 = new float3(uv1, 0),
+                UV1 = new float2(0, 0),
+                UV2 = ao
             };
 
             // 2 Top Left
             var vertex2 = new Vertex {
                 Position = v2,
                 Normal = normal,
-                UV0 = new float2(0f, 1f),
-                UV1 = ao
+                UV0 = new float3(uv2, 0),
+                UV1 = new float2(0, 1),
+                UV2 = ao
             };
 
             // 3 Bottom Right
             var vertex3 = new Vertex {
                 Position = v3,
                 Normal = normal,
-                UV0 = new float2(1f, 0f),
-                UV1 = ao
+                UV0 = new float3(uv3, 0),
+                UV1 = new float2(1, 0),
+                UV2 = ao
             };
 
             // 4 Top Right
             var vertex4 = new Vertex {
                 Position = v4,
                 Normal = normal,
-                UV0 = new float2(1f, 1f),
-                UV1 = ao
+                UV0 = new float3(uv4, 0),
+                UV1 = new float2(1, 1),
+                UV2 = ao
             };
 
-            if (vertexOverride.IsCreated) vertexOverride.Invoke(mask.Block, ref vertex1, ref vertex2, ref vertex3, ref vertex4);
+            if (vertexOverride.IsCreated) vertexOverride.Invoke(mask.Block, ref normal, ref vertex1, ref vertex2, ref vertex3, ref vertex4);
 
             mesh.VertexBuffer.Add(vertex1);
             mesh.VertexBuffer.Add(vertex2);

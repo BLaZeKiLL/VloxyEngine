@@ -14,7 +14,7 @@ namespace CodeBlaze.Vloxy.Engine {
 
     public class VloxyProvider : Provider<VloxyProvider> {
 
-        public VoxelSettings Settings { get; set; }
+        public VloxySettings Settings { get; set; }
 
         public virtual BurstFunctionPointers SetupBurstFunctionPointers() => new();
 

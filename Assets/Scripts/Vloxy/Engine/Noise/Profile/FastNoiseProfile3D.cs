@@ -1,9 +1,5 @@
-﻿#if !(UNITY_EDITOR || DEVELOPMENT_BUILD)
-using System;
-#endif
-
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise.Settings;
@@ -15,24 +11,19 @@ using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Mathematics;
 
-using UnityEngine;
-
 namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
-    public class FastNoiseProfile2D : INoiseProfile {
+    public class FastNoiseProfile3D : INoiseProfile {
 
         private FastNoiseLite _noise;
-        private int _heightHalf;
 
-        private Dictionary<int2, int> _heightMap;
+        private Dictionary<int3, byte> _heightMap;
         private ChunkSettings _chunkSettings;
         
-        protected virtual int GetBlock(int heightMapValue, int blockHeight) => default;
-        
-        public FastNoiseProfile2D(INoiseSettings settings, ChunkSettings chunkSettings) {
-            var _settings = (NoiseSettings2D) settings;
-            
-            _heightHalf = _settings.Height / 2;
+        protected virtual int GetBlock(byte value) => default;
+
+        public FastNoiseProfile3D(INoiseSettings settings, ChunkSettings chunkSettings) {
+            var _settings = (NoiseSettings3D) settings;
             
             _noise = new FastNoiseLite(_settings.Seed);
             
@@ -48,16 +39,20 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         }
 
         public void GenerateHeightMap() {
+            var sizeY = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.y;
             var sizeZ = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.z;
             var sizeX = _chunkSettings.ChunkPageSize * _chunkSettings.ChunkSize.x;
-            
-            _heightMap = new Dictionary<int2, int>((2 * sizeX + 1) * (2 * sizeZ + 1));
-            
-            for (int z = -sizeZ; z <= sizeZ + _chunkSettings.ChunkSize.z; z++) {
-                for (int x = -sizeX; x <= sizeX + _chunkSettings.ChunkSize.x; x++) {
-                    _heightMap.Add(new int2(x,z), GetHeight(x, z));
+
+            _heightMap = new Dictionary<int3, byte>((2 * sizeX + 1) * (2 * sizeZ + 1) * (2 * sizeY + 1));
+
+            for (int y = -sizeY; y < sizeY + _chunkSettings.ChunkSize.y; y++) {
+                for (int z = -sizeZ; z <= sizeZ + _chunkSettings.ChunkSize.z; z++) {
+                    for (int x = -sizeX; x <= sizeX + _chunkSettings.ChunkSize.x; x++) {
+                        _heightMap.Add(new int3(x, y, z), GetNoise(x, y, z));
+                    }
                 }
             }
+
 
 #if VLOXY_LOGGING
             VloxyLogger.Info<FastNoiseProfile2D>("Height Map Generated");
@@ -67,15 +62,15 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
         public ChunkData GenerateChunkData(int3 pos) {
             var data = VloxyProvider.Current.CreateChunkData();
 
-            int current_block = GetBlock(_heightMap[new int2(pos.x, pos.z)], pos.y);
+            int current_block = GetBlock(_heightMap[pos]);
             int count = 0;
 
             // Loop order should be same as flatten order for AddBlocks to work properly
             for (int y = 0; y < _chunkSettings.ChunkSize.y; y++) {
                 for (int z = 0; z < _chunkSettings.ChunkSize.z; z++) {
                     for (int x = 0; x < _chunkSettings.ChunkSize.x; x++) {
-                        var height = _heightMap[new int2(pos.x + x, pos.z + z)];
-                        var block = GetBlock(height, pos.y + y);
+                        var value = _heightMap[new int3(pos.x + x, pos.y + y, pos.z + z)];
+                        var block = GetBlock(value);
 
                         if (block == current_block) {
                             count++;
@@ -93,19 +88,15 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             return data;
         }
 
-        public List<Vector3> GetHeightMap() {
-            return _heightMap.Select(pair => new Vector3(pair.Key.x, pair.Value, pair.Key.y)).ToList();
-        }
-
         public void Dispose() {
-#if !(UNITY_EDITOR || DEVELOPMENT_BUILD)
+// #if !(UNITY_EDITOR || DEVELOPMENT_BUILD)
             _heightMap.Clear();
             GC.Collect();
-#endif
+// #endif
         }
-
-        private int GetHeight(int x, int z) {
-            return Mathf.Clamp(Mathf.RoundToInt(_noise.GetNoise(x, z) * _heightHalf ), -_heightHalf, _heightHalf);
+        
+        private byte GetNoise(int x, int y, int z) {
+            return (byte) (_noise.GetNoise(x, y, z) > 0 ? 1 : 0);
         }
 
     }

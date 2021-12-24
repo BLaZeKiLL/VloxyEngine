@@ -2,10 +2,9 @@
 
 namespace CodeBlaze.Vloxy.Engine.Noise.Settings {
 
-    [CreateAssetMenu(fileName = "NoiseSettings2D", menuName = "Vloxy/NoiseSettings/2D", order = 0)]
-    public class NoiseSettings2D : INoiseSettings {
+    [CreateAssetMenu(fileName = "NoiseSettings3D", menuName = "Vloxy/NoiseSettings/3D", order = 0)]
+    public class NoiseSettings3D : INoiseSettings {
 
-        public int Height = 256;
         public int Seed = 1337;
         public FastNoiseLite.NoiseType NoiseType = FastNoiseLite.NoiseType.Perlin;
         public float Frequency = 0.003f;

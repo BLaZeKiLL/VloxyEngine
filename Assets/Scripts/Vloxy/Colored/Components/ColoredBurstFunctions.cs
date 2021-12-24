@@ -13,7 +13,8 @@ namespace CodeBlaze.Vloxy.Colored.Components {
         [BurstCompile]
         [MonoPInvokeCallback(typeof(MeshExtensions.VertexOverride))]
         public static void ColoredVertexOverride(
-            int block, 
+            int block,
+            ref int3 normal,
             ref Vertex v1, 
             ref Vertex v2, 
             ref Vertex v3,

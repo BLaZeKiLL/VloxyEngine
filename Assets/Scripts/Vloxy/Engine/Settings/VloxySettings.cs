@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Settings {
 
-    [CreateAssetMenu(fileName = "VoxelSettings", menuName = "Voxel Engine/Settings", order = 0)]
-    public class VoxelSettings : ScriptableObject {
+    [CreateAssetMenu(fileName = "VloxySettings", menuName = "Vloxy/EngineSettings", order = 0)]
+    public class VloxySettings : ScriptableObject {
 
         public INoiseSettings NoiseSettings;
         public ChunkSettings Chunk;
