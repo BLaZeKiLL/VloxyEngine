@@ -19,4 +19,4 @@ MonoBehaviour:
   FractalType: 1
   Gain: 0.5
   Lacunarity: 2
-  Octaves: 5
+  Octaves: 8
