@@ -9,8 +9,6 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
     [BurstCompatible]
     public static class GreedyMesher {
 
-        private static readonly float4 AO_CURVE = new(0.75f, 0.825f, 0.9f, 1.0f);
-
         [BurstCompile]
         private readonly struct Mask {
 
@@ -166,7 +164,6 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             FunctionPointer<MeshExtensions.VertexOverride> vertexOverride
             ) {
             var normal = directionMask * mask.Normal;
-            var ao = new float4(AO_CURVE[mask.AO[0]], AO_CURVE[mask.AO[1]], AO_CURVE[mask.AO[2]], AO_CURVE[mask.AO[3]]);
 
             // Main UV
             float2 uv1, uv2, uv3, uv4;
@@ -189,7 +186,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 Normal = normal,
                 UV0 = new float3(uv1, 0),
                 UV1 = new float2(0, 0),
-                UV2 = ao
+                UV2 = mask.AO
             };
 
             // 2 Top Left
@@ -198,7 +195,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 Normal = normal,
                 UV0 = new float3(uv2, 0),
                 UV1 = new float2(0, 1),
-                UV2 = ao
+                UV2 = mask.AO
             };
 
             // 3 Bottom Right
@@ -207,7 +204,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 Normal = normal,
                 UV0 = new float3(uv3, 0),
                 UV1 = new float2(1, 0),
-                UV2 = ao
+                UV2 = mask.AO
             };
 
             // 4 Top Right
@@ -216,7 +213,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 Normal = normal,
                 UV0 = new float3(uv4, 0),
                 UV1 = new float2(1, 1),
-                UV2 = ao
+                UV2 = mask.AO
             };
 
             if (vertexOverride.IsCreated) vertexOverride.Invoke(mask.Block, ref normal, ref vertex1, ref vertex2, ref vertex3, ref vertex4);
