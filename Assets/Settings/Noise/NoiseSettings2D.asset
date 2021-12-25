@@ -15,8 +15,8 @@ MonoBehaviour:
   Height: 256
   Seed: 1331
   NoiseType: 3
-  Frequency: 0.01
+  Frequency: 0.003
   FractalType: 1
   Gain: 0.5
   Lacunarity: 2
-  Octaves: 8
+  Octaves: 5

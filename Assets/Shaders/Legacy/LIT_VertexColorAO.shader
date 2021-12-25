@@ -3,6 +3,7 @@
         _Glossiness ("Smoothness", Range(0,1)) = 0.0
         _Metallic ("Metallic", Range(0,1)) = 0.0
         _AOColor ("AO Color", Color) = (0,0,0,1)
+        _AOCurve ("AO Curve", Vector) = (0.75, 0.825, 0.9, 1.0)
         _AOIntensity ("AO Intensity", Range(0, 1)) = 1.0
 		_AOPower ("AO Power", Range(0, 1)) = 1.0
     }
@@ -25,11 +26,12 @@
         half _Metallic;
         
         half4 _AOColor;
+        float4 _AOCurve;
         float _AOIntensity;
 		float _AOPower;
 
-        float compute_ao(float ao) {
-            return pow(ao * _AOIntensity, _AOPower);
+        float compute_ao(float index) {
+            return pow(_AOCurve[index] * _AOIntensity, _AOPower);
         }
         
         void vert (inout appdata_full v, out Input o) {
