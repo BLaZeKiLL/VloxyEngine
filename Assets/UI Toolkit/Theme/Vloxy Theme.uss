@@ -1,0 +1,30 @@
+#unity-text-input {
+    background-color: #1C1C1C;
+    border-color: #111111;
+    border-radius: 8px;
+}
+
+.unity-text-field__label {
+    min-width: auto;
+}
+
+#unity-tracker {
+    background-color: #1C1C1C;
+    border-color: #111111;
+}
+
+#unity-dragger {
+    background-color: #333333;
+    border-color: #111111;
+}
+
+#unity-progress-bar .unity-progress-bar__background {
+    background-color: #1C1C1C;
+    border-color: #111111;
+    border-radius: 8px;
+}
+
+#unity-progress-bar .unity-progress-bar__progress {
+    background-color: #62E55C;
+    border-radius: 8px;
+}

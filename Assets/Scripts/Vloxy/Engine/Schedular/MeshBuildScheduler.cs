@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Components;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
 using Unity.Collections;
 using Unity.Jobs;
@@ -32,7 +33,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 
         private bool Scheduled;
         
-        public MeshBuildScheduler(int batchSize, int3 chunkSize, ChunkBehaviourPool chunkBehaviourPool, BurstFunctionPointers burstFunctionPointers) {
+        public MeshBuildScheduler(int batchSize, int3 chunkSize, int drawDistance, ChunkBehaviourPool chunkBehaviourPool, BurstFunctionPointers burstFunctionPointers) {
             BatchSize = batchSize;
             ChunkSize = chunkSize;
             
@@ -49,7 +50,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             VertexParams[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2);
             VertexParams[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4);
             
-            Results = new NativeHashMap<int3, int>(1024,Allocator.Persistent);
+            Results = new NativeHashMap<int3, int>(drawDistance.CubedSize(),Allocator.Persistent);
             Jobs = new NativeList<int3>(Allocator.Persistent);
         }
 
