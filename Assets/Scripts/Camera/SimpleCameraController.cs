@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 #endif
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace UnityTemplateProjects
 {
@@ -165,10 +166,7 @@ namespace UnityTemplateProjects
 
             if (IsEscapePressed())
             {
-                Application.Quit();
-				#if UNITY_EDITOR
-				UnityEditor.EditorApplication.isPlaying = false; 
-				#endif
+                SceneManager.LoadScene(0);
             }
 
             // Hide and lock cursor when right mouse button pressed

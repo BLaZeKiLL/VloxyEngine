@@ -29,6 +29,7 @@ namespace CodeBlaze.Vloxy.Engine {
         public virtual MeshBuildScheduler MeshBuildScheduler(ChunkBehaviourPool chunkBehaviourPool, BurstFunctionPointers burstFunctionPointers) => new(
             Settings.Scheduler.BatchSize, 
             Settings.Chunk.ChunkSize, 
+            Settings.Chunk.DrawDistance,
             chunkBehaviourPool,
             burstFunctionPointers
         );

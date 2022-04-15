@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: NoiseSettings2D
   m_EditorClassIdentifier: 
   Height: 256
-  Seed: 1331
+  Seed: 1337
   NoiseType: 3
-  Frequency: 0.003
+  Frequency: 0.006
   FractalType: 1
   Gain: 0.5
   Lacunarity: 2
-  Octaves: 8
+  Octaves: 6
