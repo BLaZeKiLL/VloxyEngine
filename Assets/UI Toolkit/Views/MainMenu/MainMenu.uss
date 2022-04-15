@@ -29,3 +29,11 @@
     color: rgba(255, 255, 255, 255);
     -unity-text-align: middle-center;
 }
+
+.vloxy-text-primary {
+    color: rgb(98, 229, 92);
+}
+
+.vloxy-display-none {
+    display: none;
+}

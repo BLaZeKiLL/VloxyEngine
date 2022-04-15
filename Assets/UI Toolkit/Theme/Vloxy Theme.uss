@@ -18,6 +18,11 @@
     border-color: #111111;
 }
 
+#unity-checkmark {
+    border-color: #111111;
+    border-radius: 8px;
+}
+
 #unity-progress-bar .unity-progress-bar__background {
     background-color: #1C1C1C;
     border-color: #111111;

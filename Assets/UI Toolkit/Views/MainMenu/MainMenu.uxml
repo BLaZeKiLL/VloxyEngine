@@ -1,26 +1,67 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI%20Toolkit/Views/MainMenu/MainMenu.uss?fileID=7433441132597879392&amp;guid=e09b2b0947a977b4fb9109800d106694&amp;type=3#MainMenu" />
-    <ui:VisualElement name="Root" style="flex-grow: 1; align-items: stretch; justify-content: center; padding-left: 16%; padding-right: 16%; padding-top: 4%; padding-bottom: 4%; background-image: url(&apos;project://database/Assets/UI%20Toolkit/Images/textured_02.png?fileID=2800000&amp;guid=ecd02cd85939b244e89b7bda0f787a05&amp;type=3#textured_02&apos;);">
+    <ui:VisualElement name="Root" style="flex-grow: 1; align-items: stretch; justify-content: center; padding-left: 32%; padding-right: 32%; padding-top: 16%; padding-bottom: 16%; background-image: url(&apos;project://database/Assets/UI%20Toolkit/Images/textured_02.png?fileID=2800000&amp;guid=ecd02cd85939b244e89b7bda0f787a05&amp;type=3#textured_02&apos;);">
         <ui:VisualElement name="Header" class="vloxy-card" style="flex-grow: 0; flex-direction: row; align-items: stretch; justify-content: center; margin-bottom: 16px; background-color: rgba(34, 34, 34, 0.75);">
             <ui:Label text="Vloxy Engine" display-tooltip-when-elided="true" name="Title" style="-unity-text-align: middle-center; font-size: 36px; color: rgb(255, 255, 255);" />
         </ui:VisualElement>
         <ui:VisualElement name="Main" class="card vloxy-card" style="flex-grow: 1; margin-top: 16px; flex-direction: column; background-color: rgba(34, 34, 34, 0.75);">
             <ui:VisualElement name="Options" style="flex-direction: row; flex-grow: 1;">
                 <ui:VisualElement name="OptionsList" style="width: 150px;">
-                    <ui:Label text="Height Map" display-tooltip-when-elided="true" class="vloxy-text" />
-                    <ui:Label text="Chunk" display-tooltip-when-elided="true" class="vloxy-text" />
-                    <ui:Label text="Rendering" display-tooltip-when-elided="true" class="vloxy-text" />
-                    <ui:Label text="Schedular" display-tooltip-when-elided="true" class="vloxy-text" />
+                    <ui:Label name="HeightMapButton" text="Height Map" display-tooltip-when-elided="true" class="vloxy-text vloxy-text-primary" />
+                    <ui:Label name="ChunkButton" text="Chunk" display-tooltip-when-elided="true" class="vloxy-text" />
+                    <ui:Label name="RenderingButton" text="Rendering" display-tooltip-when-elided="true" class="vloxy-text" />
+                    <ui:Label name="SchedularButton" text="Schedular" display-tooltip-when-elided="true" class="vloxy-text" />
                 </ui:VisualElement>
                 <ui:VisualElement name="Page" style="flex-grow: 1; flex-shrink: 0;">
-                    <ui:SliderInt label="Page Size" value="8" high-value="20" name="PageSize" class="vloxy-text" />
-                    <ui:SliderInt label="Draw Distance" value="4" high-value="20" name="DrawDistance" class="vloxy-text" />
-                    <ui:VisualElement value="4" name="ChunkSize" style="flex-direction: row;">
-                        <ui:Label text="Chunk Size" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
-                        <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
-                            <ui:TextField label="X" value="32" text="32" max-length="2" name="ChunkSizeX" class="vloxy-text" style="flex-grow: 1;" />
-                            <ui:TextField label="Y" value="32" text="32" max-length="2" name="ChunkSizeY" class="vloxy-text" style="flex-grow: 1;" />
-                            <ui:TextField label="Z" value="32" text="32" max-length="2" name="ChunkSizeZ" class="vloxy-text" style="flex-grow: 1;" />
+                    <ui:VisualElement name="HeightMapPage">
+                        <ui:VisualElement style="flex-direction: row;">
+                            <ui:Label text="Height" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:TextField value="256" text="256" name="Height" class="vloxy-text" style="flex-grow: 1;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row;">
+                            <ui:Label text="Seed" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:TextField value="1337" text="1337" name="Seed" class="vloxy-text" style="flex-grow: 1;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row;">
+                            <ui:Label text="Frequency" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:TextField value="0.03" text="0.03" name="Frequency" class="vloxy-text" style="flex-grow: 1;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row;">
+                            <ui:Label text="Gain" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:TextField value="0.5" text="0.5" name="Gain" class="vloxy-text" style="flex-grow: 1;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row;">
+                            <ui:Label text="Lacunarity" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:TextField value="2" text="2" name="Lacunarity" class="vloxy-text" style="flex-grow: 1;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row;">
+                            <ui:Label text="Octaves" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:TextField value="4" text="4" name="Octaves" class="vloxy-text" style="flex-grow: 1;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ChunkPage" class="vloxy-display-none">
+                        <ui:SliderInt label="Page Size" value="8" high-value="20" name="PageSize" class="vloxy-text" />
+                        <ui:SliderInt label="Draw Distance" value="4" high-value="20" name="DrawDistance" class="vloxy-text" />
+                        <ui:VisualElement value="4" name="ChunkSize" style="flex-direction: row;">
+                            <ui:Label text="Chunk Size" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+                                <ui:TextField label="X" value="32" text="32" max-length="2" name="ChunkSizeX" class="vloxy-text" style="flex-grow: 1;" />
+                                <ui:TextField label="Y" value="32" text="32" max-length="2" name="ChunkSizeY" class="vloxy-text" style="flex-grow: 1;" />
+                                <ui:TextField label="Z" value="32" text="32" max-length="2" name="ChunkSizeZ" class="vloxy-text" style="flex-grow: 1;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="RenderingPage" class="vloxy-display-none">
+                        <ui:VisualElement style="flex-direction: row;">
+                            <ui:Label text="CastShadows" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:VisualElement style="flex-grow: 1;" />
+                            <ui:Toggle name="CastShadows" class="vloxy-text" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="SchedularPage" class="vloxy-display-none">
+                        <ui:VisualElement style="flex-direction: row;">
+                            <ui:Label text="BatchSize" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:TextField value="32" text="32" name="BatchSize" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
