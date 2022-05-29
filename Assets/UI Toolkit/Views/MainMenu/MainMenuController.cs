@@ -7,6 +7,8 @@ using Unity.Mathematics;
 
 using UnityEngine.UIElements;
 
+using Random = UnityEngine.Random;
+
 namespace CodeBlaze {
 
     public class MainMenuController {
@@ -76,10 +78,12 @@ namespace CodeBlaze {
             public HeightMapController(VisualElement root) {
                 _height = root.Q<TextField>("Height");
                 _seed = root.Q<TextField>("Seed");
-                _frequency = root.Q<TextField>("Frequency");
-                _gain = root.Q<TextField>("Gain");
+                _frequency = root.Q<TextField>("Scale");
+                _gain = root.Q<TextField>("Persistence");
                 _lacunarity = root.Q<TextField>("Lacunarity");
                 _octaves = root.Q<TextField>("Octaves");
+
+                _seed.value = Random.Range(0, 1000000).ToString();
             }
 
             public void SetValue(VloxySettings settings) {

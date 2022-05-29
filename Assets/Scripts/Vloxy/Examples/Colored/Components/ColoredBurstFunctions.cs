@@ -1,15 +1,15 @@
 ﻿using AOT;
 
-using CodeBlaze.Vloxy.Colored.Data;
 using CodeBlaze.Vloxy.Engine.Mesher;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
+using CodeBlaze.Vloxy.Examples.Colored.Data;
 
 using Unity.Burst;
 using Unity.Mathematics;
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Colored.Components {
+namespace CodeBlaze.Vloxy.Examples.Colored.Components {
 
     [BurstCompile]
     public static class ColoredBurstFunctions {

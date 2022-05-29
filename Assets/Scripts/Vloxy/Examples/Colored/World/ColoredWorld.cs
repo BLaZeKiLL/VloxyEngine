@@ -2,7 +2,7 @@
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.World;
 
-namespace CodeBlaze.Vloxy.Colored.World {
+namespace CodeBlaze.Vloxy.Examples.Colored.World {
 
     public class ColoredWorld : VloxyWorld {
 

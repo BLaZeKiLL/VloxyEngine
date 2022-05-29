@@ -2,12 +2,12 @@
 
 using CodeBlaze.Vloxy.Engine.Mesher;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
-using CodeBlaze.Vloxy.Textured.Data;
+using CodeBlaze.Vloxy.Examples.Textured.Data;
 
 using Unity.Burst;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Textured.Components {
+namespace CodeBlaze.Vloxy.Examples.Textured.Components {
 
     [BurstCompile]
     public static class TexturedBurstFunctions {

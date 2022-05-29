@@ -1,20 +1,7 @@
-﻿#if !(UNITY_EDITOR || DEVELOPMENT_BUILD)
-using System;
-#endif
-
-using System.Runtime.InteropServices;
-
-using CodeBlaze.Vloxy.Engine.Noise.Settings;
+﻿using System.Runtime.InteropServices;
 
 using Unity.Burst;
-
-#if VLOXY_LOGGING
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
-#endif
-
 using Unity.Mathematics;
-
-using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
 
@@ -45,11 +32,11 @@ namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
             float frequency = 1;
             float height = 0;
 
-            for (int i = 0; i < _Settings.Octaves; i++) {
-                float x = position.x / _Settings.Scale * frequency;
-                float z = position.z / _Settings.Scale * frequency;
+            float sampleX = (position.x + _Settings.Seed) / _Settings.Scale;
+            float sampleZ = (position.z + _Settings.Seed) / _Settings.Scale;
 
-                float noise = Unity.Mathematics.noise.cnoise(new float2(x, z));
+            for (int i = 0; i < _Settings.Octaves; i++) {
+                float noise = Unity.Mathematics.noise.cnoise(new float2(sampleX * frequency, sampleZ * frequency));
 
                 height += noise * amplitude;
 

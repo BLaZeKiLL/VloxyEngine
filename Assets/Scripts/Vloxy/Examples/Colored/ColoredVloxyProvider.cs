@@ -3,21 +3,21 @@ using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Mesher;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Noise.Settings;
-using CodeBlaze.Vloxy.Textured.Components;
+using CodeBlaze.Vloxy.Examples.Colored.Components;
 
 using Unity.Burst;
 
-namespace CodeBlaze.Vloxy.Textured.Vloxy.Textured {
+namespace CodeBlaze.Vloxy.Examples.Colored {
 
-    public class TexturedVloxyProvider : VloxyProvider {
+    public class ColoredVloxyProvider : VloxyProvider {
         
         public override BurstFunctionPointers SetupBurstFunctionPointers() {
             return new BurstFunctionPointers {
-                VertexOverridePointer = BurstCompiler.CompileFunctionPointer<MeshOverrides.VertexOverride>(TexturedBurstFunctions.TexturedVertexOverride),
-                ComputeBlockOverridePointer = BurstCompiler.CompileFunctionPointer<NoiseOverrides.ComputeBlockOverride>(TexturedBurstFunctions.TexturedComputeBlockOverride)
+                VertexOverridePointer = BurstCompiler.CompileFunctionPointer<MeshOverrides.VertexOverride>(ColoredBurstFunctions.ColoredVertexOverride),
+                ComputeBlockOverridePointer = BurstCompiler.CompileFunctionPointer<NoiseOverrides.ComputeBlockOverride>(ColoredBurstFunctions.ColoredComputeBlockOverride)
             };
         }
-
+        
         public override NoiseProfile NoiseProfile() {
             var settings = (NoiseSettings) Settings.NoiseSettings;
 

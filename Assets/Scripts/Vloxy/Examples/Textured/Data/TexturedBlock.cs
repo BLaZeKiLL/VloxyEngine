@@ -1,4 +1,4 @@
-﻿namespace CodeBlaze.Vloxy.Textured.Data {
+﻿namespace CodeBlaze.Vloxy.Examples.Textured.Data {
 
     public enum TexturedBlock : int {
 

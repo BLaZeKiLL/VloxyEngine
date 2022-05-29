@@ -9,7 +9,7 @@ namespace CodeBlaze.Editor.Build {
         private static void BuildMonoDebug() {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
-                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING", "VLOXY_DEBUG", "VLOXY_PROFILING"
+                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING", "VLOXY_DEBUG"
             });
             
             var options = new BuildPlayerOptions {
@@ -51,7 +51,7 @@ namespace CodeBlaze.Editor.Build {
         private static void BuildIL2CPPDebug() {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.IL2CPP);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
-                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING", "VLOXY_DEBUG", "VLOXY_PROFILING"
+                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING", "VLOXY_DEBUG"
             });
             
             var options = new BuildPlayerOptions {

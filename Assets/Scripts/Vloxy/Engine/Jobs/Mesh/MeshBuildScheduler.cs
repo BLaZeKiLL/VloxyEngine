@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-using UnityEngine;
 using UnityEngine.Rendering;
-
-#if VLOXY_PROFILING
-using CodeBlaze.Vloxy.Profiling;
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
-#endif
 
 namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
@@ -34,6 +30,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         private NativeArray<VertexAttributeDescriptor> VertexParams;
 
         private bool Scheduled;
+
+#if VLOXY_LOGGING
+        private Stopwatch watch;
+#endif
         
         public MeshBuildScheduler(int batchSize, int3 chunkSize, int drawDistance, ChunkBehaviourPool chunkBehaviourPool, BurstFunctionPointers burstFunctionPointers) {
             BatchSize = batchSize;
@@ -55,12 +55,16 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             
             Results = new NativeHashMap<int3, int>(drawDistance.CubedSize(),Allocator.Persistent);
             Jobs = new NativeList<int3>(Allocator.Persistent);
+            
+#if VLOXY_LOGGING
+            watch = new Stopwatch();
+#endif
         }
 
         // Call early in frame
         public void Schedule(List<int3> jobs, ChunkStoreAccessor accessor) {
-#if VLOXY_PROFILING
-            VloxyProfiler.MeshBuildJobMarker.Begin();
+#if VLOXY_LOGGING
+            watch.Restart();
 #endif
             if (Scheduled) {
                 throw new InvalidOperationException("Job Already Scheduled");
@@ -89,11 +93,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
         // Call late in frame
         public void Complete() {
-#if VLOXY_PROFILING
-            if (!Scheduled) return;
-#else
             if (!Scheduled || !Handle.IsCompleted) return;
-#endif
+            
             Handle.Complete();
 
             var meshes = new UnityEngine.Mesh[Jobs.Length];
@@ -114,10 +115,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
             Scheduled = false;
             
-#if VLOXY_PROFILING
-            VloxyProfiler.MeshBuildJobMarker.End();
-            
-            VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {VloxyProfiler.MeshBuildJobRecorder.TimeMS()}");
+#if VLOXY_LOGGING
+            watch.Stop();
+            VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {watch.ElapsedMilliseconds} MS");
 #endif
         }
         

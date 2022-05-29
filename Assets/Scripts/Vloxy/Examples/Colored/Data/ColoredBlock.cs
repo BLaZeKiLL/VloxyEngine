@@ -5,7 +5,7 @@ using UnityEngine;
 
 using Random = UnityEngine.Random;
 
-namespace CodeBlaze.Vloxy.Colored.Data {
+namespace CodeBlaze.Vloxy.Examples.Colored.Data {
 
     public static class ColoredBlocks {
 

@@ -17,7 +17,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
         private int3 _ChunkSize;
         private int _PageSize;
         private BurstFunctionPointers _BurstFunctionPointers;
-        
+
         private NativeHashMap<int3, ChunkData> _Results;
 
         private JobHandle _Handle;
@@ -34,9 +34,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
             if (_Scheduled) {
                 throw new InvalidOperationException("Job Already Scheduled");
             }
-            
+
             _Results = new NativeHashMap<int3, ChunkData>(_PageSize.CubedSize(), Allocator.TempJob);
-            
+
             var job = new ChunkDataJob {
                 Data = data,
                 Jobs = jobs,
@@ -46,7 +46,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
                 BurstFunctionPointers = _BurstFunctionPointers
             };
 
-            _Handle = job.Schedule(jobs.Length, 1);
+            _Handle = job.Schedule(jobs.Length, 4);
 
             _Scheduled = true;
         }
@@ -62,7 +62,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
         public void Dispose() {
             _Results.Dispose();
         }
-        
 
     }
 

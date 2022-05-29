@@ -1,4 +1,6 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
+﻿using System.Diagnostics;
+
+using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
@@ -10,12 +12,7 @@ using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Mathematics;
 
-
 using UnityEngine;
-
-#if VLOXY_PROFILING
-using CodeBlaze.Vloxy.Profiling;
-#endif
 
 namespace CodeBlaze.Vloxy.Engine.World {
 
@@ -68,16 +65,23 @@ namespace CodeBlaze.Vloxy.Engine.World {
             ChunkDataScheduler = VloxyProvider.Current.ChunkDataScheduler(NoiseProfile, BurstFunctionPointers);
             ChunkStore = VloxyProvider.Current.ChunkStore(ChunkDataScheduler);
             
-#if VLOXY_PROFILING
-            VloxyProfiler.Initialize();
-#endif
 #if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
 #endif
         }
 
         private void Start() {
+#if VLOXY_LOGGING
+            var watch = new Stopwatch();
+            watch.Start();
+#endif
+            
             ChunkStore.GenerateChunks();
+
+#if VLOXY_LOGGING
+            watch.Stop();
+            VloxyLogger.Info<VloxyWorld>($"Vloxy World Generated : {watch.ElapsedMilliseconds} MS");
+#endif
             
             FocusChunkCoord = new int3(1,1,1) * int.MinValue;
 
@@ -99,16 +103,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void OnDestroy() {
             ChunkStore.Dispose();
             MeshBuildScheduler.Dispose();
-
-#if VLOXY_PROFILING
-            VloxyProfiler.Dispose();
-#endif
         }
 
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
-#if VLOXY_PROFILING
-            VloxyProfiler.ViewRegionUpdateMarker.Begin();
-#endif
             var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
 
             if (claim.Count != 0) MeshBuildScheduler.Schedule(claim, ChunkStore.Accessor);
@@ -120,10 +117,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
             WorldViewRegionUpdate();
 
             FocusChunkCoord = NewFocusChunkCoord;
-            
-#if VLOXY_PROFILING
-            VloxyProfiler.ViewRegionUpdateMarker.End();
-#endif
         }
 
         #endregion

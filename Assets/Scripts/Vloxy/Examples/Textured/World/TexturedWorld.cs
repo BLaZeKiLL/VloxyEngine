@@ -2,7 +2,7 @@
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.World;
 
-namespace CodeBlaze.Vloxy.Textured.Vloxy.Textured.World {
+namespace CodeBlaze.Vloxy.Examples.Textured.World {
 
     public class TexturedWorld : VloxyWorld {
 
