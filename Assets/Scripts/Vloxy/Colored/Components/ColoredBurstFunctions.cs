@@ -1,9 +1,13 @@
 ﻿using AOT;
 
+using CodeBlaze.Vloxy.Colored.Data;
 using CodeBlaze.Vloxy.Engine.Mesher;
+using CodeBlaze.Vloxy.Engine.Noise.Profile;
 
 using Unity.Burst;
 using Unity.Mathematics;
+
+using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Colored.Components {
 
@@ -11,7 +15,7 @@ namespace CodeBlaze.Vloxy.Colored.Components {
     public static class ColoredBurstFunctions {
 
         [BurstCompile]
-        [MonoPInvokeCallback(typeof(MeshExtensions.VertexOverride))]
+        [MonoPInvokeCallback(typeof(MeshOverrides.VertexOverride))]
         public static void ColoredVertexOverride(
             int block,
             ref int3 normal,
@@ -31,6 +35,12 @@ namespace CodeBlaze.Vloxy.Colored.Components {
             v2.Color = color;
             v3.Color = color;
             v4.Color = color;
+        }
+        
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(NoiseOverrides.ComputeBlockOverride))]
+        public static int ColoredComputeBlockOverride(ref NoiseValue noise) {
+            return noise.Position.y > noise.Value ? ColoredBlocks.Air() : ColoredBlocks.FromColor32(new Color32(255, 10, 10, 255));
         }
 
     }

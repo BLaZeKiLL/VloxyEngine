@@ -1,10 +1,8 @@
-﻿using CodeBlaze.Vloxy.Engine.Data;
-
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Components {
+namespace CodeBlaze.Vloxy.Engine.Data {
 
     [BurstCompile]
     public struct ChunkStoreAccessor {

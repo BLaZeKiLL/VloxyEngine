@@ -23,11 +23,11 @@
                             <ui:TextField value="1337" text="1337" name="Seed" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row;">
-                            <ui:Label text="Frequency" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
-                            <ui:TextField value="0.03" text="0.03" name="Frequency" class="vloxy-text" style="flex-grow: 1;" />
+                            <ui:Label text="Scale" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:TextField value="0.01" text="0.01" name="Frequency" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row;">
-                            <ui:Label text="Gain" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:Label text="Persistence" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
                             <ui:TextField value="0.5" text="0.5" name="Gain" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row;">
@@ -40,8 +40,8 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="ChunkPage" class="vloxy-display-none">
-                        <ui:SliderInt label="Page Size" value="8" high-value="20" name="PageSize" class="vloxy-text" />
-                        <ui:SliderInt label="Draw Distance" value="4" high-value="20" name="DrawDistance" class="vloxy-text" />
+                        <ui:SliderInt label="Page Size" value="4" high-value="20" name="PageSize" class="vloxy-text" />
+                        <ui:SliderInt label="Draw Distance" value="2" high-value="20" name="DrawDistance" class="vloxy-text" />
                         <ui:VisualElement value="4" name="ChunkSize" style="flex-direction: row;">
                             <ui:Label text="Chunk Size" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
                             <ui:VisualElement style="flex-grow: 1; flex-direction: row;">

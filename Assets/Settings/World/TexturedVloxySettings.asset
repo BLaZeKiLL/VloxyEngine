@@ -24,4 +24,4 @@ MonoBehaviour:
     Material: {fileID: 2100000, guid: 5859681f51610964abcbfb5326525a3d, type: 2}
     CastShadows: 0
   Scheduler:
-    BatchSize: 1
+    BatchSize: 32

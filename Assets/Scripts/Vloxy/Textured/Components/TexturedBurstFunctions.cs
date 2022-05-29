@@ -1,6 +1,7 @@
 ﻿using AOT;
 
 using CodeBlaze.Vloxy.Engine.Mesher;
+using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Textured.Data;
 
 using Unity.Burst;
@@ -12,7 +13,7 @@ namespace CodeBlaze.Vloxy.Textured.Components {
     public static class TexturedBurstFunctions {
 
         [BurstCompile]
-        [MonoPInvokeCallback(typeof(MeshExtensions.VertexOverride))]
+        [MonoPInvokeCallback(typeof(MeshOverrides.VertexOverride))]
         public static void TexturedVertexOverride(
             int block,
             ref int3 normal,
@@ -47,6 +48,16 @@ namespace CodeBlaze.Vloxy.Textured.Components {
                     v4.UV0.z = 3;
                     break;
             }
+        }
+
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(NoiseOverrides.ComputeBlockOverride))]
+        public static int TexturedComputeBlockOverride(ref NoiseValue noise) {
+            if (noise.Position.y > noise.Value ) return (int) TexturedBlock.AIR;
+            if (noise.Position.y == noise.Value) return (int) TexturedBlock.GRASS;
+            if (noise.Position.y <= noise.Value - 1 && noise.Position.y >= noise.Value - 3) return (int)TexturedBlock.DIRT;
+
+            return (int) TexturedBlock.STONE;
         }
 
     }

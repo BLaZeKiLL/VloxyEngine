@@ -83,12 +83,12 @@ namespace CodeBlaze {
             }
 
             public void SetValue(VloxySettings settings) {
-                var noise = settings.NoiseSettings as NoiseSettings2D;
+                var noise = settings.NoiseSettings as NoiseSettings;
 
                 noise.Height = int.Parse(_height.value);
                 noise.Seed = int.Parse(_seed.value);
-                noise.Frequency = float.Parse(_frequency.value);
-                noise.Gain = float.Parse(_gain.value);
+                noise.Scale = float.Parse(_frequency.value);
+                noise.Persistance = float.Parse(_gain.value);
                 noise.Lacunarity = float.Parse(_lacunarity.value);
                 noise.Octaves = int.Parse(_octaves.value);
             }

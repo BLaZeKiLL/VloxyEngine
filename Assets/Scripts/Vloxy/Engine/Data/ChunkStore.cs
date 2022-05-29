@@ -2,6 +2,7 @@
 using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Data;
+using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
 using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
@@ -10,22 +11,21 @@ using CodeBlaze.Vloxy.Engine.Utils.Logger;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Components {
+namespace CodeBlaze.Vloxy.Engine.Data {
 
     public class ChunkStore {
 
         public ChunkStoreAccessor Accessor { get; }
         
-        private NativeHashMap<int3, Chunk> _Chunks;
-        
-        private INoiseProfile _NoiseProfile;
         private ChunkSettings _ChunkSettings;
+        private ChunkDataScheduler _ChunkDataScheduler;
 
+        private NativeHashMap<int3, Chunk> _Chunks;
         private HashSet<int3> _Claim;
         private List<int3> _Reclaim;
 
-        public ChunkStore(INoiseProfile noiseProfile, ChunkSettings chunkSettings) {
-            _NoiseProfile = noiseProfile;
+        public ChunkStore(ChunkDataScheduler chunkDataScheduler, ChunkSettings chunkSettings) {
+            _ChunkDataScheduler = chunkDataScheduler;
             _ChunkSettings = chunkSettings;
 
             var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
@@ -38,17 +38,35 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
 
         internal void GenerateChunks() {
+            var jobs = new NativeList<int3>(_ChunkSettings.ChunkPageSize.CubedSize(), Allocator.TempJob);
+            var data = new NativeList<ChunkData>(_ChunkSettings.ChunkPageSize.CubedSize(), Allocator.TempJob);
+            
+            // Prepare Job
             for (int x = -_ChunkSettings.ChunkPageSize; x <= _ChunkSettings.ChunkPageSize; x++) {
                 for (int z = -_ChunkSettings.ChunkPageSize; z <= _ChunkSettings.ChunkPageSize; z++) {
                     for (int y = -_ChunkSettings.ChunkPageSize; y <= _ChunkSettings.ChunkPageSize; y++) {
-                        var pos = new int3(x, y, z) * _ChunkSettings.ChunkSize;
-                        var data = _NoiseProfile.GenerateChunkData(pos);
-                        var chunk = VloxyProvider.Current.CreateChunk(pos, data);
-
-                        _Chunks.Add(pos, chunk);
+                        var position = new int3(x, y, z) * _ChunkSettings.ChunkSize;
+                        jobs.Add(position);
+                        data.Add(VloxyProvider.Current.CreateChunkData());
                     }
                 }
             }
+            
+            // Schedule Job
+            _ChunkDataScheduler.Schedule(jobs, data);
+            
+            // Complete Job
+            var result = _ChunkDataScheduler.Complete();
+
+            for (int i = 0; i < jobs.Length; i++) {
+                var position = jobs[i];
+                _Chunks.Add(position, VloxyProvider.Current.CreateChunk(position, result[position]));
+            }
+
+            // Dispose Job
+            _ChunkDataScheduler.Dispose();
+            jobs.Dispose();
+            data.Dispose();
 
 #if VLOXY_LOGGING
             VloxyLogger.Info<ChunkStore>("Chunks Created : " + _Chunks.Count());

@@ -1,4 +1,5 @@
 ﻿using CodeBlaze.Vloxy.Engine.Components;
+using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Mesher;
 
 using Unity.Burst;
@@ -9,20 +10,21 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace CodeBlaze.Vloxy.Engine.Scheduler {
+namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
     [BurstCompile]
     internal struct MeshBuildJob : IJobParallelFor {
 
-        [ReadOnly] public BurstFunctionPointers BurstFunctionPointers;
-        [ReadOnly] public ChunkStoreAccessor Accessor;
         [ReadOnly] public int3 ChunkSize;
-        [ReadOnly] public NativeList<int3> Jobs;
+        [ReadOnly] public BurstFunctionPointers BurstFunctionPointers;
         [ReadOnly] public NativeArray<VertexAttributeDescriptor> VertexParams;
+
+        [ReadOnly] public ChunkStoreAccessor Accessor;
+        [ReadOnly] public NativeList<int3> Jobs;
 
         [WriteOnly] public NativeHashMap<int3, int>.ParallelWriter Results;
 
-        public Mesh.MeshDataArray MeshDataArray;
+        public UnityEngine.Mesh.MeshDataArray MeshDataArray;
 
         public void Execute(int index) {
             var vertexOverride = BurstFunctionPointers.VertexOverridePointer;

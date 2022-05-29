@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Components;
+using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
 using Unity.Collections;
@@ -15,7 +17,7 @@ using CodeBlaze.Vloxy.Profiling;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 #endif
 
-namespace CodeBlaze.Vloxy.Engine.Scheduler {
+namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
     public class MeshBuildScheduler {
         
@@ -26,7 +28,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
         private int3 ChunkSize;
         
         private JobHandle Handle;
-        private Mesh.MeshDataArray MeshDataArray;
+        private UnityEngine.Mesh.MeshDataArray MeshDataArray;
         private NativeHashMap<int3, int> Results;
         private NativeList<int3> Jobs;
         private NativeArray<VertexAttributeDescriptor> VertexParams;
@@ -40,6 +42,7 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             ChunkBehaviourPool = chunkBehaviourPool;
             BurstFunctionPointers = burstFunctionPointers;
 
+            // TODO : Make Configurable
             VertexParams = new NativeArray<VertexAttributeDescriptor>(6, Allocator.Persistent);
             
             // int's cause issues
@@ -54,22 +57,20 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             Jobs = new NativeList<int3>(Allocator.Persistent);
         }
 
-        public void Dispose() {
-            VertexParams.Dispose();
-            Results.Dispose();
-            Jobs.Dispose();
-        }
-
         // Call early in frame
         public void Schedule(List<int3> jobs, ChunkStoreAccessor accessor) {
 #if VLOXY_PROFILING
             VloxyProfiler.MeshBuildJobMarker.Begin();
 #endif
+            if (Scheduled) {
+                throw new InvalidOperationException("Job Already Scheduled");
+            }
+            
             for (int i = 0; i < jobs.Count; i++) {
                 Jobs.Add(jobs[i]);
             }
             
-            MeshDataArray = Mesh.AllocateWritableMeshData(Jobs.Length);
+            MeshDataArray = UnityEngine.Mesh.AllocateWritableMeshData(Jobs.Length);
 
             var job = new MeshBuildJob {
                 BurstFunctionPointers = BurstFunctionPointers,
@@ -93,21 +94,21 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
 #else
             if (!Scheduled || !Handle.IsCompleted) return;
 #endif
-
             Handle.Complete();
 
-            var meshes = new Mesh[Jobs.Length];
+            var meshes = new UnityEngine.Mesh[Jobs.Length];
 
-            for (int i = 0; i < Jobs.Length; i++) {
-                meshes[Results[Jobs[i]]] = ChunkBehaviourPool.Claim(Jobs[i]).Mesh();
+            for (var index = 0; index < Jobs.Length; index++) {
+                meshes[Results[Jobs[index]]] = ChunkBehaviourPool.Claim(Jobs[index]).Mesh();
             }
 
-            Mesh.ApplyAndDisposeWritableMeshData(MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds);
+            UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds);
 
-            foreach (var mesh in meshes) {
-                mesh.RecalculateBounds();
+            // TODO : pre compute bounds
+            for (var index = 0; index < meshes.Length; index++) {
+                meshes[index].RecalculateBounds();
             }
-            
+
             Results.Clear();
             Jobs.Clear();
 
@@ -118,6 +119,12 @@ namespace CodeBlaze.Vloxy.Engine.Scheduler {
             
             VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {VloxyProfiler.MeshBuildJobRecorder.TimeMS()}");
 #endif
+        }
+        
+        public void Dispose() {
+            VertexParams.Dispose();
+            Results.Dispose();
+            Jobs.Dispose();
         }
 
     }

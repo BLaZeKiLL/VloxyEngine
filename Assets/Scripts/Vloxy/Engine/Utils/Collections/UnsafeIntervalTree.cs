@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Text;
 
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
-    public struct UnsafeCompressedList {
+    [BurstCompile]
+    public struct UnsafeIntervalTree {
 
         private struct Node {
             public int ID;
@@ -25,7 +27,7 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
         public int CompressedLength => Internal.Length;
 
-        public UnsafeCompressedList(int capacity, Allocator allocator) {
+        public UnsafeIntervalTree(int capacity, Allocator allocator) {
             Internal = new UnsafeList<Node>(capacity, allocator);
             Length = 0;
         }

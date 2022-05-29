@@ -1,7 +1,9 @@
-﻿using Unity.Mathematics;
+﻿using Unity.Burst;
+using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Data {
 
+    [BurstCompile]
     public struct Chunk {
 
         public ChunkData Data { get; }

@@ -1,6 +1,4 @@
 ﻿using CodeBlaze.Vloxy.Colored.Components;
-using CodeBlaze.Vloxy.Colored.Data;
-using CodeBlaze.Vloxy.Colored.Noise;
 
 using CodeBlaze.Vloxy.Engine;
 using CodeBlaze.Vloxy.Engine.Components;
@@ -13,14 +11,25 @@ using Unity.Burst;
 namespace CodeBlaze.Vloxy.Colored {
 
     public class ColoredVloxyProvider : VloxyProvider {
-
-        public override INoiseProfile NoiseProfile() => new ColoredNoiseProfile2D(Settings.NoiseSettings, Settings.Chunk);
-        // public override INoiseProfile NoiseProfile() => new ColoredNoiseProfile3D(Settings.NoiseSettings, Settings.Chunk);
-
+        
         public override BurstFunctionPointers SetupBurstFunctionPointers() {
             return new BurstFunctionPointers {
-                VertexOverridePointer = BurstCompiler.CompileFunctionPointer<MeshExtensions.VertexOverride>(ColoredBurstFunctions.ColoredVertexOverride)
+                VertexOverridePointer = BurstCompiler.CompileFunctionPointer<MeshOverrides.VertexOverride>(ColoredBurstFunctions.ColoredVertexOverride),
+                ComputeBlockOverridePointer = BurstCompiler.CompileFunctionPointer<NoiseOverrides.ComputeBlockOverride>(ColoredBurstFunctions.ColoredComputeBlockOverride)
             };
+        }
+        
+        public override NoiseProfile NoiseProfile() {
+            var settings = (NoiseSettings) Settings.NoiseSettings;
+
+            return new NoiseProfile(new NoiseProfile.Settings {
+                Height = settings.Height,
+                Seed = settings.Seed,
+                Scale = settings.Scale,
+                Lacunarity = settings.Lacunarity,
+                Persistance = settings.Persistance,
+                Octaves = settings.Octaves,
+            });
         }
 
     }
