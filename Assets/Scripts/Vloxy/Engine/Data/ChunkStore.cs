@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
-using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
@@ -39,17 +37,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         }
 
         internal void GenerateChunks() {
-            var jobs = new NativeList<int3>(_ChunkSettings.ChunkPageSize.CubedSize(), Allocator.TempJob);
-            
-            // Prepare Job
-            for (int x = -_ChunkSettings.ChunkPageSize; x <= _ChunkSettings.ChunkPageSize; x++) {
-                for (int z = -_ChunkSettings.ChunkPageSize; z <= _ChunkSettings.ChunkPageSize; z++) {
-                    for (int y = -_ChunkSettings.ChunkPageSize; y <= _ChunkSettings.ChunkPageSize; y++) {
-                        var position = new int3(x, y, z) * _ChunkSettings.ChunkSize;
-                        jobs.Add(position);
-                    }
-                }
-            }
+            var jobs = _Page.GetPositions(Allocator.TempJob);
             
             // Schedule Job
             _ChunkDataScheduler.Schedule(jobs);

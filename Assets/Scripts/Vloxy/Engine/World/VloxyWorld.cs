@@ -4,7 +4,7 @@ using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
-using CodeBlaze.Vloxy.Engine.Noise.Profile;
+using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;

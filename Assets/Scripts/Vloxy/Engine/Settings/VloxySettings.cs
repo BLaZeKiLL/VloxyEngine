@@ -1,6 +1,4 @@
-﻿using CodeBlaze.Vloxy.Engine.Noise.Settings;
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Settings {
 

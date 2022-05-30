@@ -1,7 +1,7 @@
 ﻿using AOT;
 
 using CodeBlaze.Vloxy.Engine.Mesher;
-using CodeBlaze.Vloxy.Engine.Noise.Profile;
+using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Examples.Textured.Data;
 
 using Unity.Burst;

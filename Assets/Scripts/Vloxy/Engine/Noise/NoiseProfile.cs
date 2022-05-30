@@ -3,7 +3,7 @@
 using Unity.Burst;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Noise.Profile {
+namespace CodeBlaze.Vloxy.Engine.Noise {
 
     [BurstCompile]
     public struct NoiseProfile {

@@ -1,32 +1,50 @@
-﻿using System;
+﻿using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
-using CodeBlaze.Vloxy.Engine.Noise.Profile;
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
-
-using Unity.Mathematics;
+using Unity.Collections;
 
 using UnityEngine;
 
 namespace CodeBlaze.Sandbox {
 
+    public struct Test {
+
+        public int Member;
+
+    }
+    
     public class Sandbox : MonoBehaviour {
 
-        private void Start() {
-            var random = new Unity.Mathematics.Random(1337);
-            var profile = new NoiseProfile(new NoiseProfile.Settings {
-                Height = 256,
-                Seed = 1337,
-                Scale = 50,
-                Lacunarity = 2f,
-                Persistance = 0.5f,
-                Octaves = 6
-            });
+        private NativeHashMap<int, Test> Map;
 
-            for (int i = 0; i < 10; i++) {
-                var noise = profile.GetNoise(random.NextInt3(new int3(64, 256, 64)));
+        private void Awake() {
+            Map = new NativeHashMap<int, Test>(10, Allocator.Persistent);
+        }
+
+        private void Start() {
+            var x = new Test {
+                Member = 5
+            };
             
-                VloxyLogger.Info<Sandbox>($"Value : {noise.Value}");
-            }
+            Map.Add(0, x);
+
+            // We Get A Copy Here
+            var y = Map[0];
+
+            // Update the copy
+            y.Member = 10;
+
+            // Update the map
+            Map[0] = y;
+
+            var z = Map[0];
+            
+            VloxyLogger.Info<Sandbox>($"X = {x.Member}");
+            VloxyLogger.Info<Sandbox>($"Y = {y.Member}");
+            VloxyLogger.Info<Sandbox>($"Z = {z.Member}");
+        }
+
+        private void OnDestroy() {
+            Map.Dispose();
         }
 
     }

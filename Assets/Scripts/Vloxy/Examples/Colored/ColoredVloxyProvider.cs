@@ -1,8 +1,7 @@
 ﻿using CodeBlaze.Vloxy.Engine;
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Mesher;
-using CodeBlaze.Vloxy.Engine.Noise.Profile;
-using CodeBlaze.Vloxy.Engine.Noise.Settings;
+using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Examples.Colored.Components;
 
 using Unity.Burst;

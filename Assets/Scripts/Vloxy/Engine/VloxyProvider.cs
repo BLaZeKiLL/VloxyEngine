@@ -3,7 +3,7 @@ using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
-using CodeBlaze.Vloxy.Engine.Noise.Profile;
+using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Provider;
 
@@ -19,7 +19,7 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual BurstFunctionPointers SetupBurstFunctionPointers() => new();
         
-        public virtual NoiseProfile NoiseProfile() => new(new NoiseProfile.Settings {
+        public virtual NoiseProfile NoiseProfile() => new (new NoiseProfile.Settings {
             Height = Settings.NoiseSettings.Height,
             Seed = Settings.NoiseSettings.Seed,
             Scale = Settings.NoiseSettings.Scale,
@@ -30,8 +30,6 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual Chunk CreateChunk(int3 position, ChunkData data) => new(position, data);
         
-        public virtual ChunkData CreateChunkData() => new(Settings.Chunk.ChunkSize);
-
         public virtual ChunkStore ChunkStore(
             ChunkDataScheduler chunkDataScheduler
         ) => new(chunkDataScheduler, Settings.Chunk);
@@ -52,13 +50,12 @@ namespace CodeBlaze.Vloxy.Engine {
         public virtual ChunkDataScheduler ChunkDataScheduler(
             NoiseProfile noiseProfile, 
             BurstFunctionPointers burstFunctionPointers
-        ) =>
-            new ChunkDataScheduler(
-                noiseProfile,
-                Settings.Chunk.ChunkSize, 
-                Settings.Chunk.ChunkPageSize, 
-                burstFunctionPointers
-            );
+        ) => new(
+            noiseProfile,
+            Settings.Chunk.ChunkSize, 
+            Settings.Chunk.ChunkPageSize, 
+            burstFunctionPointers
+        );
 
     }
 

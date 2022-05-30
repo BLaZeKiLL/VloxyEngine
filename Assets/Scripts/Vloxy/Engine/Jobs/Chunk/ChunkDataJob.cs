@@ -1,6 +1,6 @@
 ﻿using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Noise.Profile;
+using CodeBlaze.Vloxy.Engine.Noise;
 
 using Unity.Burst;
 using Unity.Collections;
@@ -16,7 +16,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
         [ReadOnly] public NoiseProfile NoiseProfile;
         [ReadOnly] public BurstFunctionPointers BurstFunctionPointers;
 
-        [ReadOnly] public NativeList<int3> Jobs;
+        [ReadOnly] public NativeArray<int3> Jobs;
         
         [WriteOnly] public NativeHashMap<int3, ChunkData>.ParallelWriter Results;
 

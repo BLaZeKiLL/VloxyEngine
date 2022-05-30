@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Engine.Noise.Settings {
+namespace CodeBlaze.Vloxy.Engine.Settings {
 
     [CreateAssetMenu(fileName = "NoiseSettings2D", menuName = "Vloxy/NoiseSettings/2D", order = 0)]
     public class NoiseSettings : ScriptableObject {

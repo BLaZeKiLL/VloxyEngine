@@ -2,7 +2,7 @@
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Noise.Profile;
+using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
 using Unity.Collections;
@@ -30,7 +30,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
             _BurstFunctionPointers = burstFunctionPointers;
         }
 
-        public void Schedule(NativeList<int3> jobs) {
+        public void Schedule(NativeArray<int3> jobs) {
             if (_Scheduled) {
                 throw new InvalidOperationException("Job Already Scheduled");
             }

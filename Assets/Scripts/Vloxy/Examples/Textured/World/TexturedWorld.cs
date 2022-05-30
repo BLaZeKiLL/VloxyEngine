@@ -1,5 +1,4 @@
 ﻿using CodeBlaze.Vloxy.Engine;
-using CodeBlaze.Vloxy.Engine.Noise.Profile;
 using CodeBlaze.Vloxy.Engine.World;
 
 namespace CodeBlaze.Vloxy.Examples.Textured.World {

@@ -63,12 +63,12 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
         // Call early in frame
         public void Schedule(List<int3> jobs, ChunkStoreAccessor accessor) {
+            if (Scheduled) {
+                throw new InvalidOperationException($"Job Already Scheduled : {Handle}");
+            }
 #if VLOXY_LOGGING
             watch.Restart();
 #endif
-            if (Scheduled) {
-                throw new InvalidOperationException("Job Already Scheduled");
-            }
             
             for (int i = 0; i < jobs.Count; i++) {
                 Jobs.Add(jobs[i]);
@@ -94,7 +94,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         // Call late in frame
         public void Complete() {
             if (!Scheduled || !Handle.IsCompleted) return;
-            
+
             Handle.Complete();
 
             var meshes = new UnityEngine.Mesh[Jobs.Length];

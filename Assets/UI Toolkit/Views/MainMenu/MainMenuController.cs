@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 
-using CodeBlaze.Vloxy.Engine.Noise.Settings;
 using CodeBlaze.Vloxy.Engine.Settings;
 
 using Unity.Mathematics;
