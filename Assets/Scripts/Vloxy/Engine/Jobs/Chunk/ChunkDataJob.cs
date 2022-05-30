@@ -17,22 +17,23 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
         [ReadOnly] public BurstFunctionPointers BurstFunctionPointers;
 
         [ReadOnly] public NativeList<int3> Jobs;
-        [ReadOnly] public NativeList<ChunkData> Data;
         
         [WriteOnly] public NativeHashMap<int3, ChunkData>.ParallelWriter Results;
 
         public void Execute(int index) {
             var position = Jobs[index];
-            var data = Data[index];
             
-            GenerateChunkData(position, ref data);
+            var data = GenerateChunkData(position);
             
             Results.TryAdd(position, data);
         }
         
-        private void GenerateChunkData(int3 position, ref ChunkData data) {
+        private ChunkData GenerateChunkData(int3 position) {
+            var data = new ChunkData(ChunkSize);
+            
             var noise = NoiseProfile.GetNoise(position);
             int current_block = BurstFunctionPointers.ComputeBlockOverridePointer.Invoke(ref noise);
+            
             int count = 0;
         
             // Loop order should be same as flatten order for AddBlocks to work properly
@@ -54,6 +55,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
             }
             
             data.AddBlocks(current_block, count); // Finale interval
+
+            return data;
         }
 
     }

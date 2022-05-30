@@ -20,18 +20,19 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         private ChunkSettings _ChunkSettings;
         private ChunkDataScheduler _ChunkDataScheduler;
 
-        private NativeHashMap<int3, Chunk> _Chunks;
+        private ChunkPage _Page;
         private HashSet<int3> _Claim;
         private List<int3> _Reclaim;
-
+        
         public ChunkStore(ChunkDataScheduler chunkDataScheduler, ChunkSettings chunkSettings) {
             _ChunkDataScheduler = chunkDataScheduler;
             _ChunkSettings = chunkSettings;
 
             var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
-            _Chunks = new NativeHashMap<int3, Chunk>(_ChunkSettings.ChunkPageSize.CubedSize(), Allocator.Persistent);
+
+            _Page = new ChunkPage(int3.zero, _ChunkSettings.ChunkPageSize, _ChunkSettings.ChunkSize);
             
-            Accessor = new ChunkStoreAccessor(_Chunks, _ChunkSettings.ChunkSize);
+            Accessor = new ChunkStoreAccessor(_Page.Chunks, _ChunkSettings.ChunkSize);
 
             _Claim = new HashSet<int3>(viewRegionSize);
             _Reclaim = new List<int3>(viewRegionSize);
@@ -39,7 +40,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         internal void GenerateChunks() {
             var jobs = new NativeList<int3>(_ChunkSettings.ChunkPageSize.CubedSize(), Allocator.TempJob);
-            var data = new NativeList<ChunkData>(_ChunkSettings.ChunkPageSize.CubedSize(), Allocator.TempJob);
             
             // Prepare Job
             for (int x = -_ChunkSettings.ChunkPageSize; x <= _ChunkSettings.ChunkPageSize; x++) {
@@ -47,29 +47,27 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                     for (int y = -_ChunkSettings.ChunkPageSize; y <= _ChunkSettings.ChunkPageSize; y++) {
                         var position = new int3(x, y, z) * _ChunkSettings.ChunkSize;
                         jobs.Add(position);
-                        data.Add(VloxyProvider.Current.CreateChunkData());
                     }
                 }
             }
             
             // Schedule Job
-            _ChunkDataScheduler.Schedule(jobs, data);
+            _ChunkDataScheduler.Schedule(jobs);
             
             // Complete Job
             var result = _ChunkDataScheduler.Complete();
 
             for (int i = 0; i < jobs.Length; i++) {
                 var position = jobs[i];
-                _Chunks.Add(position, VloxyProvider.Current.CreateChunk(position, result[position]));
+                _Page.Chunks.Add(position, VloxyProvider.Current.CreateChunk(position, result[position]));
             }
 
             // Dispose Job
             _ChunkDataScheduler.Dispose();
             jobs.Dispose();
-            data.Dispose();
 
 #if VLOXY_LOGGING
-            VloxyLogger.Info<ChunkStore>("Chunks Created : " + _Chunks.Count());
+            VloxyLogger.Info<ChunkStore>("Chunks Created : " + _Page.ChunkCount());
 #endif
         }
         
@@ -95,11 +93,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         }
 
         internal void Dispose() {
-            foreach (var pair in _Chunks) {
-                pair.Value.Data.Dispose();
-            }
-            
-            _Chunks.Dispose();
+            _Page.Dispose();
         }
 
         private void InitialRegion(int3 focus) {
