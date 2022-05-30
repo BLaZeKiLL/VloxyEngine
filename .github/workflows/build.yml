@@ -28,7 +28,7 @@ jobs:
         with:
           path: Library
           key:
-            Library-${{ matrix.targetPlatform }}-${{ hashFiles(.) }}
+            Library-${{ matrix.targetPlatform }}-${{ hashFiles('.') }}
           restore-keys: |
             Library-${{ matrix.targetPlatform }}-
             Library-
