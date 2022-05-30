@@ -30,7 +30,9 @@ namespace CodeBlaze.Editor.Build {
         [MenuItem("Build/Mono/Release")]
         private static void BuildMonoRelease() {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x);
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] { "UNITY_POST_PROCESSING_STACK_V2" });
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
+                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING"
+            });
             
             var options = new BuildPlayerOptions {
                 scenes = EditorBuildSettingsScene.GetActiveSceneList(EditorBuildSettings.scenes),
@@ -72,7 +74,9 @@ namespace CodeBlaze.Editor.Build {
         [MenuItem("Build/IL2CPP/Release")]
         private static void BuildIL2CPPRelease() {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.IL2CPP);
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] { "UNITY_POST_PROCESSING_STACK_V2" });
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
+                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING"
+            });
             
             var options = new BuildPlayerOptions {
                 scenes = EditorBuildSettingsScene.GetActiveSceneList(EditorBuildSettings.scenes),

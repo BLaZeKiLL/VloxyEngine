@@ -29,6 +29,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected int3 FocusChunkCoord;
         
         private BurstFunctionPointers BurstFunctionPointers;
+        private bool IsFocused;
 
         #region Virtual
 
@@ -84,12 +85,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
 #endif
             
             FocusChunkCoord = new int3(1,1,1) * int.MinValue;
+            IsFocused = _focus != null;
 
             WorldStart();
         }
 
         private void Update() {
-            var NewFocusChunkCoord = _focus != null ? VloxyUtils.GetChunkCoords(_focus.position) : int3.zero;
+            var NewFocusChunkCoord = IsFocused ? VloxyUtils.GetChunkCoords(_focus.position) : int3.zero;
 
             if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) ViewRegionUpdate(NewFocusChunkCoord);
 
@@ -107,7 +109,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
             var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
-
+            
             if (claim.Count != 0) MeshBuildScheduler.Schedule(claim, ChunkStore.Accessor);
 
             for (var index = 0; index < reclaim.Count; index++) {
@@ -115,7 +117,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             }
 
             WorldViewRegionUpdate();
-
+            
             FocusChunkCoord = NewFocusChunkCoord;
         }
 

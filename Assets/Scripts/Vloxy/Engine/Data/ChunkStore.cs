@@ -65,6 +65,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             }
             
 #if VLOXY_LOGGING
+            VloxyLogger.Info<ChunkStore>($"New Focus : {newFocusChunkCoord}, Focus : {focusChunkCoord}");
             VloxyLogger.Info<ChunkStore>($"Claim : {_Claim.Count()}, Reclaim : {_Reclaim.Count}");
 #endif
 
