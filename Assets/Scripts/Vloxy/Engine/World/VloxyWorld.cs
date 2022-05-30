@@ -24,7 +24,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected NoiseProfile NoiseProfile;
         protected ChunkBehaviourPool ChunkBehaviourPool;
         protected MeshBuildScheduler MeshBuildScheduler;
-        protected ChunkDataScheduler ChunkDataScheduler;
+        protected ChunkPageScheduler ChunkPageScheduler;
         protected ChunkStore ChunkStore;
         protected int3 FocusChunkCoord;
         
@@ -62,8 +62,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
             NoiseProfile = VloxyProvider.Current.NoiseProfile();
             ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
             MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkBehaviourPool, BurstFunctionPointers);
-            ChunkDataScheduler = VloxyProvider.Current.ChunkDataScheduler(NoiseProfile, BurstFunctionPointers);
-            ChunkStore = VloxyProvider.Current.ChunkStore(ChunkDataScheduler);
+            ChunkPageScheduler = VloxyProvider.Current.ChunkDataScheduler(NoiseProfile, BurstFunctionPointers);
+            ChunkStore = VloxyProvider.Current.ChunkStore(ChunkPageScheduler);
             
 #if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");

@@ -6,7 +6,6 @@ using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
-using Unity.Collections;
 using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Data {
@@ -16,14 +15,14 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         public ChunkStoreAccessor Accessor { get; }
         
         private ChunkSettings _ChunkSettings;
-        private ChunkDataScheduler _ChunkDataScheduler;
+        private ChunkPageScheduler _chunkPageScheduler;
 
         private ChunkPage _Page;
         private HashSet<int3> _Claim;
         private List<int3> _Reclaim;
         
-        public ChunkStore(ChunkDataScheduler chunkDataScheduler, ChunkSettings chunkSettings) {
-            _ChunkDataScheduler = chunkDataScheduler;
+        public ChunkStore(ChunkPageScheduler chunkPageScheduler, ChunkSettings chunkSettings) {
+            _chunkPageScheduler = chunkPageScheduler;
             _ChunkSettings = chunkSettings;
 
             var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
@@ -38,16 +37,16 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         internal void GenerateChunks() {
             // Schedule Job
-            _ChunkDataScheduler.Schedule(_Page);
+            _chunkPageScheduler.Schedule(_Page);
             
             // Complete Job
-            _ChunkDataScheduler.Complete();
+            _chunkPageScheduler.Complete();
 
             // Dispose Job
-            _ChunkDataScheduler.Dispose();
+            _chunkPageScheduler.Dispose();
 
 #if VLOXY_LOGGING
-            VloxyLogger.Info<ChunkStore>("Chunks Created : " + _Page.ChunkCount());
+            VloxyLogger.Info<ChunkStore>($"Chunk Page : {_Page.Position},Chunks Created : {_Page.ChunkCount()}");
 #endif
         }
         

@@ -7,8 +7,6 @@ using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Provider;
 
-using Unity.Mathematics;
-
 using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine {
@@ -27,12 +25,10 @@ namespace CodeBlaze.Vloxy.Engine {
             Persistance = Settings.NoiseSettings.Persistance,
             Octaves = Settings.NoiseSettings.Octaves,
         });
-
-        public virtual Chunk CreateChunk(int3 position, ChunkData data) => new(position, data);
         
         public virtual ChunkStore ChunkStore(
-            ChunkDataScheduler chunkDataScheduler
-        ) => new(chunkDataScheduler, Settings.Chunk);
+            ChunkPageScheduler chunkPageScheduler
+        ) => new(chunkPageScheduler, Settings.Chunk);
 
         public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
         
@@ -47,7 +43,7 @@ namespace CodeBlaze.Vloxy.Engine {
             burstFunctionPointers
         );
 
-        public virtual ChunkDataScheduler ChunkDataScheduler(
+        public virtual ChunkPageScheduler ChunkDataScheduler(
             NoiseProfile noiseProfile, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
