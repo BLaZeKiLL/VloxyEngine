@@ -13,6 +13,7 @@
                     <ui:Label name="SchedularButton" text="Schedular" display-tooltip-when-elided="true" class="vloxy-text" />
                 </ui:VisualElement>
                 <ui:VisualElement name="Page" style="flex-grow: 1; flex-shrink: 0;">
+                    
                     <ui:VisualElement name="HeightMapPage">
                         <ui:VisualElement style="flex-direction: row;">
                             <ui:Label text="Height" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
@@ -23,12 +24,12 @@
                             <ui:TextField value="1337" text="1337" name="Seed" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row;">
-                            <ui:Label text="Frequency" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
-                            <ui:TextField value="0.03" text="0.03" name="Frequency" class="vloxy-text" style="flex-grow: 1;" />
+                            <ui:Label text="Scale" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:TextField value="512" text="512" name="Scale" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row;">
-                            <ui:Label text="Gain" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
-                            <ui:TextField value="0.5" text="0.5" name="Gain" class="vloxy-text" style="flex-grow: 1;" />
+                            <ui:Label text="Persistence" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
+                            <ui:TextField value="0.5" text="0.5" name="Persistence" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row;">
                             <ui:Label text="Lacunarity" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
@@ -39,6 +40,7 @@
                             <ui:TextField value="4" text="4" name="Octaves" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
+                    
                     <ui:VisualElement name="ChunkPage" class="vloxy-display-none">
                         <ui:SliderInt label="Page Size" value="8" high-value="20" name="PageSize" class="vloxy-text" />
                         <ui:SliderInt label="Draw Distance" value="4" high-value="20" name="DrawDistance" class="vloxy-text" />
@@ -51,6 +53,7 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
+                    
                     <ui:VisualElement name="RenderingPage" class="vloxy-display-none">
                         <ui:VisualElement style="flex-direction: row;">
                             <ui:Label text="CastShadows" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
@@ -58,14 +61,17 @@
                             <ui:Toggle name="CastShadows" class="vloxy-text" />
                         </ui:VisualElement>
                     </ui:VisualElement>
+                    
                     <ui:VisualElement name="SchedularPage" class="vloxy-display-none">
                         <ui:VisualElement style="flex-direction: row;">
                             <ui:Label text="BatchSize" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
                             <ui:TextField value="32" text="32" name="BatchSize" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
+                    
                 </ui:VisualElement>
             </ui:VisualElement>
+            
             <ui:VisualElement name="Footer" style="flex-direction: row; align-items: center;">
                 <ui:VisualElement style="width: 150px;">
                     <ui:Button text="Generate" display-tooltip-when-elided="true" name="Generate" class="vloxy-button" />
@@ -74,6 +80,7 @@
                     <ui:ProgressBar name="LoadingBar" style="visibility: hidden;" />
                 </ui:VisualElement>
             </ui:VisualElement>
+            
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

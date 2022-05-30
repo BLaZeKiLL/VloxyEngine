@@ -12,18 +12,10 @@ namespace CodeBlaze.Editor.Config {
             UnityEngine.Debug.Log("Debug config set");
         }
 
-        [MenuItem("Config/Profile")]
-        private static void Profile() {
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
-                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING", "VLOXY_DEBUG", "VLOXY_PROFILING"
-            });
-            UnityEngine.Debug.Log("Profile config set");
-        }
-
         [MenuItem("Config/Release")]
         private static void Release() {
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] { "UNITY_POST_PROCESSING_STACK_V2" });
-            UnityEngine.Debug.Log("Rekease config set");
+            UnityEngine.Debug.Log("Release config set");
         }
 
     }

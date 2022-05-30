@@ -1,19 +1,21 @@
 ﻿using CodeBlaze.Vloxy.Engine.Utils.Collections;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Data {
 
+    [BurstCompile]
     public struct ChunkData {
 
         private int3 ChunkSize;
-        private UnsafeCompressedList Data;
+        private UnsafeIntervalTree Data;
 
         public ChunkData(int3 chunkSize) {
             ChunkSize = chunkSize;
-            Data = new UnsafeCompressedList(32, Allocator.Persistent);
+            Data = new UnsafeIntervalTree(128, Allocator.Persistent);
         }
 
         public void AddBlocks(int block, int count) {

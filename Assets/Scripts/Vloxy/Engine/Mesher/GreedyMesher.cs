@@ -1,4 +1,4 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
+﻿using CodeBlaze.Vloxy.Engine.Data;
 
 using Unity.Burst;
 using Unity.Collections;
@@ -28,7 +28,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         [BurstCompile]
         internal static MeshBuffer GenerateMesh(
             ChunkStoreAccessor accessor, int3 pos, int3 size,
-            FunctionPointer<MeshExtensions.VertexOverride> vertexOverride
+            FunctionPointer<MeshOverrides.VertexOverride> vertexOverride
             ) {
             var mesh = new MeshBuffer {
                 VertexBuffer = new NativeList<Vertex>(Allocator.Temp),
@@ -161,7 +161,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         private static void CreateQuad(
             MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
             int width, int height, int3 v1, int3 v2, int3 v3, int3 v4, 
-            FunctionPointer<MeshExtensions.VertexOverride> vertexOverride
+            FunctionPointer<MeshOverrides.VertexOverride> vertexOverride
             ) {
             var normal = directionMask * mask.Normal;
 

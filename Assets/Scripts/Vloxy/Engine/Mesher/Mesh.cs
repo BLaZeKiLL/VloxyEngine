@@ -30,7 +30,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
     }
 
     [BurstCompile]
-    public static class MeshExtensions {
+    public static class MeshOverrides {
 
         public delegate void VertexOverride(int block, ref int3 normal, ref Vertex v1, ref Vertex v2, ref Vertex v3, ref Vertex v4);
 

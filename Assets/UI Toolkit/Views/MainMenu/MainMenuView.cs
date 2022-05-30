@@ -39,9 +39,9 @@ namespace CodeBlaze {
 
         private void OnGenerateWorld(ClickEvent _) {
             _controller.SetValue(_settings);
-
+#if VLOXY_LOGGING
             VloxyLogger.Info<MainMenuView>("Generating World");
-            
+#endif
             StartCoroutine(GenerateWorld());
         }
 
