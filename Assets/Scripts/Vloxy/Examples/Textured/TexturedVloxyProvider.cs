@@ -18,19 +18,6 @@ namespace CodeBlaze.Vloxy.Examples.Textured {
             };
         }
 
-        public override NoiseProfile NoiseProfile() {
-            var settings = (NoiseSettings) Settings.NoiseSettings;
-
-            return new NoiseProfile(new NoiseProfile.Settings {
-                Height = settings.Height,
-                Seed = settings.Seed,
-                Scale = settings.Scale,
-                Lacunarity = settings.Lacunarity,
-                Persistance = settings.Persistance,
-                Octaves = settings.Octaves,
-            });
-        }
-
     }
 
 }

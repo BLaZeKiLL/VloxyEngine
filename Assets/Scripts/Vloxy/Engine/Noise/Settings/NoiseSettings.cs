@@ -3,7 +3,7 @@
 namespace CodeBlaze.Vloxy.Engine.Noise.Settings {
 
     [CreateAssetMenu(fileName = "NoiseSettings2D", menuName = "Vloxy/NoiseSettings/2D", order = 0)]
-    public class NoiseSettings : INoiseSettings {
+    public class NoiseSettings : ScriptableObject {
 
         public int Height = 256;
         public int Seed = 1337;

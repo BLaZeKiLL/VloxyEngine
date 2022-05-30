@@ -19,7 +19,14 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual BurstFunctionPointers SetupBurstFunctionPointers() => new();
         
-        public virtual NoiseProfile NoiseProfile() => new();
+        public virtual NoiseProfile NoiseProfile() => new(new NoiseProfile.Settings {
+            Height = Settings.NoiseSettings.Height,
+            Seed = Settings.NoiseSettings.Seed,
+            Scale = Settings.NoiseSettings.Scale,
+            Lacunarity = Settings.NoiseSettings.Lacunarity,
+            Persistance = Settings.NoiseSettings.Persistance,
+            Octaves = Settings.NoiseSettings.Octaves,
+        });
 
         public virtual Chunk CreateChunk(int3 position, ChunkData data) => new(position, data);
         
