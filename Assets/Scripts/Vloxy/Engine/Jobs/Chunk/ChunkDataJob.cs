@@ -18,14 +18,14 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
 
         [ReadOnly] public NativeArray<int3> Jobs;
         
-        [WriteOnly] public NativeHashMap<int3, ChunkData>.ParallelWriter Results;
+        [WriteOnly] public NativeHashMap<int3, Data.Chunk>.ParallelWriter Results;
 
         public void Execute(int index) {
             var position = Jobs[index];
             
             var data = GenerateChunkData(position);
             
-            Results.TryAdd(position, data);
+            Results.TryAdd(position, new Data.Chunk(position, data));
         }
         
         private ChunkData GenerateChunkData(int3 position) {

@@ -37,22 +37,14 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         }
 
         internal void GenerateChunks() {
-            var jobs = _Page.GetPositions(Allocator.TempJob);
-            
             // Schedule Job
-            _ChunkDataScheduler.Schedule(jobs);
+            _ChunkDataScheduler.Schedule(_Page);
             
             // Complete Job
-            var result = _ChunkDataScheduler.Complete();
-
-            for (int i = 0; i < jobs.Length; i++) {
-                var position = jobs[i];
-                _Page.Chunks.Add(position, VloxyProvider.Current.CreateChunk(position, result[position]));
-            }
+            _ChunkDataScheduler.Complete();
 
             // Dispose Job
             _ChunkDataScheduler.Dispose();
-            jobs.Dispose();
 
 #if VLOXY_LOGGING
             VloxyLogger.Info<ChunkStore>("Chunks Created : " + _Page.ChunkCount());
