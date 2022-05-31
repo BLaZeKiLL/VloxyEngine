@@ -564,8 +564,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2bc8ddfec9c4beaba071b31a0f9d0cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _focus: {fileID: 963194228}
-  _settings: {fileID: 11400000, guid: 52a6b2026aad8ff419d583b5a88c620f, type: 2}
+  _Focus: {fileID: 963194228}
+  _Settings: {fileID: 11400000, guid: 52a6b2026aad8ff419d583b5a88c620f, type: 2}
 --- !u!4 &892864101
 Transform:
   m_ObjectHideFlags: 0
