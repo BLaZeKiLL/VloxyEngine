@@ -37,13 +37,13 @@
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row;">
                             <ui:Label text="Octaves" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
-                            <ui:TextField value="4" text="4" name="Octaves" class="vloxy-text" style="flex-grow: 1;" />
+                            <ui:TextField value="6" text="6" name="Octaves" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                     
                     <ui:VisualElement name="ChunkPage" class="vloxy-display-none">
-                        <ui:SliderInt label="Page Size" value="8" high-value="20" name="PageSize" class="vloxy-text" />
-                        <ui:SliderInt label="Draw Distance" value="4" high-value="20" name="DrawDistance" class="vloxy-text" />
+                        <ui:SliderInt label="Page Size" value="10" high-value="20" name="PageSize" class="vloxy-text" />
+                        <ui:SliderInt label="Draw Distance" value="5" high-value="20" name="DrawDistance" class="vloxy-text" />
                         <ui:VisualElement value="4" name="ChunkSize" style="flex-direction: row;">
                             <ui:Label text="Chunk Size" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 150px;" />
                             <ui:VisualElement style="flex-grow: 1; flex-direction: row;">

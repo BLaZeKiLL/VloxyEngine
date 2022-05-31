@@ -17,114 +17,118 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
     public class MeshBuildScheduler {
         
-        private ChunkBehaviourPool ChunkBehaviourPool;
-        private BurstFunctionPointers BurstFunctionPointers;
+        private ChunkBehaviourPool _ChunkBehaviourPool;
+        private BurstFunctionPointers _BurstFunctionPointers;
         
-        private int BatchSize;
-        private int3 ChunkSize;
+        private int _BatchSize;
+        private int3 _ChunkSize;
         
-        private JobHandle Handle;
-        private UnityEngine.Mesh.MeshDataArray MeshDataArray;
-        private NativeHashMap<int3, int> Results;
-        private NativeList<int3> Jobs;
-        private NativeArray<VertexAttributeDescriptor> VertexParams;
+        private JobHandle _Handle;
+        private UnityEngine.Mesh.MeshDataArray _MeshDataArray;
+        private NativeHashMap<int3, int> _Results;
+        private NativeList<int3> _Jobs;
+        private NativeArray<VertexAttributeDescriptor> _VertexParams;
 
-        private bool Scheduled;
+        private bool _Scheduled;
 
 #if VLOXY_LOGGING
-        private Stopwatch watch;
+        private Stopwatch _Watch;
 #endif
         
         public MeshBuildScheduler(int batchSize, int3 chunkSize, int drawDistance, ChunkBehaviourPool chunkBehaviourPool, BurstFunctionPointers burstFunctionPointers) {
-            BatchSize = batchSize;
-            ChunkSize = chunkSize;
+            _BatchSize = batchSize;
+            _ChunkSize = chunkSize;
             
-            ChunkBehaviourPool = chunkBehaviourPool;
-            BurstFunctionPointers = burstFunctionPointers;
+            _ChunkBehaviourPool = chunkBehaviourPool;
+            _BurstFunctionPointers = burstFunctionPointers;
 
             // TODO : Make Configurable
-            VertexParams = new NativeArray<VertexAttributeDescriptor>(6, Allocator.Persistent);
+            _VertexParams = new NativeArray<VertexAttributeDescriptor>(6, Allocator.Persistent);
             
             // int's cause issues
-            VertexParams[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
-            VertexParams[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3);
-            VertexParams[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
-            VertexParams[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 3);
-            VertexParams[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2);
-            VertexParams[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4);
+            _VertexParams[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
+            _VertexParams[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3);
+            _VertexParams[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
+            _VertexParams[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 3);
+            _VertexParams[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2);
+            _VertexParams[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4);
             
-            Results = new NativeHashMap<int3, int>(drawDistance.CubedSize(),Allocator.Persistent);
-            Jobs = new NativeList<int3>(Allocator.Persistent);
+            _Results = new NativeHashMap<int3, int>(drawDistance.CubedSize(),Allocator.Persistent);
+            _Jobs = new NativeList<int3>(Allocator.Persistent);
             
 #if VLOXY_LOGGING
-            watch = new Stopwatch();
+            _Watch = new Stopwatch();
 #endif
         }
 
+        public bool CanSchedule() => !_Scheduled;
+
         // Call early in frame
         public void Schedule(List<int3> jobs, ChunkStoreAccessor accessor) {
-            if (Scheduled) {
-                throw new InvalidOperationException($"Job Already Scheduled : {Handle}");
+            if (_Scheduled) {
+#if VLOXY_LOGGING
+                VloxyLogger.Error<MeshBuildScheduler>($"Job Already Scheduled : {_Handle}");
+#endif
+                return;
             }
 #if VLOXY_LOGGING
-            watch.Restart();
+            _Watch.Restart();
 #endif
             
             for (int i = 0; i < jobs.Count; i++) {
-                Jobs.Add(jobs[i]);
+                _Jobs.Add(jobs[i]);
             }
             
-            MeshDataArray = UnityEngine.Mesh.AllocateWritableMeshData(Jobs.Length);
+            _MeshDataArray = UnityEngine.Mesh.AllocateWritableMeshData(_Jobs.Length);
 
             var job = new MeshBuildJob {
-                BurstFunctionPointers = BurstFunctionPointers,
+                BurstFunctionPointers = _BurstFunctionPointers,
                 Accessor = accessor,
-                ChunkSize = ChunkSize,
-                Jobs = Jobs,
-                VertexParams = VertexParams,
-                MeshDataArray = MeshDataArray,
-                Results = Results.AsParallelWriter()
+                ChunkSize = _ChunkSize,
+                Jobs = _Jobs,
+                VertexParams = _VertexParams,
+                MeshDataArray = _MeshDataArray,
+                Results = _Results.AsParallelWriter()
             };
 
-            Handle = job.Schedule(Jobs.Length, BatchSize);
+            _Handle = job.Schedule(_Jobs.Length, _BatchSize);
 
-            Scheduled = true;
+            _Scheduled = true;
         }
 
         // Call late in frame
         public void Complete() {
-            if (!Scheduled || !Handle.IsCompleted) return;
+            if (!_Scheduled || !_Handle.IsCompleted) return;
 
-            Handle.Complete();
+            _Handle.Complete();
 
-            var meshes = new UnityEngine.Mesh[Jobs.Length];
+            var meshes = new UnityEngine.Mesh[_Jobs.Length];
 
-            for (var index = 0; index < Jobs.Length; index++) {
-                meshes[Results[Jobs[index]]] = ChunkBehaviourPool.Claim(Jobs[index]).Mesh();
+            for (var index = 0; index < _Jobs.Length; index++) {
+                meshes[_Results[_Jobs[index]]] = _ChunkBehaviourPool.Claim(_Jobs[index]).Mesh();
             }
 
-            UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds);
-
-            // TODO : pre compute bounds
+            UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(_MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds);
+            
             for (var index = 0; index < meshes.Length; index++) {
                 meshes[index].RecalculateBounds();
             }
+            
+            _Results.Clear();
+            _Jobs.Clear();
 
-            Results.Clear();
-            Jobs.Clear();
-
-            Scheduled = false;
+            _Scheduled = false;
             
 #if VLOXY_LOGGING
-            watch.Stop();
-            VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {watch.ElapsedMilliseconds} MS");
+            _Watch.Stop();
+            VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {_Watch.ElapsedMilliseconds} MS");
 #endif
         }
         
         public void Dispose() {
-            VertexParams.Dispose();
-            Results.Dispose();
-            Jobs.Dispose();
+            _VertexParams.Dispose();
+            _Results.Dispose();
+            _Jobs.Dispose();
         }
 
     }

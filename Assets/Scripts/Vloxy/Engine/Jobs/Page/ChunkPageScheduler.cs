@@ -3,6 +3,7 @@
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Collections;
 using Unity.Jobs;
@@ -26,10 +27,15 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
             _PageSize = pageSize;
             _BurstFunctionPointers = burstFunctionPointers;
         }
+        
+        public bool CanSchedule() => !_Scheduled;
 
         public void Schedule(ChunkPage page) {
             if (_Scheduled) {
-                throw new InvalidOperationException("Job Already Scheduled");
+#if VLOXY_LOGGING
+                VloxyLogger.Error<ChunkPageScheduler>($"Job Already Scheduled : {_Handle}");
+#endif
+                return;
             }
 
             var jobs = page.GetPositions(Allocator.TempJob);

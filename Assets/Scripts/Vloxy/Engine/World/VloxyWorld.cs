@@ -18,8 +18,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
     public class VloxyWorld : MonoBehaviour {
 
-        [SerializeField] private Transform _focus;
-        [SerializeField] private VloxySettings _settings;
+        [SerializeField] private Transform _Focus;
+        [SerializeField] private VloxySettings _Settings;
 
         protected NoiseProfile NoiseProfile;
         protected ChunkBehaviourPool ChunkBehaviourPool;
@@ -27,9 +27,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected ChunkPageScheduler ChunkPageScheduler;
         protected ChunkStore ChunkStore;
         protected int3 FocusChunkCoord;
+        protected BurstFunctionPointers BurstFunctionPointers;
         
-        private BurstFunctionPointers BurstFunctionPointers;
-        private bool IsFocused;
+        private bool _IsFocused;
 
         #region Virtual
 
@@ -46,7 +46,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private void Awake() {
             VloxyProvider.Initialize(Provider(), provider => {
-                provider.Settings = _settings;
+                provider.Settings = _Settings;
 #if VLOXY_LOGGING
                 VloxyLogger.Info<VloxyWorld>("Provider Initialized");
 #endif
@@ -85,15 +85,17 @@ namespace CodeBlaze.Vloxy.Engine.World {
 #endif
             
             FocusChunkCoord = new int3(1,1,1) * int.MinValue;
-            IsFocused = _focus != null;
+            _IsFocused = _Focus != null;
 
             WorldStart();
         }
 
         private void Update() {
-            var NewFocusChunkCoord = IsFocused ? VloxyUtils.GetChunkCoords(_focus.position) : int3.zero;
+            var NewFocusChunkCoord = _IsFocused ? VloxyUtils.GetChunkCoords(_Focus.position) : int3.zero;
 
-            if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) ViewRegionUpdate(NewFocusChunkCoord);
+            if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce() && MeshBuildScheduler.CanSchedule()) {
+                ViewRegionUpdate(NewFocusChunkCoord);
+            }
 
             WorldUpdate();
 
