@@ -83,7 +83,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             for (int x = -_ChunkSettings.DrawDistance; x <= _ChunkSettings.DrawDistance; x++) {
                 for (int z = -_ChunkSettings.DrawDistance; z <= _ChunkSettings.DrawDistance; z++) {
                     for (int y = -_ChunkSettings.DrawDistance; y <= _ChunkSettings.DrawDistance; y++) {
-                        _Claim.Add(focus + new int3(x, y, z) * _ChunkSettings.ChunkSize);
+                        Add(_Claim, focus + new int3(x, y, z) * _ChunkSettings.ChunkSize, ChunkState.State.INACTIVE);
                     }
                 }
             }
@@ -111,22 +111,23 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         }
 
         private void Add(ISet<int3> set, int3 position, ChunkState.State state) {
-            // if (_ChunkState.GetState(position) != state) return;
+            if (!_Page.ContainsChunk(position)) return;
+            if (_ChunkState.GetState(position) != state) return;
 
             set.Add(position);
 
-            // switch (state) {
-            //     case ChunkState.State.INACTIVE:
-            //         _ChunkState.SetState(position, ChunkState.State.SCHEDULED);
-            //         break;
-            //     case ChunkState.State.SCHEDULED:
-            //         break;
-            //     case ChunkState.State.ACTIVE:
-            //         _ChunkState.SetState(position, ChunkState.State.INACTIVE);
-            //         break;
-            //     default:
-            //         throw new ArgumentOutOfRangeException(nameof(state), state, null);
-            // }
+            switch (state) {
+                case ChunkState.State.INACTIVE:
+                    _ChunkState.SetState(position, ChunkState.State.SCHEDULED);
+                    break;
+                case ChunkState.State.SCHEDULED:
+                    break;
+                case ChunkState.State.ACTIVE:
+                    _ChunkState.SetState(position, ChunkState.State.INACTIVE);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
+            }
         }
 
     }

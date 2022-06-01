@@ -115,15 +115,15 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             for (var index = 0; index < _Jobs.Length; index++) {
                 var position = _Jobs[index];
                 
-                // if (_ChunkState.GetState(position) == ChunkState.State.SCHEDULED) {
+                if (_ChunkState.GetState(position) == ChunkState.State.SCHEDULED) {
                     meshes[_Results[position]] = _ChunkBehaviourPool.Claim(position).Mesh();
-                    // _ChunkState.SetState(position, ChunkState.State.ACTIVE);
-//                 } else { // This is unnecessary, how can we avoid this ? 
-//                     meshes[_Results[position]] = new UnityEngine.Mesh();
-// #if VLOXY_LOGGING
-//                     VloxyLogger.Warn<MeshBuildScheduler>($"Redundant Mesh : {position}");
-// #endif
-//                 }
+                    _ChunkState.SetState(position, ChunkState.State.ACTIVE);
+                } else { // This is unnecessary, how can we avoid this ? 
+                    meshes[_Results[position]] = new UnityEngine.Mesh();
+#if VLOXY_LOGGING
+                    VloxyLogger.Warn<MeshBuildScheduler>($"Redundant Mesh : {position}");
+#endif
+                }
             }
 
             UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(_MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds);

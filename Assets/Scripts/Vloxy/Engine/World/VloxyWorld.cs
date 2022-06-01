@@ -57,25 +57,15 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             ConstructVloxyComponents();
             
+            FocusChunkCoord = new int3(1,1,1) * int.MinValue;
+
             WorldAwake();
         }
 
         private void Start() {
-#if VLOXY_LOGGING
-            var watch = new Stopwatch();
-            watch.Start();
-#endif
-            
-            ChunkStore.GenerateChunks();
-            // ChunkState.Initialize(int3.zero, _Settings.Chunk.PageSize, _Settings.Chunk.ChunkSize);
-
-#if VLOXY_LOGGING
-            watch.Stop();
-            VloxyLogger.Info<VloxyWorld>($"Vloxy World Generated : {watch.ElapsedMilliseconds} MS");
-#endif
-            
-            FocusChunkCoord = new int3(1,1,1) * int.MinValue;
             _IsFocused = _Focus != null;
+            
+            GenerateWorld();
 
             WorldStart();
         }
@@ -112,6 +102,20 @@ namespace CodeBlaze.Vloxy.Engine.World {
             
 #if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
+#endif
+        }
+
+        private void GenerateWorld() {
+#if VLOXY_LOGGING
+            var watch = new Stopwatch();
+            watch.Start();
+#endif
+            ChunkState.Initialize(int3.zero, _Settings.Chunk.PageSize, _Settings.Chunk.ChunkSize);
+            ChunkStore.GenerateChunks();
+
+#if VLOXY_LOGGING
+            watch.Stop();
+            VloxyLogger.Info<VloxyWorld>($"Vloxy World Generated : {watch.ElapsedMilliseconds} MS");
 #endif
         }
 
