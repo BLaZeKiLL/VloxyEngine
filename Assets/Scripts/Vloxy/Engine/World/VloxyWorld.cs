@@ -2,7 +2,7 @@
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
+using CodeBlaze.Vloxy.Engine.Jobs.Page;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -21,14 +21,16 @@ namespace CodeBlaze.Vloxy.Engine.World {
         [SerializeField] private Transform _Focus;
         [SerializeField] private VloxySettings _Settings;
 
+        protected int3 FocusChunkCoord;
+
+        protected ChunkState ChunkState;
+        protected ChunkStore ChunkStore;
         protected NoiseProfile NoiseProfile;
         protected ChunkBehaviourPool ChunkBehaviourPool;
         protected MeshBuildScheduler MeshBuildScheduler;
         protected ChunkPageScheduler ChunkPageScheduler;
-        protected ChunkStore ChunkStore;
-        protected int3 FocusChunkCoord;
         protected BurstFunctionPointers BurstFunctionPointers;
-        
+
         private bool _IsFocused;
 
         #region Virtual
@@ -55,37 +57,15 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             ConstructVloxyComponents();
             
+            FocusChunkCoord = new int3(1,1,1) * int.MinValue;
+
             WorldAwake();
         }
 
-        private void ConstructVloxyComponents() {
-            BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
-            NoiseProfile = VloxyProvider.Current.NoiseProfile();
-            ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
-            MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkBehaviourPool, BurstFunctionPointers);
-            ChunkPageScheduler = VloxyProvider.Current.ChunkDataScheduler(NoiseProfile, BurstFunctionPointers);
-            ChunkStore = VloxyProvider.Current.ChunkStore(ChunkPageScheduler);
-            
-#if VLOXY_LOGGING
-            VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
-#endif
-        }
-
         private void Start() {
-#if VLOXY_LOGGING
-            var watch = new Stopwatch();
-            watch.Start();
-#endif
-            
-            ChunkStore.GenerateChunks();
-
-#if VLOXY_LOGGING
-            watch.Stop();
-            VloxyLogger.Info<VloxyWorld>($"Vloxy World Generated : {watch.ElapsedMilliseconds} MS");
-#endif
-            
-            FocusChunkCoord = new int3(1,1,1) * int.MinValue;
             _IsFocused = _Focus != null;
+            
+            GenerateWorld();
 
             WorldStart();
         }
@@ -108,6 +88,36 @@ namespace CodeBlaze.Vloxy.Engine.World {
             ChunkStore.Dispose();
             MeshBuildScheduler.Dispose();
         }
+        
+        #endregion
+
+        private void ConstructVloxyComponents() {
+            ChunkState = VloxyProvider.Current.ChunkState();
+            NoiseProfile = VloxyProvider.Current.NoiseProfile();
+            ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
+            BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
+            MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkState, ChunkBehaviourPool, BurstFunctionPointers);
+            ChunkPageScheduler = VloxyProvider.Current.ChunkDataScheduler(NoiseProfile, BurstFunctionPointers);
+            ChunkStore = VloxyProvider.Current.ChunkStore(ChunkState, ChunkPageScheduler);
+            
+#if VLOXY_LOGGING
+            VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
+#endif
+        }
+
+        private void GenerateWorld() {
+#if VLOXY_LOGGING
+            var watch = new Stopwatch();
+            watch.Start();
+#endif
+            ChunkState.Initialize(int3.zero, _Settings.Chunk.PageSize, _Settings.Chunk.ChunkSize);
+            ChunkStore.GenerateChunks();
+
+#if VLOXY_LOGGING
+            watch.Stop();
+            VloxyLogger.Info<VloxyWorld>($"Vloxy World Generated : {watch.ElapsedMilliseconds} MS");
+#endif
+        }
 
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
             var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
@@ -122,8 +132,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
             
             FocusChunkCoord = NewFocusChunkCoord;
         }
-
-        #endregion
 
     }
 

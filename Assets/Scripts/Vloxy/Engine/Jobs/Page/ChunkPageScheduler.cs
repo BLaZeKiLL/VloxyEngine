@@ -3,13 +3,14 @@
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise;
+using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
+namespace CodeBlaze.Vloxy.Engine.Jobs.Page {
 
     public class ChunkPageScheduler {
 
@@ -21,10 +22,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
         private JobHandle _Handle;
         private bool _Scheduled;
 
-        public ChunkPageScheduler(NoiseProfile noiseProfile, int3 chunkSize, int pageSize, BurstFunctionPointers burstFunctionPointers) {
+        public ChunkPageScheduler(VloxySettings settings, NoiseProfile noiseProfile, BurstFunctionPointers burstFunctionPointers) {
+            _ChunkSize = settings.Chunk.ChunkSize;
+            _PageSize = settings.Chunk.PageSize;
+            
             _NoiseProfile = noiseProfile;
-            _ChunkSize = chunkSize;
-            _PageSize = pageSize;
             _BurstFunctionPointers = burstFunctionPointers;
         }
         

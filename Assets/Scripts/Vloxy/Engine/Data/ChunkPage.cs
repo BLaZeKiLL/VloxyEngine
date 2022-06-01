@@ -34,11 +34,11 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         public NativeArray<int3> GetPositions(Allocator handle) {
             var result = new NativeArray<int3>(PageSize.CubedSize(), handle);
             var index = 0;
-            
+             
             for (int x = -PageSize; x <= PageSize; x++) {
                 for (int z = -PageSize; z <= PageSize; z++) {
                     for (int y = -PageSize; y <= PageSize; y++) {
-                        result[index] = (new int3(x, y, z) * ChunkSize); // + Page Offset
+                        result[index] = (new int3(x, y, z) * ChunkSize); // + Page Position
                         index++;
                     }
                 }
@@ -46,8 +46,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
             return result;
         }
-        
-        
+
+        public bool ContainsChunk(int3 position) => Chunks.ContainsKey(position);
 
     }
 

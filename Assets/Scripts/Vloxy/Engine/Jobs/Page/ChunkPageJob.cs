@@ -7,7 +7,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
+namespace CodeBlaze.Vloxy.Engine.Jobs.Page {
 
     [BurstCompile]
     public struct ChunkPageJob : IJobParallelFor {
@@ -18,14 +18,14 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
 
         [ReadOnly] public NativeArray<int3> Jobs;
         
-        [WriteOnly] public NativeHashMap<int3, Data.Chunk>.ParallelWriter Results;
+        [WriteOnly] public NativeHashMap<int3, Chunk>.ParallelWriter Results;
 
         public void Execute(int index) {
             var position = Jobs[index];
-            
+
             var data = GenerateChunkData(position);
-            
-            Results.TryAdd(position, new Data.Chunk(position, data));
+
+            Results.TryAdd(position, new Chunk(position, data));
         }
         
         private ChunkData GenerateChunkData(int3 position) {

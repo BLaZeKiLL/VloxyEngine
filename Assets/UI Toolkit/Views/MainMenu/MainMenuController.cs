@@ -117,7 +117,7 @@ namespace CodeBlaze {
             }
 
             public void SetValue(VloxySettings settings) {
-                settings.Chunk.ChunkPageSize = _pageSize.value;
+                settings.Chunk.PageSize = _pageSize.value;
                 settings.Chunk.DrawDistance = _drawDistance.value;
                 settings.Chunk.ChunkSize = new int3(
                     int.Parse(_chunkSizeX.value), 

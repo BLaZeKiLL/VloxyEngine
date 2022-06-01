@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
+using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
@@ -16,9 +17,10 @@ using UnityEngine.Rendering;
 namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
     public class MeshBuildScheduler {
-        
-        private ChunkBehaviourPool _ChunkBehaviourPool;
-        private BurstFunctionPointers _BurstFunctionPointers;
+
+        private readonly ChunkState _ChunkState;
+        private readonly ChunkBehaviourPool _ChunkBehaviourPool;
+        private readonly BurstFunctionPointers _BurstFunctionPointers;
         
         private int _BatchSize;
         private int3 _ChunkSize;
@@ -35,10 +37,16 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         private Stopwatch _Watch;
 #endif
         
-        public MeshBuildScheduler(int batchSize, int3 chunkSize, int drawDistance, ChunkBehaviourPool chunkBehaviourPool, BurstFunctionPointers burstFunctionPointers) {
-            _BatchSize = batchSize;
-            _ChunkSize = chunkSize;
-            
+        public MeshBuildScheduler(
+            VloxySettings settings,
+            ChunkState chunkState,
+            ChunkBehaviourPool chunkBehaviourPool, 
+            BurstFunctionPointers burstFunctionPointers
+        ) {
+            _BatchSize = settings.Scheduler.BatchSize;
+            _ChunkSize = settings.Chunk.ChunkSize;
+
+            _ChunkState = chunkState;
             _ChunkBehaviourPool = chunkBehaviourPool;
             _BurstFunctionPointers = burstFunctionPointers;
 
@@ -53,7 +61,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _VertexParams[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2);
             _VertexParams[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4);
             
-            _Results = new NativeHashMap<int3, int>(drawDistance.CubedSize(),Allocator.Persistent);
+            _Results = new NativeHashMap<int3, int>(settings.Chunk.DrawDistance.CubedSize(),Allocator.Persistent);
             _Jobs = new NativeList<int3>(Allocator.Persistent);
             
 #if VLOXY_LOGGING
@@ -105,7 +113,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             var meshes = new UnityEngine.Mesh[_Jobs.Length];
 
             for (var index = 0; index < _Jobs.Length; index++) {
-                meshes[_Results[_Jobs[index]]] = _ChunkBehaviourPool.Claim(_Jobs[index]).Mesh();
+                var position = _Jobs[index];
+                
+                if (_ChunkState.GetState(position) == ChunkState.State.SCHEDULED) {
+                    meshes[_Results[position]] = _ChunkBehaviourPool.Claim(position).Mesh();
+                    _ChunkState.SetState(position, ChunkState.State.ACTIVE);
+                } else { // This is unnecessary, how can we avoid this ? 
+                    meshes[_Results[position]] = new UnityEngine.Mesh();
+#if VLOXY_LOGGING
+                    VloxyLogger.Warn<MeshBuildScheduler>($"Redundant Mesh : {position}");
+#endif
+                }
             }
 
             UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(_MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds);

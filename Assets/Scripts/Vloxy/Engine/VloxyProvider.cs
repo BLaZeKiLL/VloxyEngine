@@ -1,7 +1,7 @@
 ﻿
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
+using CodeBlaze.Vloxy.Engine.Jobs.Page;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -25,20 +25,23 @@ namespace CodeBlaze.Vloxy.Engine {
             Persistance = Settings.NoiseSettings.Persistance,
             Octaves = Settings.NoiseSettings.Octaves,
         });
+
+        public virtual ChunkState ChunkState() => new();
         
         public virtual ChunkStore ChunkStore(
+            ChunkState chunkState,
             ChunkPageScheduler chunkPageScheduler
-        ) => new(chunkPageScheduler, Settings.Chunk);
+        ) => new(Settings, chunkState, chunkPageScheduler);
 
         public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
         
         public virtual MeshBuildScheduler MeshBuildScheduler(
+            ChunkState chunkState,
             ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
-            Settings.Scheduler.BatchSize, 
-            Settings.Chunk.ChunkSize, 
-            Settings.Chunk.DrawDistance,
+            Settings,
+            chunkState,
             chunkBehaviourPool,
             burstFunctionPointers
         );
@@ -47,9 +50,8 @@ namespace CodeBlaze.Vloxy.Engine {
             NoiseProfile noiseProfile, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
+            Settings,
             noiseProfile,
-            Settings.Chunk.ChunkSize, 
-            Settings.Chunk.ChunkPageSize, 
             burstFunctionPointers
         );
 
