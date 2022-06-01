@@ -72,6 +72,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
     [BurstCompile]
     public static class NoiseOverrides {
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int ComputeBlockOverride(ref NoiseValue noise);
 
     }

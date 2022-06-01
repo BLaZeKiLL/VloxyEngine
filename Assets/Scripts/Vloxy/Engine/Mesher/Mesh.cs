@@ -1,4 +1,6 @@
-﻿using Unity.Burst;
+﻿using System.Runtime.InteropServices;
+
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 
@@ -32,6 +34,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
     [BurstCompile]
     public static class MeshOverrides {
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void VertexOverride(int block, ref int3 normal, ref Vertex v1, ref Vertex v2, ref Vertex v3, ref Vertex v4);
 
     }
