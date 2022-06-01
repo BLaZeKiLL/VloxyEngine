@@ -13,10 +13,10 @@ namespace CodeBlaze.Vloxy.Engine.Settings {
     public class ChunkSettings {
         
         [Tooltip("Number of chunks per page = (2 * chunk_page_size + 1)^2")]
-        public int ChunkPageSize = 8;
+        public int PageSize = 4;
         
         [Tooltip("Number of chunk_behaviours per page = (2 * draw_distance + 1)^2")]
-        public int DrawDistance = 4;
+        public int DrawDistance = 2;
 
         [Tooltip("Chunk dimensions")]
         public int3 ChunkSize = 32 * new int3(1,1,1);

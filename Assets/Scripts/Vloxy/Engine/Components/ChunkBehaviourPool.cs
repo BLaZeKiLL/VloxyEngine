@@ -14,16 +14,15 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
     public class ChunkBehaviourPool {
         
-        private IObjectPool<ChunkBehaviour> _pool;
-
-        private Dictionary<int3, ChunkBehaviour> _active;
+        private IObjectPool<ChunkBehaviour> _Pool;
+        private Dictionary<int3, ChunkBehaviour> _Active;
 
         public ChunkBehaviourPool(Transform transform, VloxySettings settings) {
             var viewRegionSize = settings.Chunk.DrawDistance.CubedSize();
             
-            _active = new Dictionary<int3, ChunkBehaviour>(viewRegionSize);
+            _Active = new Dictionary<int3, ChunkBehaviour>(viewRegionSize);
             
-            _pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
+            _Pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
                 () => {
                     var go = new GameObject("Chunk", typeof(ChunkBehaviour)) {
                         transform = {
@@ -49,19 +48,19 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
         
         public ChunkBehaviour Claim(int3 position) {
-            var behaviour = _pool.Get();
+            var behaviour = _Pool.Get();
 
             behaviour.transform.position = position.GetVector3();
             behaviour.name = $"Chunk({position})";
 
-            _active.Add(position, behaviour);
+            _Active.Add(position, behaviour);
             
             return behaviour;
         }
 
         public void Reclaim(int3 pos) {
-            _pool.Release(_active[pos]);
-            _active.Remove(pos);
+            _Pool.Release(_Active[pos]);
+            _Active.Remove(pos);
         }
 
     }

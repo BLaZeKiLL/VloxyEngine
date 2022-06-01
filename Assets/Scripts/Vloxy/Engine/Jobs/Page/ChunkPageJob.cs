@@ -22,9 +22,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Page {
 
         public void Execute(int index) {
             var position = Jobs[index];
-            
+
             var data = GenerateChunkData(position);
-            
+
             Results.TryAdd(position, new Chunk(position, data));
         }
         
