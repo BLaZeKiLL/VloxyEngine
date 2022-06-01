@@ -9,7 +9,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
+namespace CodeBlaze.Vloxy.Engine.Jobs.Page {
 
     public class ChunkPageScheduler {
 

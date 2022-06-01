@@ -48,13 +48,13 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 #endif
         }
         
-        public ChunkBehaviour Claim(int3 pos) {
+        public ChunkBehaviour Claim(int3 position) {
             var behaviour = _pool.Get();
 
-            behaviour.transform.position = pos.GetVector3();
-            behaviour.name = $"Chunk({pos})";
+            behaviour.transform.position = position.GetVector3();
+            behaviour.name = $"Chunk({position})";
 
-            _active.Add(pos, behaviour);
+            _active.Add(position, behaviour);
             
             return behaviour;
         }

@@ -2,7 +2,7 @@
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
+using CodeBlaze.Vloxy.Engine.Jobs.Page;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -21,14 +21,15 @@ namespace CodeBlaze.Vloxy.Engine.World {
         [SerializeField] private Transform _Focus;
         [SerializeField] private VloxySettings _Settings;
 
+        protected int3 FocusChunkCoord;
+
+        protected ChunkStore ChunkStore;
         protected NoiseProfile NoiseProfile;
         protected ChunkBehaviourPool ChunkBehaviourPool;
         protected MeshBuildScheduler MeshBuildScheduler;
         protected ChunkPageScheduler ChunkPageScheduler;
-        protected ChunkStore ChunkStore;
-        protected int3 FocusChunkCoord;
         protected BurstFunctionPointers BurstFunctionPointers;
-        
+
         private bool _IsFocused;
 
         #region Virtual

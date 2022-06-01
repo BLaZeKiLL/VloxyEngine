@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
+using CodeBlaze.Vloxy.Engine.Jobs.Page;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
@@ -19,7 +19,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         private ChunkPage _Page;
         private HashSet<int3> _Claim;
-        private List<int3> _Reclaim;
+        private HashSet<int3> _Reclaim;
         
         public ChunkStore(ChunkPageScheduler chunkPageScheduler, ChunkSettings chunkSettings) {
             _chunkPageScheduler = chunkPageScheduler;
@@ -32,7 +32,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             Accessor = new ChunkStoreAccessor(_Page.Chunks, _ChunkSettings.ChunkSize);
 
             _Claim = new HashSet<int3>(viewRegionSize);
-            _Reclaim = new List<int3>(viewRegionSize);
+            _Reclaim = new HashSet<int3>(viewRegionSize);
         }
 
         internal void GenerateChunks() {
@@ -58,8 +58,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _Claim.Clear();
             
             if (!initial.AndReduce()) {
-                UpdateReclaim(focusChunkCoord, -diff);
-                UpdateClaim(newFocusChunkCoord, diff);
+                Update(_Reclaim, focusChunkCoord, -diff);
+                Update(_Claim, newFocusChunkCoord, diff);
             } else {
                 InitialRegion(newFocusChunkCoord);
             }
@@ -69,7 +69,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             VloxyLogger.Info<ChunkStore>($"Claim : {_Claim.Count()}, Reclaim : {_Reclaim.Count}");
 #endif
 
-            return (_Claim.ToList(), _Reclaim);
+            return (_Claim.ToList(), _Reclaim.ToList());
         }
 
         internal void Dispose() {
@@ -86,43 +86,22 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             }
         }
 
-        private void UpdateClaim(int3 focus, int3 diff) {
+        private void Update(HashSet<int3> set, int3 focus, int3 diff) {
             var distance = _ChunkSettings.DrawDistance;
             var size = _ChunkSettings.ChunkSize;
             
             for (int i = -distance; i <= distance; i++) {
                 for (int j = -distance; j <= distance; j++) {
                     if (diff.x != 0) {
-                        _Claim.Add(new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z)));
+                        set.Add(new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z)));
                     }
 
                     if (diff.y != 0) {
-                        _Claim.Add(new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z)));
+                        set.Add(new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z)));
                     }
 
                     if (diff.z != 0) {
-                        _Claim.Add(new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance)));
-                    }
-                }
-            }
-        }
-        
-        private void UpdateReclaim(int3 focus, int3 diff) {
-            var distance = _ChunkSettings.DrawDistance;
-            var size = _ChunkSettings.ChunkSize;
-            
-            for (int i = -distance; i <= distance; i++) {
-                for (int j = -distance; j <= distance; j++) {
-                    if (diff.x != 0) {
-                        _Reclaim.Add(new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z)));
-                    }
-
-                    if (diff.y != 0) {
-                        _Reclaim.Add(new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z)));
-                    }
-
-                    if (diff.z != 0) {
-                        _Reclaim.Add(new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance)));
+                        set.Add(new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance)));
                     }
                 }
             }
