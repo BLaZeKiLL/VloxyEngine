@@ -18,15 +18,15 @@ namespace CodeBlaze.Vloxy.Engine {
         public virtual BurstFunctionPointers SetupBurstFunctionPointers() => new();
         
         public virtual NoiseProfile NoiseProfile() => new (new NoiseProfile.Settings {
-            Height = Settings.NoiseSettings.Height,
-            Seed = Settings.NoiseSettings.Seed,
-            Scale = Settings.NoiseSettings.Scale,
-            Lacunarity = Settings.NoiseSettings.Lacunarity,
-            Persistance = Settings.NoiseSettings.Persistance,
-            Octaves = Settings.NoiseSettings.Octaves,
+            Height = Settings.Noise.Height,
+            Seed = Settings.Noise.Seed,
+            Scale = Settings.Noise.Scale,
+            Lacunarity = Settings.Noise.Lacunarity,
+            Persistance = Settings.Noise.Persistance,
+            Octaves = Settings.Noise.Octaves,
         });
 
-        public virtual ChunkState ChunkState() => new();
+        public virtual ChunkState ChunkState() => new(Settings);
         
         public virtual ChunkStore ChunkStore(
             ChunkState chunkState,

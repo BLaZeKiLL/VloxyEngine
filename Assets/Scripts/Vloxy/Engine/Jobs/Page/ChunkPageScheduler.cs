@@ -16,16 +16,18 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Page {
 
         private NoiseProfile _NoiseProfile;
         private int3 _ChunkSize;
-        private int _PageSize;
         private BurstFunctionPointers _BurstFunctionPointers;
         
         private JobHandle _Handle;
         private bool _Scheduled;
 
-        public ChunkPageScheduler(VloxySettings settings, NoiseProfile noiseProfile, BurstFunctionPointers burstFunctionPointers) {
+        public ChunkPageScheduler(
+            VloxySettings settings, 
+            NoiseProfile noiseProfile, 
+            BurstFunctionPointers burstFunctionPointers
+        ) {
             _ChunkSize = settings.Chunk.ChunkSize;
-            _PageSize = settings.Chunk.PageSize;
-            
+
             _NoiseProfile = noiseProfile;
             _BurstFunctionPointers = burstFunctionPointers;
         }
