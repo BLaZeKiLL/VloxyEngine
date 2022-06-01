@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Jobs.Page;
@@ -12,22 +13,24 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
     public class ChunkStore {
 
-        public ChunkStoreAccessor Accessor { get; }
-        
+        internal ChunkStoreAccessor Accessor { get; }
+
+        private ChunkState _ChunkState;
         private ChunkSettings _ChunkSettings;
-        private ChunkPageScheduler _chunkPageScheduler;
+        private ChunkPageScheduler _ChunkPageScheduler;
 
         private ChunkPage _Page;
-        private HashSet<int3> _Claim;
-        private HashSet<int3> _Reclaim;
-        
-        public ChunkStore(ChunkPageScheduler chunkPageScheduler, ChunkSettings chunkSettings) {
-            _chunkPageScheduler = chunkPageScheduler;
-            _ChunkSettings = chunkSettings;
+        private ISet<int3> _Claim;
+        private ISet<int3> _Reclaim;
+
+        public ChunkStore(VloxySettings settings, ChunkState chunkState, ChunkPageScheduler chunkPageScheduler) {
+            _ChunkPageScheduler = chunkPageScheduler;
+            _ChunkSettings = settings.Chunk;
+            _ChunkState = chunkState;
 
             var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
 
-            _Page = new ChunkPage(int3.zero, _ChunkSettings.ChunkPageSize, _ChunkSettings.ChunkSize);
+            _Page = new ChunkPage(int3.zero, _ChunkSettings.PageSize, _ChunkSettings.ChunkSize);
             
             Accessor = new ChunkStoreAccessor(_Page.Chunks, _ChunkSettings.ChunkSize);
 
@@ -37,19 +40,19 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         internal void GenerateChunks() {
             // Schedule Job
-            _chunkPageScheduler.Schedule(_Page);
+            _ChunkPageScheduler.Schedule(_Page);
             
             // Complete Job
-            _chunkPageScheduler.Complete();
+            _ChunkPageScheduler.Complete();
 
             // Dispose Job
-            _chunkPageScheduler.Dispose();
+            _ChunkPageScheduler.Dispose();
 
 #if VLOXY_LOGGING
             VloxyLogger.Info<ChunkStore>($"Chunk Page : {_Page.Position},Chunks Created : {_Page.ChunkCount()}");
 #endif
         }
-        
+
         internal (List<int3>, List<int3>) ViewRegionUpdate(int3 newFocusChunkCoord, int3 focusChunkCoord) {
             var initial = focusChunkCoord == new int3(1, 1, 1) * int.MinValue;
             var diff = newFocusChunkCoord - focusChunkCoord;
@@ -58,8 +61,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _Claim.Clear();
             
             if (!initial.AndReduce()) {
-                Update(_Reclaim, focusChunkCoord, -diff);
-                Update(_Claim, newFocusChunkCoord, diff);
+                Update(_Reclaim, focusChunkCoord, -diff, ChunkState.State.ACTIVE);
+                Update(_Claim, newFocusChunkCoord, diff, ChunkState.State.INACTIVE);
             } else {
                 InitialRegion(newFocusChunkCoord);
             }
@@ -86,25 +89,44 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             }
         }
 
-        private void Update(HashSet<int3> set, int3 focus, int3 diff) {
+        private void Update(ISet<int3> set, int3 focus, int3 diff, ChunkState.State state) {
             var distance = _ChunkSettings.DrawDistance;
             var size = _ChunkSettings.ChunkSize;
             
             for (int i = -distance; i <= distance; i++) {
                 for (int j = -distance; j <= distance; j++) {
                     if (diff.x != 0) {
-                        set.Add(new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z)));
+                        Add(set, new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z)), state);
                     }
 
                     if (diff.y != 0) {
-                        set.Add(new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z)));
+                        Add(set, new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z)), state);
                     }
 
                     if (diff.z != 0) {
-                        set.Add(new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance)));
+                        Add(set, new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance)), state);
                     }
                 }
             }
+        }
+
+        private void Add(ISet<int3> set, int3 position, ChunkState.State state) {
+            // if (_ChunkState.GetState(position) != state) return;
+
+            set.Add(position);
+
+            // switch (state) {
+            //     case ChunkState.State.INACTIVE:
+            //         _ChunkState.SetState(position, ChunkState.State.SCHEDULED);
+            //         break;
+            //     case ChunkState.State.SCHEDULED:
+            //         break;
+            //     case ChunkState.State.ACTIVE:
+            //         _ChunkState.SetState(position, ChunkState.State.INACTIVE);
+            //         break;
+            //     default:
+            //         throw new ArgumentOutOfRangeException(nameof(state), state, null);
+            // }
         }
 
     }
