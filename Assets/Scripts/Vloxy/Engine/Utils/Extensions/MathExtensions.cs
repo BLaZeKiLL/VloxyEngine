@@ -13,6 +13,9 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Extensions {
         public static int CubedSize(this int num) => (2 * num + 1) * (2 * num + 1) * (2 * num + 1);
         
         [BurstCompile]
+        public static int YCubedSize(this int num, int y) => (2 * num + 1) * (2 * num + 1) * (2 * y);
+        
+        [BurstCompile]
         public static int Flatten(this int3 vec, int x, int y, int z) =>
             y * vec.x * vec.z +
             z * vec.x +

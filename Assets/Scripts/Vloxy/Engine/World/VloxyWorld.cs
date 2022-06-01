@@ -99,7 +99,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkState, ChunkBehaviourPool, BurstFunctionPointers);
             ChunkPageScheduler = VloxyProvider.Current.ChunkDataScheduler(NoiseProfile, BurstFunctionPointers);
             ChunkStore = VloxyProvider.Current.ChunkStore(ChunkState, ChunkPageScheduler);
-            
+
 #if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
 #endif
@@ -110,9 +110,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
             var watch = new Stopwatch();
             watch.Start();
 #endif
-            ChunkState.Initialize(int3.zero, _Settings.Chunk.PageSize, _Settings.Chunk.ChunkSize);
+            ChunkState.Initialize(int3.zero);
             ChunkStore.GenerateChunks();
-
 #if VLOXY_LOGGING
             watch.Stop();
             VloxyLogger.Info<VloxyWorld>($"Vloxy World Generated : {watch.ElapsedMilliseconds} MS");

@@ -86,7 +86,7 @@ namespace CodeBlaze {
             }
 
             public void SetValue(VloxySettings settings) {
-                var noise = settings.NoiseSettings as NoiseSettings;
+                var noise = settings.Noise as NoiseSettings;
 
                 noise.Height = int.Parse(_height.value);
                 noise.Seed = int.Parse(_seed.value);

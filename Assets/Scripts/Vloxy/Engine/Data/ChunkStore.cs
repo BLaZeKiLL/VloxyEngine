@@ -27,12 +27,17 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _ChunkPageScheduler = chunkPageScheduler;
             _ChunkSettings = settings.Chunk;
             _ChunkState = chunkState;
-
-            var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
-
-            _Page = new ChunkPage(int3.zero, _ChunkSettings.PageSize, _ChunkSettings.ChunkSize);
+            
+            _Page = new ChunkPage(
+                int3.zero, 
+                _ChunkSettings.ChunkSize,
+                _ChunkSettings.PageSize,
+                settings.Noise.Height
+            );
             
             Accessor = new ChunkStoreAccessor(_Page.Chunks, _ChunkSettings.ChunkSize);
+
+            var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
 
             _Claim = new HashSet<int3>(viewRegionSize);
             _Reclaim = new HashSet<int3>(viewRegionSize);

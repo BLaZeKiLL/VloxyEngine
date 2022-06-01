@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de6253de127543aeb23d6596fc20fad2, type: 3}
   m_Name: TexturedVloxySettings
   m_EditorClassIdentifier: 
-  NoiseSettings: {fileID: 11400000, guid: c28776072edff5743bd39aa43edd3f85, type: 2}
+  Noise: {fileID: 11400000, guid: c28776072edff5743bd39aa43edd3f85, type: 2}
   Chunk:
     PageSize: 4
     DrawDistance: 2
