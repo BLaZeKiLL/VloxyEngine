@@ -21,7 +21,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         [ReadOnly] public ChunkStoreAccessor Accessor;
         [ReadOnly] public NativeList<int3> Jobs;
 
-        [WriteOnly] public NativeHashMap<int3, int>.ParallelWriter Results;
+        [WriteOnly] public NativeParallelHashMap<int3, int>.ParallelWriter Results;
 
         public UnityEngine.Mesh.MeshDataArray MeshDataArray;
 

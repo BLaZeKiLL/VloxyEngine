@@ -4,6 +4,7 @@ using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
@@ -58,11 +59,7 @@ namespace CodeBlaze {
         
         private bool IsEscapePressed()
         {
-#if ENABLE_INPUT_SYSTEM
-            return Keyboard.current != null ? Keyboard.current.escapeKey.isPressed : false; 
-#else
-            return Input.GetKey(KeyCode.Escape);
-#endif
+            return Keyboard.current != null && Keyboard.current.escapeKey.isPressed; 
         }
 
     }

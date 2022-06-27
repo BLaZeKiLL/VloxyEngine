@@ -7,10 +7,10 @@ namespace CodeBlaze.Vloxy.Engine.Data {
     [BurstCompile]
     public struct ChunkStoreAccessor {
 
-        private NativeHashMap<int3, Chunk> Chunks;
+        private NativeParallelHashMap<int3, Chunk> Chunks;
         private int3 ChunkSize;
 
-        public ChunkStoreAccessor(NativeHashMap<int3, Chunk> chunks, int3 chunkSize) {
+        public ChunkStoreAccessor(NativeParallelHashMap<int3, Chunk> chunks, int3 chunkSize) {
             Chunks = chunks;
             ChunkSize = chunkSize;
         }

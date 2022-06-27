@@ -9,7 +9,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
     public class ChunkPage {
 
         public int3 Position { get; }
-        public NativeHashMap<int3, Chunk> Chunks { get; }
+        public NativeParallelHashMap<int3, Chunk> Chunks { get; }
         
         private int PageSize;
         private int YPageSize;
@@ -22,7 +22,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
             YPageSize = height / chunkSize.y / 2;
             
-            Chunks = new NativeHashMap<int3, Chunk>(
+            Chunks = new NativeParallelHashMap<int3, Chunk>(
                 PageSize.YCubedSize(YPageSize), 
                 Allocator.Persistent
             );

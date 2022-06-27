@@ -66,8 +66,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _Claim.Clear();
             
             if (!initial.AndReduce()) {
-                Update(_Reclaim, focusChunkCoord, -diff, ChunkState.State.ACTIVE);
                 Update(_Claim, newFocusChunkCoord, diff, ChunkState.State.INACTIVE);
+                Update(_Reclaim, focusChunkCoord, -diff, ChunkState.State.ACTIVE);
             } else {
                 InitialRegion(newFocusChunkCoord);
             }
@@ -117,7 +117,18 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         private void Add(ISet<int3> set, int3 position, ChunkState.State state) {
             if (!_Page.ContainsChunk(position)) return;
-            if (_ChunkState.GetState(position) != state) return;
+
+            if (_ChunkState.GetState(position) != state) {
+                if (state == ChunkState.State.ACTIVE && _ChunkState.GetState(position) == ChunkState.State.SCHEDULED) {
+                    _ChunkState.SetState(position, ChunkState.State.INACTIVE);
+                } else {
+#if VLOXY_LOGGING
+                    VloxyLogger.Warn<ChunkStore>($"Invalid Claim/Reclaim : {position} : Expected : {state} : Actual : {_ChunkState.GetState(position)}");
+#endif
+                }
+                
+                return;
+            }
 
             set.Add(position);
 

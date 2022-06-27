@@ -27,7 +27,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         
         private JobHandle _Handle;
         private UnityEngine.Mesh.MeshDataArray _MeshDataArray;
-        private NativeHashMap<int3, int> _Results;
+        private NativeParallelHashMap<int3, int> _Results;
         private NativeList<int3> _Jobs;
         private NativeArray<VertexAttributeDescriptor> _VertexParams;
 
@@ -61,7 +61,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _VertexParams[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2);
             _VertexParams[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4);
             
-            _Results = new NativeHashMap<int3, int>(settings.Chunk.DrawDistance.CubedSize(),Allocator.Persistent);
+            _Results = new NativeParallelHashMap<int3, int>(settings.Chunk.DrawDistance.CubedSize(),Allocator.Persistent);
             _Jobs = new NativeList<int3>(Allocator.Persistent);
             
 #if VLOXY_LOGGING

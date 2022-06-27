@@ -14,10 +14,10 @@ namespace CodeBlaze.Sandbox {
     
     public class Sandbox : MonoBehaviour {
 
-        private NativeHashMap<int, Test> Map;
+        private NativeParallelHashMap<int, Test> Map;
 
         private void Awake() {
-            Map = new NativeHashMap<int, Test>(10, Allocator.Persistent);
+            Map = new NativeParallelHashMap<int, Test>(10, Allocator.Persistent);
         }
 
         private void Start() {

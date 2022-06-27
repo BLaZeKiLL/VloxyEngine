@@ -18,7 +18,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Page {
 
         [ReadOnly] public NativeArray<int3> Jobs;
         
-        [WriteOnly] public NativeHashMap<int3, Chunk>.ParallelWriter Results;
+        [WriteOnly] public NativeParallelHashMap<int3, Chunk>.ParallelWriter Results;
 
         public void Execute(int index) {
             var position = Jobs[index];
