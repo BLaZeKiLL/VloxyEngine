@@ -43,7 +43,7 @@ namespace CodeBlaze.Camera
                     ""type"": ""Value"",
                     ""id"": ""3d111222-be8d-43ce-b503-98f1bfd5a93d"",
                     ""expectedControlType"": ""Vector2"",
-                    ""processors"": ""ScaleVector2(x=15,y=15)"",
+                    ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
