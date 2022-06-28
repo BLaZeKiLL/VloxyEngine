@@ -87,7 +87,7 @@ jobs:
           
       - uses: actions/upload-artifact@v3
         with:
-          name: Build
+          name: Build-${{ matrix.buildMethod }}
           path: |
             Build
             !**/*DoNotShip*/**
