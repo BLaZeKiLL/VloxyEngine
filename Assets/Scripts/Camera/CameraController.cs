@@ -2,9 +2,9 @@
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-namespace UnityTemplateProjects
+namespace CodeBlaze.Camera
 {
-    public class SimpleCameraController : MonoBehaviour
+    public class CameraController : MonoBehaviour
     {
         class CameraState
         {
@@ -72,68 +72,61 @@ namespace UnityTemplateProjects
         [Tooltip("Whether or not to invert our Y axis for mouse input to rotation.")]
         public bool invertY = false;
         
+        [SerializeField] private GameObject m_TouchControls;
+        
         InputAction movementAction;
-        InputAction verticalMovementAction;
+        // InputAction verticalMovementAction;
         InputAction lookAction;
-        InputAction boostFactorAction;
+        // InputAction boostFactorAction;
         bool        mouseRightButtonPressed;
 
-        void Start()
+        private void Start()
         {
-            var map = new InputActionMap("Simple Camera Controller");
+            var map = new CameraInput();
 
-            lookAction = map.AddAction("look", binding: "<Mouse>/delta");
-            movementAction = map.AddAction("move", binding: "<Gamepad>/leftStick");
-            verticalMovementAction = map.AddAction("Vertical Movement");
-            boostFactorAction = map.AddAction("Boost Factor", binding: "<Mouse>/scroll");
+            map.Player.Enable();
+            
+            lookAction = map.Player.Look;
+            movementAction = map.Player.Move;
+            
+            if (UnityEngine.Device.SystemInfo.deviceType == DeviceType.Handheld) {
+                Application.targetFrameRate = Screen.currentResolution.refreshRate;
+                m_TouchControls.SetActive(true);
+            }
+            
+            // verticalMovementAction = map.AddAction("Vertical Movement");
+            // boostFactorAction = map.AddAction("Boost Factor", binding: "<Mouse>/scroll");
 
-            lookAction.AddBinding("<Gamepad>/rightStick").WithProcessor("scaleVector2(x=15, y=15)");
+            // verticalMovementAction.AddCompositeBinding("Dpad")
+            //                       .With("Up", "<Keyboard>/pageUp")
+            //                       .With("Down", "<Keyboard>/pageDown")
+            //                       .With("Up", "<Keyboard>/e")
+            //                       .With("Down", "<Keyboard>/q")
+            //                       .With("Up", "<Gamepad>/rightshoulder")
+            //                       .With("Down", "<Gamepad>/leftshoulder");
             
-            movementAction.AddCompositeBinding("Dpad")
-                .With("Up", "<Keyboard>/w")
-                .With("Up", "<Keyboard>/upArrow")
-                .With("Down", "<Keyboard>/s")
-                .With("Down", "<Keyboard>/downArrow")
-                .With("Left", "<Keyboard>/a")
-                .With("Left", "<Keyboard>/leftArrow")
-                .With("Right", "<Keyboard>/d")
-                .With("Right", "<Keyboard>/rightArrow");
-            
-            verticalMovementAction.AddCompositeBinding("Dpad")
-                .With("Up", "<Keyboard>/pageUp")
-                .With("Down", "<Keyboard>/pageDown")
-                .With("Up", "<Keyboard>/e")
-                .With("Down", "<Keyboard>/q")
-                .With("Up", "<Gamepad>/rightshoulder")
-                .With("Down", "<Gamepad>/leftshoulder");
-            
-            boostFactorAction.AddBinding("<Gamepad>/Dpad").WithProcessor("scaleVector2(x=1, y=4)");
-
-            movementAction.Enable();
-            lookAction.Enable();
-            verticalMovementAction.Enable();
-            boostFactorAction.Enable();
+            // boostFactorAction.AddBinding("<Gamepad>/Dpad").WithProcessor("scaleVector2(x=1, y=4)");
         }
 
-        void OnEnable()
+        private void OnEnable()
         {
             m_TargetCameraState.SetFromTransform(transform);
             m_InterpolatingCameraState.SetFromTransform(transform);
         }
 
-        Vector3 GetInputTranslationDirection()
+        private Vector3 GetInputTranslationDirection()
         {
             Vector3 direction = Vector3.zero;
             
             var moveDelta = movementAction.ReadValue<Vector2>();
             direction.x = moveDelta.x;
             direction.z = moveDelta.y;
-            direction.y = verticalMovementAction.ReadValue<Vector2>().y;
+            // direction.y = verticalMovementAction.ReadValue<Vector2>().y;
 
             return direction;
         }
         
-        void Update()
+        private void Update()
         {
             // Exit Sample  
 
@@ -178,7 +171,7 @@ namespace UnityTemplateProjects
             }
             
             // Modify movement by a boost factor (defined in Inspector and modified in play mode through the mouse scroll wheel)
-            boost += GetBoostFactor();
+            // boost += GetBoostFactor();
             translation *= Mathf.Pow(2.0f, boost);
 
             m_TargetCameraState.Translate(translation);
@@ -192,41 +185,41 @@ namespace UnityTemplateProjects
             m_InterpolatingCameraState.UpdateTransform(transform);
         }
 
-        float GetBoostFactor()
-        {
-            return boostFactorAction.ReadValue<Vector2>().y * 0.01f;
-        }
+        // private float GetBoostFactor()
+        // {
+        //     return boostFactorAction.ReadValue<Vector2>().y * 0.01f;
+        // }
 
-        Vector2 GetInputLookRotation()
+        private Vector2 GetInputLookRotation()
         {
             return lookAction.ReadValue<Vector2>();
         }
 
-        bool IsBoostPressed()
+        private bool IsBoostPressed()
         {
             bool boost = Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed; 
             boost |= Gamepad.current != null && Gamepad.current.xButton.isPressed;
             return boost;
         }
 
-        bool IsEscapePressed()
+        private bool IsEscapePressed()
         {
             return Keyboard.current != null && Keyboard.current.escapeKey.isPressed;
         }
 
-        bool IsCameraRotationAllowed()
+        private bool IsCameraRotationAllowed()
         {
             bool canRotate = Mouse.current != null && Mouse.current.rightButton.isPressed;
             canRotate |= Gamepad.current != null && Gamepad.current.rightStick.ReadValue().magnitude > 0;
             return canRotate;
         }
 
-        bool IsRightMouseButtonDown()
+        private bool IsRightMouseButtonDown()
         {
             return Mouse.current != null && Mouse.current.rightButton.isPressed;
         }
 
-        bool IsRightMouseButtonUp()
+        private bool IsRightMouseButtonUp()
         {
             return Mouse.current != null && !Mouse.current.rightButton.isPressed;
         }
