@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     
 jobs:
-  android:
+  linux:
     name: Release Build For Android
     runs-on: ubuntu-latest
     strategy:
@@ -44,7 +44,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: Build
+          name: Build-${{ matrix.buildMethod }}
           path: |
             Build
             !**/*DoNotShip*/**
