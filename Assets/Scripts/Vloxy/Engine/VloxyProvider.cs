@@ -37,11 +37,13 @@ namespace CodeBlaze.Vloxy.Engine {
         
         public virtual MeshBuildScheduler MeshBuildScheduler(
             ChunkState chunkState,
+            ChunkStore chunkStore,
             ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,
             chunkState,
+            chunkStore,
             chunkBehaviourPool,
             burstFunctionPointers
         );

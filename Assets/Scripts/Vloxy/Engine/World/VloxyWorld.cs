@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
@@ -73,15 +74,19 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void Update() {
             var NewFocusChunkCoord = _IsFocused ? VloxyUtils.GetChunkCoords(_Focus.position) : int3.zero;
 
-            if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce() && MeshBuildScheduler.CanSchedule()) {
+            if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) {
                 ViewRegionUpdate(NewFocusChunkCoord);
             }
+            
+            MeshBuildScheduler.Update();
 
             WorldUpdate();
 
             // ChunkStore.ActiveChunkUpdate();
-            
-            MeshBuildScheduler.Complete();
+        }
+
+        private void LateUpdate() {
+            MeshBuildScheduler.LateUpdate();
         }
 
         private void OnDestroy() {
@@ -96,10 +101,10 @@ namespace CodeBlaze.Vloxy.Engine.World {
             NoiseProfile = VloxyProvider.Current.NoiseProfile();
             ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
             BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
-            MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkState, ChunkBehaviourPool, BurstFunctionPointers);
             ChunkPageScheduler = VloxyProvider.Current.ChunkDataScheduler(NoiseProfile, BurstFunctionPointers);
             ChunkStore = VloxyProvider.Current.ChunkStore(ChunkState, ChunkPageScheduler);
-
+            MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkState, ChunkStore, ChunkBehaviourPool, BurstFunctionPointers);
+            
 #if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
 #endif
@@ -121,7 +126,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
             var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
             
-            if (claim.Count != 0) MeshBuildScheduler.Schedule(claim, ChunkStore.Accessor);
+            if (claim.Count != 0) MeshBuildScheduler.Schedule(claim);
 
             for (var index = 0; index < reclaim.Count; index++) {
                 ChunkBehaviourPool.Reclaim(reclaim[index]);
