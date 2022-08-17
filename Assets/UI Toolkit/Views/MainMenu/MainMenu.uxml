@@ -67,7 +67,7 @@
                     <ui:VisualElement name="SchedularPage" class="vloxy-display-none">
                         <ui:VisualElement style="flex-direction: row;">
                             <ui:Label text="BatchSize" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 200px;" />
-                            <ui:TextField value="32" text="32" name="BatchSize" class="vloxy-text" style="flex-grow: 1;" />
+                            <ui:TextField value="8" text="8" name="BatchSize" class="vloxy-text" style="flex-grow: 1;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

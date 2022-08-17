@@ -117,8 +117,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
             _Scheduled = true;
         }
-
-        // Call late in frame
+        
         private void Complete() {
             if (!_Handle.IsCompleted) return;
 
