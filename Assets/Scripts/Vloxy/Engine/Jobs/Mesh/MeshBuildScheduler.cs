@@ -19,16 +19,18 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
     public class MeshBuildScheduler {
 
         private readonly ChunkState _ChunkState;
+        private readonly ChunkStore _ChunkStore;
         private readonly ChunkBehaviourPool _ChunkBehaviourPool;
         private readonly BurstFunctionPointers _BurstFunctionPointers;
         
         private int _BatchSize;
         private int3 _ChunkSize;
-        
+        private Queue<int3> _Queue;
+
         private JobHandle _Handle;
-        private UnityEngine.Mesh.MeshDataArray _MeshDataArray;
-        private NativeParallelHashMap<int3, int> _Results;
         private NativeList<int3> _Jobs;
+        private NativeParallelHashMap<int3, int> _Results;
+        private UnityEngine.Mesh.MeshDataArray _MeshDataArray;
         private NativeArray<VertexAttributeDescriptor> _VertexParams;
 
         private bool _Scheduled;
@@ -40,6 +42,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         public MeshBuildScheduler(
             VloxySettings settings,
             ChunkState chunkState,
+            ChunkStore chunkStore,
             ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) {
@@ -47,6 +50,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _ChunkSize = settings.Chunk.ChunkSize;
 
             _ChunkState = chunkState;
+            _ChunkStore = chunkStore;
             _ChunkBehaviourPool = chunkBehaviourPool;
             _BurstFunctionPointers = burstFunctionPointers;
 
@@ -63,35 +67,45 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             
             _Results = new NativeParallelHashMap<int3, int>(settings.Chunk.DrawDistance.CubedSize(),Allocator.Persistent);
             _Jobs = new NativeList<int3>(Allocator.Persistent);
-            
+            _Queue = new Queue<int3>();
+
 #if VLOXY_LOGGING
             _Watch = new Stopwatch();
 #endif
         }
 
-        public bool CanSchedule() => !_Scheduled;
+        public void Update() {
+            if (!_Scheduled && _Queue.Count > 0) Process();
+        }
+
+        public void LateUpdate() {
+            if (_Scheduled) Complete();
+        }   
 
         // Call early in frame
-        public void Schedule(List<int3> jobs, ChunkStoreAccessor accessor) {
-            if (_Scheduled) {
-#if VLOXY_LOGGING
-                VloxyLogger.Error<MeshBuildScheduler>($"Job Already Scheduled : {_Handle}");
-#endif
-                return;
+        public void Schedule(List<int3> jobs) {
+            for (int i = 0; i < jobs.Count; i++) {
+                _Queue.Enqueue(jobs[i]);
             }
+        }
+
+        private void Process() {
+            var count = _BatchSize;
+
+            while (count > 0 && _Queue.Count > 0) {
+                _Jobs.Add(_Queue.Dequeue());
+                count--;
+            }
+            
 #if VLOXY_LOGGING
             _Watch.Restart();
 #endif
-            
-            for (int i = 0; i < jobs.Count; i++) {
-                _Jobs.Add(jobs[i]);
-            }
             
             _MeshDataArray = UnityEngine.Mesh.AllocateWritableMeshData(_Jobs.Length);
 
             var job = new MeshBuildJob {
                 BurstFunctionPointers = _BurstFunctionPointers,
-                Accessor = accessor,
+                Accessor = _ChunkStore.Accessor,
                 ChunkSize = _ChunkSize,
                 Jobs = _Jobs,
                 VertexParams = _VertexParams,
@@ -99,14 +113,14 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
                 Results = _Results.AsParallelWriter()
             };
 
-            _Handle = job.Schedule(_Jobs.Length, _BatchSize);
+            _Handle = job.Schedule(_Jobs.Length, 1);
 
             _Scheduled = true;
         }
 
         // Call late in frame
-        public void Complete() {
-            if (!_Scheduled || !_Handle.IsCompleted) return;
+        private void Complete() {
+            if (!_Handle.IsCompleted) return;
 
             _Handle.Complete();
 
