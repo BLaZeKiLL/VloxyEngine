@@ -27,7 +27,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
 
         [BurstCompile]
         internal static MeshBuffer GenerateMesh(
-            ChunkStoreAccessor accessor, int3 pos, int3 size,
+            ChunkAccessor accessor, int3 pos, int3 size,
             FunctionPointer<MeshOverrides.VertexOverride> vertexOverride
             ) {
             var mesh = new MeshBuffer {
@@ -252,7 +252,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         }
 
         [BurstCompile]
-        private static int4 ComputeAOMask(ChunkStoreAccessor accessor, int3 pos, int3 coord, int axis1, int axis2) {
+        private static int4 ComputeAOMask(ChunkAccessor accessor, int3 pos, int3 coord, int axis1, int axis2) {
             var L = coord;
             var R = coord;
             var B = coord;

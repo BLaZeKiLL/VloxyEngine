@@ -19,7 +19,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
     public class MeshBuildScheduler {
 
         private readonly ChunkState _ChunkState;
-        private readonly ChunkStore _ChunkStore;
+        private readonly ChunkManager _ChunkManager;
         private readonly ChunkBehaviourPool _ChunkBehaviourPool;
         private readonly BurstFunctionPointers _BurstFunctionPointers;
         
@@ -42,7 +42,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         public MeshBuildScheduler(
             VloxySettings settings,
             ChunkState chunkState,
-            ChunkStore chunkStore,
+            ChunkManager chunkManager,
             ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) {
@@ -50,7 +50,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _ChunkSize = settings.Chunk.ChunkSize;
 
             _ChunkState = chunkState;
-            _ChunkStore = chunkStore;
+            _ChunkManager = chunkManager;
             _ChunkBehaviourPool = chunkBehaviourPool;
             _BurstFunctionPointers = burstFunctionPointers;
 
@@ -105,7 +105,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
             var job = new MeshBuildJob {
                 BurstFunctionPointers = _BurstFunctionPointers,
-                Accessor = _ChunkStore.Accessor,
+                Accessor = _ChunkManager.Accessor,
                 ChunkSize = _ChunkSize,
                 Jobs = _Jobs,
                 VertexParams = _VertexParams,

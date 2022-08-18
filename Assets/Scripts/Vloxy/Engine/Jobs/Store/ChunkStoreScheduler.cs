@@ -10,9 +10,9 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Jobs.Page {
+namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
 
-    public class ChunkPageScheduler {
+    public class ChunkStoreScheduler {
 
         private NoiseProfile _NoiseProfile;
         private int3 _ChunkSize;
@@ -21,7 +21,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Page {
         private JobHandle _Handle;
         private bool _Scheduled;
 
-        public ChunkPageScheduler(
+        public ChunkStoreScheduler(
             VloxySettings settings, 
             NoiseProfile noiseProfile, 
             BurstFunctionPointers burstFunctionPointers
@@ -34,21 +34,21 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Page {
         
         public bool CanSchedule() => !_Scheduled;
 
-        public void Schedule(ChunkPage page) {
+        public void Schedule(ChunkStore store) {
             if (_Scheduled) {
 #if VLOXY_LOGGING
-                VloxyLogger.Error<ChunkPageScheduler>($"Job Already Scheduled : {_Handle}");
+                VloxyLogger.Error<ChunkStoreScheduler>($"Job Already Scheduled : {_Handle}");
 #endif
                 return;
             }
 
-            var jobs = page.GetPositions(Allocator.TempJob);
+            var jobs = store.GetPositions(Allocator.TempJob);
             
-            var job = new ChunkPageJob {
+            var job = new ChunkStoreJob {
                 Jobs = jobs,
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,
-                Results = page.Chunks.AsParallelWriter(),
+                Results = store.Chunks.AsParallelWriter(),
                 BurstFunctionPointers = _BurstFunctionPointers,
             };
 

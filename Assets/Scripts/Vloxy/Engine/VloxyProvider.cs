@@ -1,7 +1,7 @@
 ﻿
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Jobs.Page;
+using CodeBlaze.Vloxy.Engine.Jobs.Store;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -28,27 +28,27 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual ChunkState ChunkState() => new(Settings);
         
-        public virtual ChunkStore ChunkStore(
+        public virtual ChunkManager ChunkStore(
             ChunkState chunkState,
-            ChunkPageScheduler chunkPageScheduler
-        ) => new(Settings, chunkState, chunkPageScheduler);
+            ChunkStoreScheduler chunkStoreScheduler
+        ) => new(Settings, chunkState, chunkStoreScheduler);
 
         public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
         
         public virtual MeshBuildScheduler MeshBuildScheduler(
             ChunkState chunkState,
-            ChunkStore chunkStore,
+            ChunkManager chunkManager,
             ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,
             chunkState,
-            chunkStore,
+            chunkManager,
             chunkBehaviourPool,
             burstFunctionPointers
         );
 
-        public virtual ChunkPageScheduler ChunkDataScheduler(
+        public virtual ChunkStoreScheduler ChunkDataScheduler(
             NoiseProfile noiseProfile, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(

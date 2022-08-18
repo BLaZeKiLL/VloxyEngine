@@ -7,10 +7,10 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Jobs.Page {
+namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
 
     [BurstCompile]
-    public struct ChunkPageJob : IJobParallelFor {
+    public struct ChunkStoreJob : IJobParallelFor {
 
         [ReadOnly] public int3 ChunkSize;
         [ReadOnly] public NoiseProfile NoiseProfile;

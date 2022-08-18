@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Jobs.Page;
+using CodeBlaze.Vloxy.Engine.Jobs.Store;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -25,11 +25,11 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected int3 FocusChunkCoord;
 
         protected ChunkState ChunkState;
-        protected ChunkStore ChunkStore;
+        protected ChunkManager ChunkManager;
         protected NoiseProfile NoiseProfile;
         protected ChunkBehaviourPool ChunkBehaviourPool;
         protected MeshBuildScheduler MeshBuildScheduler;
-        protected ChunkPageScheduler ChunkPageScheduler;
+        protected ChunkStoreScheduler ChunkStoreScheduler;
         protected BurstFunctionPointers BurstFunctionPointers;
 
         private bool _IsFocused;
@@ -90,7 +90,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void OnDestroy() {
-            ChunkStore.Dispose();
+            ChunkManager.Dispose();
             MeshBuildScheduler.Dispose();
         }
         
@@ -101,9 +101,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
             NoiseProfile = VloxyProvider.Current.NoiseProfile();
             ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
             BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
-            ChunkPageScheduler = VloxyProvider.Current.ChunkDataScheduler(NoiseProfile, BurstFunctionPointers);
-            ChunkStore = VloxyProvider.Current.ChunkStore(ChunkState, ChunkPageScheduler);
-            MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkState, ChunkStore, ChunkBehaviourPool, BurstFunctionPointers);
+            ChunkStoreScheduler = VloxyProvider.Current.ChunkDataScheduler(NoiseProfile, BurstFunctionPointers);
+            ChunkManager = VloxyProvider.Current.ChunkStore(ChunkState, ChunkStoreScheduler);
+            MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(ChunkState, ChunkManager, ChunkBehaviourPool, BurstFunctionPointers);
             
 #if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
@@ -116,7 +116,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             watch.Start();
 #endif
             ChunkState.Initialize(int3.zero);
-            ChunkStore.GenerateChunks();
+            ChunkManager.GenerateChunks();
 #if VLOXY_LOGGING
             watch.Stop();
             VloxyLogger.Info<VloxyWorld>($"Vloxy World Generated : {watch.ElapsedMilliseconds} MS");
@@ -124,7 +124,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
-            var (claim, reclaim) = ChunkStore.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
+            var (claim, reclaim) = ChunkManager.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
             
             if (claim.Count != 0) MeshBuildScheduler.Schedule(claim);
 
