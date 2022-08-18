@@ -85,8 +85,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 FocusChunkCoord = NewFocusChunkCoord;
             }
             
-            ChunkStoreScheduler.Update();
             MeshBuildScheduler.Update();
+            ChunkStoreScheduler.Update(MeshBuildScheduler.Handle);
 
             WorldUpdate();
 
@@ -94,8 +94,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void LateUpdate() {
-            ChunkStoreScheduler.LateUpdate();
             MeshBuildScheduler.LateUpdate();
+            ChunkStoreScheduler.LateUpdate();
         }
 
         private void OnDestroy() {

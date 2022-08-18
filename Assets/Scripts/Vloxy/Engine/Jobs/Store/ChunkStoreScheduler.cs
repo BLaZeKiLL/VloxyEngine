@@ -16,6 +16,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
 
     public class ChunkStoreScheduler {
 
+        internal JobHandle Handle { get; private set; }
+        
         private int3 _ChunkSize;
         private ChunkState _ChunkState;
         private ChunkStore _ChunkStore;
@@ -24,7 +26,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
         
         private NativeList<int3> _Jobs;
         private Queue<int3> _Queue;
-        private JobHandle _Handle;
         private bool _Scheduled;
         private int _BatchSize;
         
@@ -53,12 +54,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
 #endif
         }
         
-        public void Update() {
-            if (!_Scheduled && _Queue.Count > 0) Process();
+        public bool Update(JobHandle dep) {
+            if (_Scheduled || _Queue.Count <= 0) return false;
+
+            Process(dep);
+
+            return true;
+
         }
 
-        public void LateUpdate() {
-            if (_Scheduled) Complete();
+        public bool LateUpdate() {
+            return _Scheduled && Complete();
         }
 
         public void GenerateChunks(NativeArray<int3> jobs) {
@@ -83,7 +89,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
             }
         }
 
-        private void Process() {
+        private void Process(JobHandle dep) {
             var count = _BatchSize;
             
             while (count > 0 && _Queue.Count > 0) {
@@ -103,23 +109,38 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
                 BurstFunctionPointers = _BurstFunctionPointers,
             };
             
-            _Handle = job.Schedule(_Jobs.Length, 1);
+            Handle = job.Schedule(_Jobs.Length, 1, dep);
 
             _Scheduled = true;
         }
 
-        private void Complete() {
-            if (!_Handle.IsCompleted) return;
+        private bool Complete() {
+            if (!Handle.IsCompleted) return false;
             
-            _Handle.Complete();
+            Handle.Complete();
 
-#if VLOXY_LOGGING
-            _Watch.Stop();
-            VloxyLogger.Info<ChunkStoreScheduler>($"Chunks streamed : {_Jobs.Length}, In : {_Watch.ElapsedMilliseconds} MS");
-#endif
+            int index;
             
+            for (index = 0; index < _Jobs.Length; index++) {
+                var position = _Jobs[index];
+                
+                if (_ChunkState.GetState(position) == ChunkState.State.STREAMING) {
+                    _ChunkState.SetState(position, ChunkState.State.LOADED);
+                } else { // This is unnecessary, how can we avoid this ? 
+#if VLOXY_LOGGING
+                    VloxyLogger.Warn<ChunkStoreScheduler>($"Redundant Chunk : {position} : {_ChunkState.GetState(position)}");
+#endif
+                }
+            }
+
             _Jobs.Clear();
             _Scheduled = false;
+            
+#if VLOXY_LOGGING
+            _Watch.Stop();
+            VloxyLogger.Info<ChunkStoreScheduler>($"Chunks streamed : {index}, In : {_Watch.ElapsedMilliseconds} MS");
+#endif
+            return true;
         }
 
         public void Dispose() {

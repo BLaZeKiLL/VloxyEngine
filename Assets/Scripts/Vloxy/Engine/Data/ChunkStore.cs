@@ -44,7 +44,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
              
             for (int x = -PageSize; x <= PageSize; x++) {
                 for (int z = -PageSize; z <= PageSize; z++) {
-                    for (int y = -YPageSize; y < YPageSize; y++) {
+                    for (int y = -YPageSize; y <= YPageSize; y++) {
                         result[index] = (new int3(x, y, z) * ChunkSize); // + Page Position
                         index++;
                     }

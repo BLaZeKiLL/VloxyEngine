@@ -18,6 +18,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
     public class MeshBuildScheduler {
 
+        internal JobHandle Handle { get; private set; }
+
         private readonly ChunkState _ChunkState;
         private readonly ChunkAccessor _ChunkAccessor;
         private readonly ChunkBehaviourPool _ChunkBehaviourPool;
@@ -27,7 +29,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         private int3 _ChunkSize;
         private Queue<int3> _Queue;
 
-        private JobHandle _Handle;
         private NativeList<int3> _Jobs;
         private NativeParallelHashMap<int3, int> _Results;
         private UnityEngine.Mesh.MeshDataArray _MeshDataArray;
@@ -74,13 +75,18 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 #endif
         }
 
-        public void Update() {
-            if (!_Scheduled && _Queue.Count > 0) Process();
+        public bool Update() {
+            if (_Scheduled || _Queue.Count <= 0) return false;
+
+            Process();
+
+            return true;
+
         }
 
-        public void LateUpdate() {
-            if (_Scheduled) Complete();
-        }   
+        public bool LateUpdate() {
+            return _Scheduled && Complete();
+        } 
         
         public void Schedule(List<int3> jobs) {
             for (int i = 0; i < jobs.Count; i++) {
@@ -112,15 +118,15 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
                 Results = _Results.AsParallelWriter()
             };
 
-            _Handle = job.Schedule(_Jobs.Length, 1);
+            Handle = job.Schedule(_Jobs.Length, 1);
 
             _Scheduled = true;
         }
         
-        private void Complete() {
-            if (!_Handle.IsCompleted) return;
+        private bool Complete() {
+            if (!Handle.IsCompleted) return false;
 
-            _Handle.Complete();
+            Handle.Complete();
 
             var meshes = new UnityEngine.Mesh[_Jobs.Length];
 
@@ -153,6 +159,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _Watch.Stop();
             VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {_Watch.ElapsedMilliseconds} MS");
 #endif
+
+            return true;
         }
         
         public void Dispose() {
