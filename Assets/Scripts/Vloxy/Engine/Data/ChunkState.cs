@@ -11,9 +11,11 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         public enum State {
 
-            INACTIVE,
-            SCHEDULED,
-            ACTIVE
+            STREAMING,
+            LOADED,
+            MESHING,
+            ACTIVE,
+            UNLOAD
 
         }
 
@@ -37,11 +39,14 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                 for (int z = -_PageSize; z <= _PageSize; z++) {
                     for (int y = -_YPageSize; y < _YPageSize; y++) {
                         // + Page Position
-                        _Dictionary.Add((new int3(x, y, z) * _ChunkSize), State.INACTIVE);
+                        _Dictionary.Add((new int3(x, y, z) * _ChunkSize), State.LOADED);
                     }
                 }
             }
         }
+
+        public void AddState(int3 position, State state) => _Dictionary.Add(position, state);
+        public void RemoveState(int3 position) => _Dictionary.Remove(position);
         
         public State GetState(int3 position) => _Dictionary[position];
 

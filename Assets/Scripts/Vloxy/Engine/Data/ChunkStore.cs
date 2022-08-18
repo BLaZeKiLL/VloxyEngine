@@ -56,6 +56,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         public bool ContainsChunk(int3 position) => Chunks.ContainsKey(position);
 
+        public void RemoveChunk(int3 position) => Chunks.Remove(position);
+
     }
 
 }

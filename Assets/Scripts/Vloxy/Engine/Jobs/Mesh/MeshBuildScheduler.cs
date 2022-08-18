@@ -19,7 +19,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
     public class MeshBuildScheduler {
 
         private readonly ChunkState _ChunkState;
-        private readonly ChunkManager _ChunkManager;
+        private readonly ChunkAccessor _ChunkAccessor;
         private readonly ChunkBehaviourPool _ChunkBehaviourPool;
         private readonly BurstFunctionPointers _BurstFunctionPointers;
         
@@ -42,7 +42,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         public MeshBuildScheduler(
             VloxySettings settings,
             ChunkState chunkState,
-            ChunkManager chunkManager,
+            ChunkAccessor chunkAccessor,
             ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) {
@@ -50,7 +50,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _ChunkSize = settings.Chunk.ChunkSize;
 
             _ChunkState = chunkState;
-            _ChunkManager = chunkManager;
+            _ChunkAccessor = chunkAccessor;
             _ChunkBehaviourPool = chunkBehaviourPool;
             _BurstFunctionPointers = burstFunctionPointers;
 
@@ -81,8 +81,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         public void LateUpdate() {
             if (_Scheduled) Complete();
         }   
-
-        // Call early in frame
+        
         public void Schedule(List<int3> jobs) {
             for (int i = 0; i < jobs.Count; i++) {
                 _Queue.Enqueue(jobs[i]);
@@ -105,7 +104,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
             var job = new MeshBuildJob {
                 BurstFunctionPointers = _BurstFunctionPointers,
-                Accessor = _ChunkManager.Accessor,
+                Accessor = _ChunkAccessor,
                 ChunkSize = _ChunkSize,
                 Jobs = _Jobs,
                 VertexParams = _VertexParams,
@@ -128,13 +127,13 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             for (var index = 0; index < _Jobs.Length; index++) {
                 var position = _Jobs[index];
                 
-                if (_ChunkState.GetState(position) == ChunkState.State.SCHEDULED) {
+                if (_ChunkState.GetState(position) == ChunkState.State.MESHING) {
                     meshes[_Results[position]] = _ChunkBehaviourPool.Claim(position).Mesh();
                     _ChunkState.SetState(position, ChunkState.State.ACTIVE);
                 } else { // This is unnecessary, how can we avoid this ? 
                     meshes[_Results[position]] = new UnityEngine.Mesh();
 #if VLOXY_LOGGING
-                    VloxyLogger.Warn<MeshBuildScheduler>($"Redundant Mesh : {position}");
+                    VloxyLogger.Warn<MeshBuildScheduler>($"Redundant Mesh : {position} : {_ChunkState.GetState(position)}");
 #endif
                 }
             }

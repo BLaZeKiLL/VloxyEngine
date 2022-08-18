@@ -7,6 +7,9 @@ using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Provider;
 
+using Unity.Collections;
+using Unity.Mathematics;
+
 using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine {
@@ -30,29 +33,34 @@ namespace CodeBlaze.Vloxy.Engine {
         
         public virtual ChunkManager ChunkStore(
             ChunkState chunkState,
-            ChunkStoreScheduler chunkStoreScheduler
-        ) => new(Settings, chunkState, chunkStoreScheduler);
+            NoiseProfile noiseProfile,
+            BurstFunctionPointers burstFunctionPointers
+        ) => new(Settings, chunkState);
 
         public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
         
         public virtual MeshBuildScheduler MeshBuildScheduler(
             ChunkState chunkState,
-            ChunkManager chunkManager,
+            ChunkAccessor chunkAccessor,
             ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,
             chunkState,
-            chunkManager,
+            chunkAccessor,
             chunkBehaviourPool,
             burstFunctionPointers
         );
 
         public virtual ChunkStoreScheduler ChunkDataScheduler(
-            NoiseProfile noiseProfile, 
+            ChunkState chunkState,
+            ChunkStore chunkStore,
+            NoiseProfile noiseProfile,
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,
+            chunkState,
+            chunkStore,
             noiseProfile,
             burstFunctionPointers
         );
