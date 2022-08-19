@@ -18,7 +18,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         [ReadOnly] public BurstFunctionPointers BurstFunctionPointers;
         [ReadOnly] public NativeArray<VertexAttributeDescriptor> VertexParams;
 
-        [ReadOnly] public ChunkStoreAccessor Accessor;
+        [ReadOnly] public ChunkAccessor Accessor;
         [ReadOnly] public NativeList<int3> Jobs;
 
         [WriteOnly] public NativeParallelHashMap<int3, int>.ParallelWriter Results;

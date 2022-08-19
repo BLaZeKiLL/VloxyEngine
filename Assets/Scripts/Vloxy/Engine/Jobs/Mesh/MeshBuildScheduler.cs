@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
@@ -18,16 +18,19 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
     public class MeshBuildScheduler {
 
+        internal bool Processing { get; private set; }
+
         private readonly ChunkState _ChunkState;
-        private readonly ChunkStore _ChunkStore;
+        private readonly ChunkAccessor _ChunkAccessor;
         private readonly ChunkBehaviourPool _ChunkBehaviourPool;
         private readonly BurstFunctionPointers _BurstFunctionPointers;
         
-        private int _BatchSize;
+        private int _BatchCount;
         private int3 _ChunkSize;
         private Queue<int3> _Queue;
-
+        
         private JobHandle _Handle;
+
         private NativeList<int3> _Jobs;
         private NativeParallelHashMap<int3, int> _Results;
         private UnityEngine.Mesh.MeshDataArray _MeshDataArray;
@@ -36,28 +39,29 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         private bool _Scheduled;
 
 #if VLOXY_LOGGING
+        private Queue<long> _Timings;
         private Stopwatch _Watch;
 #endif
         
         public MeshBuildScheduler(
             VloxySettings settings,
             ChunkState chunkState,
-            ChunkStore chunkStore,
+            ChunkAccessor chunkAccessor,
             ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) {
-            _BatchSize = settings.Scheduler.BatchSize;
+            _BatchCount = settings.Scheduler.MeshingBatchSize;
             _ChunkSize = settings.Chunk.ChunkSize;
 
             _ChunkState = chunkState;
-            _ChunkStore = chunkStore;
+            _ChunkAccessor = chunkAccessor;
             _ChunkBehaviourPool = chunkBehaviourPool;
             _BurstFunctionPointers = burstFunctionPointers;
 
             // TODO : Make Configurable
             _VertexParams = new NativeArray<VertexAttributeDescriptor>(6, Allocator.Persistent);
             
-            // int's cause issues
+            // Int interpolation cause issues
             _VertexParams[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
             _VertexParams[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3);
             _VertexParams[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
@@ -71,26 +75,32 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
 #if VLOXY_LOGGING
             _Watch = new Stopwatch();
+            _Timings = new Queue<long>(10);
 #endif
         }
+        
+        internal bool Update() {
+            if (_Scheduled || _Queue.Count <= 0) return false;
 
-        public void Update() {
-            if (!_Scheduled && _Queue.Count > 0) Process();
+            Process();
+
+            return true;
         }
 
-        public void LateUpdate() {
-            if (_Scheduled) Complete();
-        }   
-
-        // Call early in frame
+        internal bool LateUpdate() {
+            return _Scheduled && Complete();
+        } 
+        
         public void Schedule(List<int3> jobs) {
             for (int i = 0; i < jobs.Count; i++) {
                 _Queue.Enqueue(jobs[i]);
             }
+            
+            Processing = _Queue.Count > 0;
         }
 
         private void Process() {
-            var count = _BatchSize;
+            var count = _BatchCount;
 
             while (count > 0 && _Queue.Count > 0) {
                 _Jobs.Add(_Queue.Dequeue());
@@ -105,7 +115,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
             var job = new MeshBuildJob {
                 BurstFunctionPointers = _BurstFunctionPointers,
-                Accessor = _ChunkStore.Accessor,
+                Accessor = _ChunkAccessor,
                 ChunkSize = _ChunkSize,
                 Jobs = _Jobs,
                 VertexParams = _VertexParams,
@@ -118,8 +128,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _Scheduled = true;
         }
         
-        private void Complete() {
-            if (!_Handle.IsCompleted) return;
+        private bool Complete() {
+            if (!_Handle.IsCompleted) return false;
 
             _Handle.Complete();
 
@@ -128,13 +138,13 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             for (var index = 0; index < _Jobs.Length; index++) {
                 var position = _Jobs[index];
                 
-                if (_ChunkState.GetState(position) == ChunkState.State.SCHEDULED) {
+                if (_ChunkState.GetState(position) == ChunkState.State.MESHING) {
                     meshes[_Results[position]] = _ChunkBehaviourPool.Claim(position).Mesh();
                     _ChunkState.SetState(position, ChunkState.State.ACTIVE);
                 } else { // This is unnecessary, how can we avoid this ? 
                     meshes[_Results[position]] = new UnityEngine.Mesh();
 #if VLOXY_LOGGING
-                    VloxyLogger.Warn<MeshBuildScheduler>($"Redundant Mesh : {position}");
+                    VloxyLogger.Warn<MeshBuildScheduler>($"Redundant Mesh : {position} : {_ChunkState.GetState(position)}");
 #endif
                 }
             }
@@ -150,10 +160,14 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
             _Scheduled = false;
             
+            Processing = _Queue.Count > 0;
+            
 #if VLOXY_LOGGING
             _Watch.Stop();
-            VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {_Watch.ElapsedMilliseconds} MS");
+            Timestamp(_Watch.ElapsedMilliseconds);
 #endif
+
+            return true;
         }
         
         public void Dispose() {
@@ -162,6 +176,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _Jobs.Dispose();
         }
 
+#if VLOXY_LOGGING
+        public float AvgTime => (float) _Timings.Sum() / 10;
+
+        private void Timestamp(long ms) {
+            if (_Timings.Count <= 10) _Timings.Enqueue(ms);
+            else {
+                _Timings.Dequeue();
+                _Timings.Enqueue(ms);
+            }
+        }
+#endif
     }
 
 }

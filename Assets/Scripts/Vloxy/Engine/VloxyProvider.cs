@@ -1,7 +1,8 @@
 ﻿
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Jobs.Page;
+using CodeBlaze.Vloxy.Engine.Jobs;
+using CodeBlaze.Vloxy.Engine.Jobs.Data;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -26,33 +27,37 @@ namespace CodeBlaze.Vloxy.Engine {
             Octaves = Settings.Noise.Octaves,
         });
 
-        public virtual ChunkState ChunkState() => new(Settings);
-        
-        public virtual ChunkStore ChunkStore(
-            ChunkState chunkState,
-            ChunkPageScheduler chunkPageScheduler
-        ) => new(Settings, chunkState, chunkPageScheduler);
+        public virtual ChunkManager ChunkManager() => new(Settings);
 
         public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
+
+        public virtual VloxyScheduler VloxyScheduler(
+            MeshBuildScheduler meshBuildScheduler,
+            ChunkDataScheduler chunkDataScheduler
+        ) => new VloxyScheduler(meshBuildScheduler, chunkDataScheduler);
         
         public virtual MeshBuildScheduler MeshBuildScheduler(
             ChunkState chunkState,
-            ChunkStore chunkStore,
+            ChunkAccessor chunkAccessor,
             ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,
             chunkState,
-            chunkStore,
+            chunkAccessor,
             chunkBehaviourPool,
             burstFunctionPointers
         );
 
-        public virtual ChunkPageScheduler ChunkDataScheduler(
-            NoiseProfile noiseProfile, 
+        public virtual ChunkDataScheduler ChunkDataScheduler(
+            ChunkState chunkState,
+            ChunkStore chunkStore,
+            NoiseProfile noiseProfile,
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,
+            chunkState,
+            chunkStore,
             noiseProfile,
             burstFunctionPointers
         );

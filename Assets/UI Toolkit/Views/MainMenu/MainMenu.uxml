@@ -41,10 +41,6 @@
                     </ui:VisualElement>
                     <ui:VisualElement name="ChunkPage" class="vloxy-display-none">
                         <ui:VisualElement style="flex-direction: row;">
-                            <ui:Label text="Page Size" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 200px;" />
-                            <ui:SliderInt value="10" high-value="20" name="PageSize" style="flex-grow: 1;" />
-                        </ui:VisualElement>
-                        <ui:VisualElement style="flex-direction: row;">
                             <ui:Label text="Draw Distance" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 200px;" />
                             <ui:SliderInt value="5" high-value="20" name="DrawDistance" style="flex-grow: 1;" />
                         </ui:VisualElement>
@@ -65,10 +61,6 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="SchedularPage" class="vloxy-display-none">
-                        <ui:VisualElement style="flex-direction: row;">
-                            <ui:Label text="BatchSize" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 200px;" />
-                            <ui:TextField value="8" text="8" name="BatchSize" class="vloxy-text" style="flex-grow: 1;" />
-                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>

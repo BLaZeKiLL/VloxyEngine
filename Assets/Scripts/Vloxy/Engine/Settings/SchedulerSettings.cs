@@ -7,8 +7,11 @@ namespace CodeBlaze.Vloxy.Engine.Settings {
     [Serializable]
     public class SchedulerSettings {
 
-        [Tooltip("Scheduler Batch Size")]
-        public int BatchSize = 1;
+        [HideInInspector]
+        public int MeshingBatchSize;
+        
+        [HideInInspector]
+        public int StreamingBatchSize;
 
     }
 
