@@ -2,7 +2,7 @@
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs;
-using CodeBlaze.Vloxy.Engine.Jobs.Store;
+using CodeBlaze.Vloxy.Engine.Jobs.Data;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -42,8 +42,8 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual VloxyScheduler VloxyScheduler(
             MeshBuildScheduler meshBuildScheduler,
-            ChunkStoreScheduler chunkStoreScheduler
-        ) => new VloxyScheduler(meshBuildScheduler, chunkStoreScheduler);
+            ChunkDataScheduler chunkDataScheduler
+        ) => new VloxyScheduler(meshBuildScheduler, chunkDataScheduler);
         
         public virtual MeshBuildScheduler MeshBuildScheduler(
             ChunkState chunkState,
@@ -58,7 +58,7 @@ namespace CodeBlaze.Vloxy.Engine {
             burstFunctionPointers
         );
 
-        public virtual ChunkStoreScheduler ChunkDataScheduler(
+        public virtual ChunkDataScheduler ChunkDataScheduler(
             ChunkState chunkState,
             ChunkStore chunkStore,
             NoiseProfile noiseProfile,

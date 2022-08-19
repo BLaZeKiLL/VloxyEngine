@@ -4,7 +4,7 @@ using System.Diagnostics;
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs;
-using CodeBlaze.Vloxy.Engine.Jobs.Store;
+using CodeBlaze.Vloxy.Engine.Jobs.Data;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -33,7 +33,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private VloxyScheduler VloxyScheduler;
         private ChunkBehaviourPool ChunkBehaviourPool;
         private MeshBuildScheduler MeshBuildScheduler;
-        private ChunkStoreScheduler ChunkStoreScheduler;
+        private ChunkDataScheduler _ChunkDataScheduler;
         private BurstFunctionPointers BurstFunctionPointers;
 
         private bool _IsFocused;
@@ -120,14 +120,14 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 BurstFunctionPointers
             );
             
-            ChunkStoreScheduler = VloxyProvider.Current.ChunkDataScheduler(
+            _ChunkDataScheduler = VloxyProvider.Current.ChunkDataScheduler(
                 ChunkState,
                 ChunkManager.Store,
                 NoiseProfile, 
                 BurstFunctionPointers
             );
 
-            VloxyScheduler = VloxyProvider.Current.VloxyScheduler(MeshBuildScheduler, ChunkStoreScheduler);
+            VloxyScheduler = VloxyProvider.Current.VloxyScheduler(MeshBuildScheduler, _ChunkDataScheduler);
             
 #if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
@@ -141,7 +141,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
 #endif
             
             ChunkState.Initialize(int3.zero);
-            ChunkStoreScheduler.GenerateChunks(ChunkManager.Store.GetPositions(Allocator.TempJob));
+            _ChunkDataScheduler.GenerateChunks(ChunkManager.Store.GetPositions(Allocator.TempJob));
             
 #if VLOXY_LOGGING
             watch.Stop();
@@ -165,7 +165,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             
             if (claim == null || reclaim == null) return;
             
-            if (claim.Count != 0) ChunkStoreScheduler.Schedule(claim);
+            if (claim.Count != 0) _ChunkDataScheduler.Schedule(claim);
             
             for (var index = 0; index < reclaim.Count; index++) {
                 ChunkState.RemoveState(reclaim[index]);

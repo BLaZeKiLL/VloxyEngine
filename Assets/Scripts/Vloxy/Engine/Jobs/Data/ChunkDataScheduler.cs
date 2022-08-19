@@ -12,9 +12,9 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
+namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 
-    public class ChunkStoreScheduler {
+    public class ChunkDataScheduler {
 
         internal bool Processing { get; private set; }
         
@@ -35,7 +35,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
         private Stopwatch _Watch;
 #endif
 
-        public ChunkStoreScheduler(VloxySettings settings,
+        public ChunkDataScheduler(VloxySettings settings,
             ChunkState chunkState,
             ChunkStore chunkStore,
             NoiseProfile noiseProfile,
@@ -69,7 +69,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
         } 
 
         public void GenerateChunks(NativeArray<int3> jobs) {
-            var job = new ChunkStoreJob {
+            var job = new ChunkDataJob {
                 Jobs = jobs,
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,
@@ -104,7 +104,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
             _Watch.Restart();
 #endif
             
-            var job = new ChunkStoreJob {
+            var job = new ChunkDataJob {
                 Jobs = _Jobs,
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,
@@ -131,7 +131,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
                     _ChunkState.SetState(position, ChunkState.State.LOADED);
                 } else { // This is unnecessary, how can we avoid this ? 
 #if VLOXY_LOGGING
-                    VloxyLogger.Warn<ChunkStoreScheduler>($"Redundant Chunk : {position} : {_ChunkState.GetState(position)}");
+                    VloxyLogger.Warn<ChunkDataScheduler>($"Redundant Chunk : {position} : {_ChunkState.GetState(position)}");
 #endif
                 }
             }
@@ -142,7 +142,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
             
 #if VLOXY_LOGGING
             _Watch.Stop();
-            VloxyLogger.Info<ChunkStoreScheduler>($"Chunks streamed : {index}, In : {_Watch.ElapsedMilliseconds} MS");
+            VloxyLogger.Info<ChunkDataScheduler>($"Chunks streamed : {index}, In : {_Watch.ElapsedMilliseconds} MS");
 #endif
             return true;
         }

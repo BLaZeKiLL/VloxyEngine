@@ -1,7 +1,7 @@
 ﻿using System;
 
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
-using CodeBlaze.Vloxy.Engine.Jobs.Store;
+using CodeBlaze.Vloxy.Engine.Jobs.Data;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 namespace CodeBlaze.Vloxy.Engine.Jobs {
@@ -19,22 +19,20 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         public SchedulerState State { get; private set; }
 
         private readonly MeshBuildScheduler _MeshBuildScheduler;
-        private readonly ChunkStoreScheduler _ChunkStoreScheduler;
+        private readonly ChunkDataScheduler _ChunkDataScheduler;
 
-        public VloxyScheduler(MeshBuildScheduler meshBuildScheduler, ChunkStoreScheduler chunkStoreScheduler) {
+        public VloxyScheduler(MeshBuildScheduler meshBuildScheduler, ChunkDataScheduler chunkDataScheduler) {
             _MeshBuildScheduler = meshBuildScheduler;
-            _ChunkStoreScheduler = chunkStoreScheduler;
+            _ChunkDataScheduler = chunkDataScheduler;
 
             State = SchedulerState.IDLE;
         }
 
         internal void Update() {
-            // VloxyLogger.Info<VloxyScheduler>($"Mesh : {_MeshBuildScheduler.Processing}");
-            
             if (State == SchedulerState.IDLE) {
                 if (_MeshBuildScheduler.Processing) {
                     State = SchedulerState.MESHING;
-                } else if (_ChunkStoreScheduler.Processing) {
+                } else if (_ChunkDataScheduler.Processing) {
                     State = SchedulerState.STREAMING;
                 }
             }
@@ -46,7 +44,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                     _MeshBuildScheduler.Update();
                     break;
                 case SchedulerState.STREAMING:
-                    _ChunkStoreScheduler.Update();
+                    _ChunkDataScheduler.Update();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -61,7 +59,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                     _MeshBuildScheduler.LateUpdate();
                     break;
                 case SchedulerState.STREAMING:
-                    _ChunkStoreScheduler.LateUpdate();
+                    _ChunkDataScheduler.LateUpdate();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -69,14 +67,14 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 
             if (State == SchedulerState.MESHING && !_MeshBuildScheduler.Processing) {
                 State = SchedulerState.IDLE;
-            } else if (State == SchedulerState.STREAMING && !_ChunkStoreScheduler.Processing) {
+            } else if (State == SchedulerState.STREAMING && !_ChunkDataScheduler.Processing) {
                 State = SchedulerState.IDLE;
             }
         }
 
         internal void Dispose() {
             _MeshBuildScheduler.Dispose();
-            _ChunkStoreScheduler.Dispose();
+            _ChunkDataScheduler.Dispose();
         }
 
     }

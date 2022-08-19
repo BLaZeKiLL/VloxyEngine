@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using CodeBlaze.Vloxy.Engine.Jobs.Store;
+using CodeBlaze.Vloxy.Engine.Jobs.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
