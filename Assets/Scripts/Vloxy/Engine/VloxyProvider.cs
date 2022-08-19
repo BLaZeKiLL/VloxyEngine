@@ -8,9 +8,6 @@ using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Provider;
 
-using Unity.Collections;
-using Unity.Mathematics;
-
 using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine {

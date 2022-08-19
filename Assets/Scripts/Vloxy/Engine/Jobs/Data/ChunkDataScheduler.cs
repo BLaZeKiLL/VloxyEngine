@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -141,6 +140,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 
             _Jobs.Clear();
             _Scheduled = false;
+            
             Processing = _Queue.Count > 0;
             
 #if VLOXY_LOGGING
