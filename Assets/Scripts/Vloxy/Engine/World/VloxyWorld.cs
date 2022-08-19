@@ -53,6 +53,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private void Awake() {
             VloxyProvider.Initialize(Provider(), provider => {
+                ConfigureSettings();
+                
                 provider.Settings = _Settings;
 #if VLOXY_LOGGING
                 VloxyLogger.Info<VloxyWorld>("Provider Initialized");
@@ -105,6 +107,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
         
         #endregion
 
+        private void ConfigureSettings() {
+            _Settings.Chunk.LoadDistance = _Settings.Chunk.DrawDistance + 2;
+
+            _Settings.Scheduler.MeshingBatchSize = 2 * _Settings.Chunk.DrawDistance + 1;
+            _Settings.Scheduler.StreamingBatchSize = 2 * _Settings.Chunk.LoadDistance + 1;
+        }
+        
         private void ConstructVloxyComponents() {
             ChunkState = VloxyProvider.Current.ChunkState();
             NoiseProfile = VloxyProvider.Current.NoiseProfile();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
@@ -25,7 +26,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         private readonly ChunkBehaviourPool _ChunkBehaviourPool;
         private readonly BurstFunctionPointers _BurstFunctionPointers;
         
-        private int _BatchSize;
+        private int _BatchCount;
         private int3 _ChunkSize;
         private Queue<int3> _Queue;
         
@@ -39,6 +40,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         private bool _Scheduled;
 
 #if VLOXY_LOGGING
+        private Queue<long> _Timings;
         private Stopwatch _Watch;
 #endif
         
@@ -49,7 +51,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) {
-            _BatchSize = settings.Scheduler.BatchSize;
+            _BatchCount = settings.Scheduler.MeshingBatchSize;
             _ChunkSize = settings.Chunk.ChunkSize;
 
             _ChunkState = chunkState;
@@ -74,6 +76,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
 #if VLOXY_LOGGING
             _Watch = new Stopwatch();
+            _Timings = new Queue<long>(10);
 #endif
         }
         
@@ -98,7 +101,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         }
 
         private void Process() {
-            var count = _BatchSize;
+            var count = _BatchCount;
 
             while (count > 0 && _Queue.Count > 0) {
                 _Jobs.Add(_Queue.Dequeue());
@@ -162,7 +165,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             
 #if VLOXY_LOGGING
             _Watch.Stop();
-            VloxyLogger.Info<MeshBuildScheduler>($"Meshes built : {meshes.Length}, In : {_Watch.ElapsedMilliseconds} MS");
+            Timestamp(_Watch.ElapsedMilliseconds);
 #endif
 
             return true;
@@ -174,6 +177,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _Jobs.Dispose();
         }
 
+#if VLOXY_LOGGING
+        public float AvgTime => (float) _Timings.Sum() / 10;
+
+        private void Timestamp(long ms) {
+            if (_Timings.Count <= 10) _Timings.Enqueue(ms);
+            else {
+                _Timings.Dequeue();
+                _Timings.Enqueue(ms);
+            }
+        }
+#endif
     }
 
 }

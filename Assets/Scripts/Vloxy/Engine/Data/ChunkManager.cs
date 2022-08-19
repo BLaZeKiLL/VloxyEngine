@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-using CodeBlaze.Vloxy.Engine.Jobs.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
-using Unity.Collections;
 using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Data {
@@ -31,7 +28,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             Store = new ChunkStore(
                 int3.zero, 
                 _ChunkSettings.ChunkSize,
-                _ChunkSettings.PageSize,
+                _ChunkSettings.LoadDistance,
                 settings.Noise.Height
             );
 
@@ -52,8 +49,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _Reclaim.Clear();
             _Claim.Clear();
             
-            Update(_Claim, newFocusChunkCoord, diff, _ChunkSettings.PageSize, ChunkState.State.STREAMING);
-            Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.PageSize, ChunkState.State.UNLOAD);
+            Update(_Claim, newFocusChunkCoord, diff, _ChunkSettings.LoadDistance, ChunkState.State.STREAMING);
+            Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.LoadDistance, ChunkState.State.UNLOAD);
 
 #if VLOXY_LOGGING
             VloxyLogger.Info<ChunkManager>($"Data Claim : {_Claim.Count()}, Data Reclaim : {_Reclaim.Count}");

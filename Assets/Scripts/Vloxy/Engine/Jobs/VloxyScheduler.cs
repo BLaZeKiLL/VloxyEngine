@@ -67,8 +67,16 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 
             if (State == SchedulerState.MESHING && !_MeshBuildScheduler.Processing) {
                 State = SchedulerState.IDLE;
+
+#if VLOXY_LOGGING
+                VloxyLogger.Info<VloxyScheduler>($"Meshing Avg Batch Time : {_MeshBuildScheduler.AvgTime:F3} MS");
+#endif
             } else if (State == SchedulerState.STREAMING && !_ChunkDataScheduler.Processing) {
                 State = SchedulerState.IDLE;
+                
+#if VLOXY_LOGGING
+                VloxyLogger.Info<VloxyScheduler>($"Streaming Avg Batch Time : {_ChunkDataScheduler.AvgTime:F3} MS");
+#endif
             }
         }
 

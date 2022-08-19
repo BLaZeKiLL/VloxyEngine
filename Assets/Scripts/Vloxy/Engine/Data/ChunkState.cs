@@ -27,7 +27,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         
         public ChunkState(VloxySettings settings) {
             _ChunkSize = settings.Chunk.ChunkSize;
-            _PageSize = settings.Chunk.PageSize;
+            _PageSize = settings.Chunk.LoadDistance;
 
             _YPageSize = settings.Noise.Height / _ChunkSize.y / 2;
                 

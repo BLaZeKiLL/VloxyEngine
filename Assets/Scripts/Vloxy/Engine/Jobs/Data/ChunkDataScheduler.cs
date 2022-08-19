@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
@@ -32,6 +33,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         private int _BatchSize;
         
 #if VLOXY_LOGGING
+        private Queue<long> _Timings;
         private Stopwatch _Watch;
 #endif
 
@@ -42,7 +44,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             BurstFunctionPointers burstFunctionPointers
         ) {
             _ChunkSize = settings.Chunk.ChunkSize;
-            _BatchSize = settings.Scheduler.BatchSize;
+            _BatchSize = settings.Scheduler.StreamingBatchSize;
             _ChunkState = chunkState;
             _ChunkStore = chunkStore;
             _NoiseProfile = noiseProfile;
@@ -53,6 +55,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             
 #if VLOXY_LOGGING
             _Watch = new Stopwatch();
+            _Timings = new Queue<long>(10);
 #endif
         }
         
@@ -142,7 +145,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             
 #if VLOXY_LOGGING
             _Watch.Stop();
-            VloxyLogger.Info<ChunkDataScheduler>($"Chunks streamed : {index}, In : {_Watch.ElapsedMilliseconds} MS");
+            Timestamp(_Watch.ElapsedMilliseconds);
 #endif
             return true;
         }
@@ -150,6 +153,18 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         public void Dispose() {
             _Jobs.Dispose();
         }
+        
+#if VLOXY_LOGGING
+        public float AvgTime => (float) _Timings.Sum() / 10;
+
+        private void Timestamp(long ms) {
+            if (_Timings.Count <= 10) _Timings.Enqueue(ms);
+            else {
+                _Timings.Dequeue();
+                _Timings.Enqueue(ms);
+            }
+        }
+#endif
 
     }
 

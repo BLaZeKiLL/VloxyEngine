@@ -108,7 +108,6 @@ namespace CodeBlaze {
             private readonly TextField _chunkSizeZ;
             
             public ChunkPageController(VisualElement root) {
-                _pageSize = root.Q<SliderInt>("PageSize");
                 _drawDistance = root.Q<SliderInt>("DrawDistance");
 
                 _chunkSizeX = root.Q<TextField>("ChunkSizeX");
@@ -117,7 +116,6 @@ namespace CodeBlaze {
             }
 
             public void SetValue(VloxySettings settings) {
-                settings.Chunk.PageSize = _pageSize.value;
                 settings.Chunk.DrawDistance = _drawDistance.value;
                 settings.Chunk.ChunkSize = new int3(
                     int.Parse(_chunkSizeX.value), 
@@ -147,11 +145,9 @@ namespace CodeBlaze {
             private readonly TextField _batchSize;
             
             public SchedularController(VisualElement root) {
-                _batchSize = root.Q<TextField>("BatchSize");
             }
             
             public void SetValue(VloxySettings settings) {
-                settings.Scheduler.BatchSize = int.Parse(_batchSize.value);
             }
 
         }
