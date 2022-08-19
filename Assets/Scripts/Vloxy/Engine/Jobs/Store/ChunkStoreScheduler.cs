@@ -16,7 +16,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
 
     public class ChunkStoreScheduler {
 
-        internal JobHandle Handle { get; private set; }
+        internal bool Processing { get; private set; }
         
         private int3 _ChunkSize;
         private ChunkState _ChunkState;
@@ -24,6 +24,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
         private NoiseProfile _NoiseProfile;
         private BurstFunctionPointers _BurstFunctionPointers;
         
+        private JobHandle _Handle;
+
         private NativeList<int3> _Jobs;
         private Queue<int3> _Queue;
         private bool _Scheduled;
@@ -54,18 +56,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
 #endif
         }
         
-        public bool Update(JobHandle dep) {
+        internal bool Update() {
             if (_Scheduled || _Queue.Count <= 0) return false;
 
-            Process(dep);
+            Process();
 
             return true;
-
         }
 
-        public bool LateUpdate() {
+        internal bool LateUpdate() {
             return _Scheduled && Complete();
-        }
+        } 
 
         public void GenerateChunks(NativeArray<int3> jobs) {
             var job = new ChunkStoreJob {
@@ -87,9 +88,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
             for (int i = 0; i < jobs.Count; i++) {
                 _Queue.Enqueue(jobs[i]);
             }
+            
+            Processing = _Queue.Count > 0;
         }
 
-        private void Process(JobHandle dep) {
+        private void Process() {
             var count = _BatchSize;
             
             while (count > 0 && _Queue.Count > 0) {
@@ -109,15 +112,15 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
                 BurstFunctionPointers = _BurstFunctionPointers,
             };
             
-            Handle = job.Schedule(_Jobs.Length, 1, dep);
+            _Handle = job.Schedule(_Jobs.Length, 1);
 
             _Scheduled = true;
         }
 
         private bool Complete() {
-            if (!Handle.IsCompleted) return false;
+            if (!_Handle.IsCompleted) return false;
             
-            Handle.Complete();
+            _Handle.Complete();
 
             int index;
             
@@ -135,6 +138,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Store {
 
             _Jobs.Clear();
             _Scheduled = false;
+            Processing = _Queue.Count > 0;
             
 #if VLOXY_LOGGING
             _Watch.Stop();

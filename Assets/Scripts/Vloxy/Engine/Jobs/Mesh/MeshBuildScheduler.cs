@@ -18,7 +18,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
     public class MeshBuildScheduler {
 
-        internal JobHandle Handle { get; private set; }
+        internal bool Processing { get; private set; }
 
         private readonly ChunkState _ChunkState;
         private readonly ChunkAccessor _ChunkAccessor;
@@ -28,6 +28,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         private int _BatchSize;
         private int3 _ChunkSize;
         private Queue<int3> _Queue;
+        
+        private JobHandle _Handle;
 
         private NativeList<int3> _Jobs;
         private NativeParallelHashMap<int3, int> _Results;
@@ -58,7 +60,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             // TODO : Make Configurable
             _VertexParams = new NativeArray<VertexAttributeDescriptor>(6, Allocator.Persistent);
             
-            // int's cause issues
+            // Int interpolation cause issues
             _VertexParams[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
             _VertexParams[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3);
             _VertexParams[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
@@ -74,17 +76,16 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _Watch = new Stopwatch();
 #endif
         }
-
-        public bool Update() {
+        
+        internal bool Update() {
             if (_Scheduled || _Queue.Count <= 0) return false;
 
             Process();
 
             return true;
-
         }
 
-        public bool LateUpdate() {
+        internal bool LateUpdate() {
             return _Scheduled && Complete();
         } 
         
@@ -92,6 +93,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             for (int i = 0; i < jobs.Count; i++) {
                 _Queue.Enqueue(jobs[i]);
             }
+            
+            Processing = _Queue.Count > 0;
         }
 
         private void Process() {
@@ -118,15 +121,15 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
                 Results = _Results.AsParallelWriter()
             };
 
-            Handle = job.Schedule(_Jobs.Length, 1);
+            _Handle = job.Schedule(_Jobs.Length, 1);
 
             _Scheduled = true;
         }
         
         private bool Complete() {
-            if (!Handle.IsCompleted) return false;
+            if (!_Handle.IsCompleted) return false;
 
-            Handle.Complete();
+            _Handle.Complete();
 
             var meshes = new UnityEngine.Mesh[_Jobs.Length];
 
@@ -154,6 +157,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _Jobs.Clear();
 
             _Scheduled = false;
+            
+            Processing = _Queue.Count > 0;
             
 #if VLOXY_LOGGING
             _Watch.Stop();

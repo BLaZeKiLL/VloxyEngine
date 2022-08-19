@@ -3,6 +3,7 @@ using System.Diagnostics;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
+using CodeBlaze.Vloxy.Engine.Jobs;
 using CodeBlaze.Vloxy.Engine.Jobs.Store;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
@@ -29,6 +30,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected NoiseProfile NoiseProfile;
         protected ChunkManager ChunkManager;
 
+        private VloxyScheduler VloxyScheduler;
         private ChunkBehaviourPool ChunkBehaviourPool;
         private MeshBuildScheduler MeshBuildScheduler;
         private ChunkStoreScheduler ChunkStoreScheduler;
@@ -85,8 +87,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 FocusChunkCoord = NewFocusChunkCoord;
             }
             
-            MeshBuildScheduler.Update();
-            ChunkStoreScheduler.Update(MeshBuildScheduler.Handle);
+            VloxyScheduler.Update();
 
             WorldUpdate();
 
@@ -94,14 +95,12 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void LateUpdate() {
-            MeshBuildScheduler.LateUpdate();
-            ChunkStoreScheduler.LateUpdate();
+            VloxyScheduler.LateUpdate();
         }
 
         private void OnDestroy() {
+            VloxyScheduler.Dispose();
             ChunkManager.Dispose();
-            ChunkStoreScheduler.Dispose();
-            MeshBuildScheduler.Dispose();
         }
         
         #endregion
@@ -127,6 +126,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 NoiseProfile, 
                 BurstFunctionPointers
             );
+
+            VloxyScheduler = VloxyProvider.Current.VloxyScheduler(MeshBuildScheduler, ChunkStoreScheduler);
             
 #if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
