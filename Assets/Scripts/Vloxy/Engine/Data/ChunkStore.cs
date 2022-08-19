@@ -9,20 +9,12 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         public int3 Position { get; }
         public NativeParallelHashMap<int3, Chunk> Chunks { get; }
-        
-        private int PageSize;
-        private int YPageSize;
-        private int3 ChunkSize;
 
-        public ChunkStore(int3 position, int3 chunkSize, int pageSize, int height) {
+        public ChunkStore(int3 position, int pageSize) {
             Position = position;
-            PageSize = pageSize;
-            ChunkSize = chunkSize;
 
-            YPageSize = height / chunkSize.y / 2;
-            
             Chunks = new NativeParallelHashMap<int3, Chunk>(
-                PageSize.YCubedSize(YPageSize), 
+                pageSize.CubedSize(), 
                 Allocator.Persistent
             );
         }
@@ -35,22 +27,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             }
             
             Chunks.Dispose();
-        }
-
-        public NativeArray<int3> GetPositions(Allocator handle) {
-            var result = new NativeArray<int3>(PageSize.YCubedSize(YPageSize), handle);
-            var index = 0;
-             
-            for (int x = -PageSize; x <= PageSize; x++) {
-                for (int z = -PageSize; z <= PageSize; z++) {
-                    for (int y = -YPageSize; y <= YPageSize; y++) {
-                        result[index] = (new int3(x, y, z) * ChunkSize); // + Page Position
-                        index++;
-                    }
-                }
-            }
-
-            return result;
         }
 
         public bool ContainsChunk(int3 position) => Chunks.ContainsKey(position);

@@ -27,13 +27,7 @@ namespace CodeBlaze.Vloxy.Engine {
             Octaves = Settings.Noise.Octaves,
         });
 
-        public virtual ChunkState ChunkState() => new(Settings);
-        
-        public virtual ChunkManager ChunkStore(
-            ChunkState chunkState,
-            NoiseProfile noiseProfile,
-            BurstFunctionPointers burstFunctionPointers
-        ) => new(Settings, chunkState);
+        public virtual ChunkManager ChunkManager() => new(Settings);
 
         public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
 

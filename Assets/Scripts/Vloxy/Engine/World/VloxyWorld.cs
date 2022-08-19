@@ -25,7 +25,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         protected int3 FocusChunkCoord;
 
-        protected ChunkState ChunkState;
         protected NoiseProfile NoiseProfile;
         protected ChunkManager ChunkManager;
 
@@ -108,28 +107,28 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private void ConfigureSettings() {
             _Settings.Chunk.LoadDistance = _Settings.Chunk.DrawDistance + 2;
+            _Settings.Chunk.HeightSize = _Settings.Noise.Height / _Settings.Chunk.ChunkSize.y / 2;
 
             _Settings.Scheduler.MeshingBatchSize = 2 * _Settings.Chunk.DrawDistance + 1;
             _Settings.Scheduler.StreamingBatchSize = 2 * _Settings.Chunk.LoadDistance + 1;
         }
         
         private void ConstructVloxyComponents() {
-            ChunkState = VloxyProvider.Current.ChunkState();
             NoiseProfile = VloxyProvider.Current.NoiseProfile();
+            ChunkManager = VloxyProvider.Current.ChunkManager();
+
             ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
             BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
-            
-            ChunkManager = VloxyProvider.Current.ChunkStore(ChunkState, NoiseProfile, BurstFunctionPointers);
-            
+
             MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(
-                ChunkState, 
+                ChunkManager.State, 
                 ChunkManager.Accessor, 
                 ChunkBehaviourPool, 
                 BurstFunctionPointers
             );
             
             _ChunkDataScheduler = VloxyProvider.Current.ChunkDataScheduler(
-                ChunkState,
+                ChunkManager.State,
                 ChunkManager.Store,
                 NoiseProfile, 
                 BurstFunctionPointers
@@ -147,9 +146,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             var watch = new Stopwatch();
             watch.Start();
 #endif
-            
-            ChunkState.Initialize(int3.zero);
-            _ChunkDataScheduler.GenerateChunks(ChunkManager.Store.GetPositions(Allocator.TempJob));
+            _ChunkDataScheduler.GenerateChunks(ChunkManager.InitialChunkRegion(Allocator.TempJob));
             
 #if VLOXY_LOGGING
             watch.Stop();
@@ -176,7 +173,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             if (claim.Count != 0) _ChunkDataScheduler.Schedule(claim);
             
             for (var index = 0; index < reclaim.Count; index++) {
-                ChunkState.RemoveState(reclaim[index]);
+                ChunkManager.State.RemoveState(reclaim[index]);
                 ChunkManager.Store.RemoveChunk(reclaim[index]);
             }
             

@@ -5,6 +5,7 @@ using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
+using Unity.Collections;
 using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Data {
@@ -13,23 +14,21 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         internal ChunkAccessor Accessor { get; }
         internal ChunkStore Store { get; }
+        internal ChunkState State { get; }
         
-        private ChunkState _ChunkState;
         private ChunkSettings _ChunkSettings;
         
         private ISet<int3> _Claim;
         private ISet<int3> _Reclaim;
 
-        public ChunkManager(VloxySettings settings, ChunkState chunkState) {
+        public ChunkManager(VloxySettings settings) {
             _ChunkSettings = settings.Chunk;
-            
-            _ChunkState = chunkState;
+
+            State = new ChunkState(settings);
             
             Store = new ChunkStore(
-                int3.zero, 
-                _ChunkSettings.ChunkSize,
-                _ChunkSettings.LoadDistance,
-                settings.Noise.Height
+                int3.zero,
+                _ChunkSettings.LoadDistance
             );
 
             Accessor = new ChunkAccessor(Store.Chunks, _ChunkSettings.ChunkSize);
@@ -50,7 +49,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _Claim.Clear();
             
             Update(_Claim, newFocusChunkCoord, diff, _ChunkSettings.LoadDistance, ChunkState.State.STREAMING);
-            Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.LoadDistance, ChunkState.State.UNLOAD);
+            Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.LoadDistance, ChunkState.State.UNLOADED);
 
 #if VLOXY_LOGGING
             VloxyLogger.Info<ChunkManager>($"Data Claim : {_Claim.Count()}, Data Reclaim : {_Reclaim.Count}");
@@ -69,7 +68,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                 Update(_Claim, newFocusChunkCoord, diff, _ChunkSettings.DrawDistance, ChunkState.State.MESHING);
                 Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.DrawDistance, ChunkState.State.LOADED);
             } else {
-                InitialRegion(newFocusChunkCoord);
+                InitialViewRegion(newFocusChunkCoord);
             }
             
 #if VLOXY_LOGGING
@@ -83,7 +82,28 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             Store.Dispose();
         }
 
-        private void InitialRegion(int3 focus) {
+        internal NativeArray<int3> InitialChunkRegion(Allocator handle) {
+            var size = _ChunkSettings.LoadDistance;
+            var y_size = _ChunkSettings.HeightSize;
+            
+            var result = new NativeArray<int3>(size.YCubedSize(y_size), handle);
+            var index = 0;
+             
+            for (int x = -size; x <= size; x++) {
+                for (int z = -size; z <= size; z++) {
+                    for (int y = -y_size; y <= y_size; y++) {
+                        var position = new int3(x, y, z) * _ChunkSettings.ChunkSize;
+                        result[index] = position;
+                        State.SetState(position, ChunkState.State.STREAMING);
+                        index++;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private void InitialViewRegion(int3 focus) {
             for (int x = -_ChunkSettings.DrawDistance; x <= _ChunkSettings.DrawDistance; x++) {
                 for (int z = -_ChunkSettings.DrawDistance; z <= _ChunkSettings.DrawDistance; z++) {
                     for (int y = -_ChunkSettings.DrawDistance; y <= _ChunkSettings.DrawDistance; y++) {
@@ -114,23 +134,22 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         }
 
         private void Add(ISet<int3> set, int3 position, ChunkState.State state) {
-            if (!Store.ContainsChunk(position)) {
-                if (state != ChunkState.State.STREAMING) {
+            var current = State.GetState(position);
+            
+            switch (state) {
+                case ChunkState.State.UNLOADED when current == ChunkState.State.LOADED:
+                case ChunkState.State.STREAMING when current == ChunkState.State.UNLOADED:
+                case ChunkState.State.LOADED when current == ChunkState.State.ACTIVE:
+                case ChunkState.State.MESHING when current == ChunkState.State.LOADED:
+                    set.Add(position);
+                    State.SetState(position, state);
+                    break;
+                default:
 #if VLOXY_LOGGING
-                    VloxyLogger.Warn<ChunkManager>($"Invalid Claim/Reclaim : Position {position}, State {state}");
+                    VloxyLogger.Warn<ChunkManager>($"Invalid Claim/Reclaim : Position : {position}, State : {state}, Current : {current}");
 #endif
-                    
-                    return;
-                }
-
-                set.Add(position);
-                _ChunkState.AddState(position, state);
-
-                return;
+                    break;
             }
-
-            set.Add(position);
-            _ChunkState.SetState(position, state);
         }
 
     }

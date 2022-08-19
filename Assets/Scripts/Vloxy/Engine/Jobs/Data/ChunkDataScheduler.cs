@@ -80,10 +80,22 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             };
 
             var handle = job.Schedule(jobs.Length, 4);
-
-            jobs.Dispose(handle);
             
             handle.Complete();
+            
+            for (var index = 0; index < jobs.Length; index++) {
+                var position = jobs[index];
+                
+                if (_ChunkState.GetState(position) == ChunkState.State.STREAMING) {
+                    _ChunkState.SetState(position, ChunkState.State.LOADED);
+                } else { // This is unnecessary, how can we avoid this ? 
+#if VLOXY_LOGGING
+                    VloxyLogger.Warn<ChunkDataScheduler>($"Redundant Chunk : {position} : {_ChunkState.GetState(position)}");
+#endif
+                }
+            }
+            
+            jobs.Dispose();
         }
         
         public void Schedule(List<int3> jobs) {
@@ -123,10 +135,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             if (!_Handle.IsCompleted) return false;
             
             _Handle.Complete();
-
-            int index;
             
-            for (index = 0; index < _Jobs.Length; index++) {
+            for (var index = 0; index < _Jobs.Length; index++) {
                 var position = _Jobs[index];
                 
                 if (_ChunkState.GetState(position) == ChunkState.State.STREAMING) {
