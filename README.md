@@ -1,5 +1,5 @@
 ﻿# Vloxy Engine
-A library to create block based voxel worlds
+Performance oriented voxel engine for unity.
 
 ## Current Goals
 - Extensible Api to create any type of voxel worlds
