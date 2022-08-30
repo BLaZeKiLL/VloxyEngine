@@ -1,14 +1,13 @@
-﻿name: Build
+name: Release
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
-    
+    tags:
+      - "v*"
+
 jobs:
   linux:
-    name: Build For Android
+    name: Release Build For Android
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -51,7 +50,7 @@ jobs:
             !**/*ButDontShipItWithYourGame*/**
   
   windows:
-    name: Build For Windows
+    name: Release Build For Windows
     runs-on: windows-2019
     strategy:
       fail-fast: false
@@ -92,3 +91,25 @@ jobs:
             Build
             !**/*DoNotShip*/**
             !**/*ButDontShipItWithYourGame*/**
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [linux, windows]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - uses: actions/download-artifact@v3
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            ./Build-CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease/*
+            ./Build-CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease/*
+            ./Build-CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease/*
+            ./Build-CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease/*
