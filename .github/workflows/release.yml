@@ -109,7 +109,7 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
-            ./Build-CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease/*
-            ./Build-CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease/*
-            ./Build-CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease/*
-            ./Build-CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease/*
+            ./Build-CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease
+            ./Build-CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease
+            ./Build-CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease
+            ./Build-CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease
