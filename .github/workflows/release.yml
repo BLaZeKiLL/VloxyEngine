@@ -103,13 +103,22 @@ jobs:
           lfs: true
 
       - uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Zip artifacts
+        run: |
+          zip -r android-mono.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease/
+          zip -r android-il2cpp.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease/
+          zip -r windows-mono.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease/
+          zip -r windows-il2cpp.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease/
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
-            ./Build-CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease
-            ./Build-CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease
-            ./Build-CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease
-            ./Build-CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease
+            android-mono.zip
+            android-il2cpp.zip
+            windows-mono.zip
+            windows-il2cpp.zip
