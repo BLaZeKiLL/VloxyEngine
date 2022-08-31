@@ -146,7 +146,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                     break;
                 default:
 #if VLOXY_LOGGING
-                    VloxyLogger.Warn<ChunkManager>($"Invalid Claim/Reclaim : Position : {position}, State : {state}, Current : {current}");
+                    VloxyLogger.Warn<ChunkManager>($"Invalid State Change : Position : {position}, New State : {state}, Current State : {current}");
 #endif
                     break;
             }
