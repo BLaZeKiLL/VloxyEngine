@@ -133,20 +133,20 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             }
         }
 
-        private void Add(ISet<int3> set, int3 position, ChunkState.State state) {
-            var current = State.GetState(position);
+        private void Add(ISet<int3> set, int3 position, ChunkState.State newState) {
+            var currentState = State.GetState(position);
             
-            switch (state) {
-                case ChunkState.State.UNLOADED when current == ChunkState.State.LOADED:
-                case ChunkState.State.STREAMING when current == ChunkState.State.UNLOADED:
-                case ChunkState.State.LOADED when current == ChunkState.State.ACTIVE:
-                case ChunkState.State.MESHING when current == ChunkState.State.LOADED:
+            switch (newState) {
+                case ChunkState.State.UNLOADED when currentState == ChunkState.State.LOADED:
+                case ChunkState.State.STREAMING when currentState == ChunkState.State.UNLOADED:
+                case ChunkState.State.LOADED when currentState == ChunkState.State.ACTIVE:
+                case ChunkState.State.MESHING when currentState == ChunkState.State.LOADED:
                     set.Add(position);
-                    State.SetState(position, state);
+                    State.SetState(position, newState);
                     break;
                 default:
 #if VLOXY_LOGGING
-                    VloxyLogger.Warn<ChunkManager>($"Invalid State Change : Position : {position}, New State : {state}, Current State : {current}");
+                    VloxyLogger.Warn<ChunkManager>($"Invalid State Change : Position : {position}, New State : {newState}, Current State : {currentState}");
 #endif
                     break;
             }
