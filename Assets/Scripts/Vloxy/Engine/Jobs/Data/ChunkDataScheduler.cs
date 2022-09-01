@@ -6,6 +6,7 @@ using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Collections;
@@ -27,6 +28,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         private JobHandle _Handle;
 
         private NativeList<int3> _Jobs;
+        private NativeParallelHashMap<int3, Chunk> _Results;
         private Queue<int3> _Queue;
         private bool _Scheduled;
         private int _BatchSize;
@@ -50,7 +52,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             _BurstFunctionPointers = burstFunctionPointers;
             
             _Queue = new Queue<int3>();
+            
             _Jobs = new NativeList<int3>(Allocator.Persistent);
+            _Results = new NativeParallelHashMap<int3, Chunk>(settings.Chunk.LoadDistance.CubedSize(), Allocator.Persistent);
             
 #if VLOXY_LOGGING
             _Watch = new Stopwatch();
@@ -70,6 +74,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             return _Scheduled && Complete();
         } 
 
+        /// <summary>
+        /// Initial Generation
+        /// </summary>
+        /// <param name="jobs"></param>
         public void GenerateChunks(NativeArray<int3> jobs) {
             var job = new ChunkDataJob {
                 Jobs = jobs,
@@ -122,7 +130,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 Jobs = _Jobs,
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,
-                Results = _ChunkStore.Chunks.AsParallelWriter(),
+                Results = _Results.AsParallelWriter(),
                 BurstFunctionPointers = _BurstFunctionPointers,
             };
             
@@ -140,6 +148,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 var position = _Jobs[index];
                 
                 if (_ChunkState.GetState(position) == ChunkState.State.STREAMING) {
+                    var chunk = _Results[position];
+                    _ChunkStore.Chunks.Add(position, chunk);
                     _ChunkState.SetState(position, ChunkState.State.LOADED);
                 } else { // This is unnecessary, how can we avoid this ? 
 #if VLOXY_LOGGING
@@ -149,6 +159,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             }
 
             _Jobs.Clear();
+            _Results.Clear();
+            
             _Scheduled = false;
             
             Processing = _Queue.Count > 0;
@@ -162,6 +174,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 
         public void Dispose() {
             _Jobs.Dispose();
+            _Results.Dispose();
         }
         
 #if VLOXY_LOGGING
