@@ -118,7 +118,7 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
-            android-mono.zip
-            android-il2cpp.zip
-            windows-mono.zip
-            windows-il2cpp.zip
+            android-mono-${{ github.ref_name }}.zip
+            android-il2cpp-${{ github.ref_name }}.zip
+            windows-mono-${{ github.ref_name }}.zip
+            windows-il2cpp-${{ github.ref_name }}.zip
