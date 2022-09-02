@@ -11,7 +11,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         public enum State {
             
-            DEFAULT,
+            // DEFAULT,
             UNLOADED,
             STREAMING,
             LOADED,
@@ -21,18 +21,9 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         }
 
         private IDictionary<int3, State> _Dictionary;
-
-        private int3 _ChunkSize;
-        private int _YPageSize;
-        private int _PageSize;
         
         public ChunkState(VloxySettings settings) {
-            _ChunkSize = settings.Chunk.ChunkSize;
-            _PageSize = settings.Chunk.LoadDistance;
-
-            _YPageSize = settings.Noise.Height / _ChunkSize.y / 2;
-                
-            _Dictionary = new Dictionary<int3, State>(_PageSize.CubedSize());
+            _Dictionary = new Dictionary<int3, State>(settings.Chunk.LoadDistance.CubedSize());
         }
 
         public void RemoveState(int3 position) => _Dictionary.Remove(position);
