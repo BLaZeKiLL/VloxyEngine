@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -89,11 +90,69 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
         internal bool LateUpdate() {
             return _Scheduled && Complete();
-        } 
+        }
         
-        public void Schedule(List<int3> jobs) {
+        internal void Dispose() {
+            _VertexParams.Dispose();
+            _Results.Dispose();
+            _Jobs.Dispose();
+        }
+
+        internal void Reclaim(List<int3> positions) {
+            for (int i = 0; i < positions.Count; i++) {
+                var position = positions[i];
+                var state = _ChunkState.GetState(position);
+
+                switch (state) {
+                    case ChunkState.State.UNLOADED:
+                    case ChunkState.State.STREAMING:
+                    case ChunkState.State.LOADED:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<MeshBuildScheduler>($"Invalid state : {state} for : {position}");
+#endif
+                        break;
+                    case ChunkState.State.MESHING:
+                        _ChunkState.SetState(position, ChunkState.State.LOADED);
+                        break;
+                    case ChunkState.State.ACTIVE:
+                        _ChunkBehaviourPool.Reclaim(position);
+                        _ChunkState.SetState(position, ChunkState.State.LOADED);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        internal void Schedule(List<int3> jobs) {
             for (int i = 0; i < jobs.Count; i++) {
-                _Queue.Enqueue(jobs[i]);
+                var position = jobs[i];
+                var state = _ChunkState.GetState(position);
+
+                switch (state) {
+                    case ChunkState.State.UNLOADED:
+                    case ChunkState.State.STREAMING:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<MeshBuildScheduler>($"Invalid state : {state} for : {position}");
+#endif
+                        break;
+                    case ChunkState.State.LOADED:
+                        _ChunkState.SetState(position, ChunkState.State.MESHING);
+                        _Queue.Enqueue(position);
+                        break;
+                    case ChunkState.State.MESHING:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<MeshBuildScheduler>($"Waiting meshing for : {position}");
+#endif
+                        break;
+                    case ChunkState.State.ACTIVE:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<MeshBuildScheduler>($"Invalid state : {state} for : {position}");
+#endif
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
             
             Processing = _Queue.Count > 0;
@@ -103,7 +162,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             var count = _BatchCount;
 
             while (count > 0 && _Queue.Count > 0) {
-                _Jobs.Add(_Queue.Dequeue());
+                var position = _Queue.Dequeue();
+                
+                if (_ChunkState.GetState(position) != ChunkState.State.MESHING) continue;
+                
+                _Jobs.Add(position);
                 count--;
             }
             
@@ -168,12 +231,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 #endif
 
             return true;
-        }
-        
-        public void Dispose() {
-            _VertexParams.Dispose();
-            _Results.Dispose();
-            _Jobs.Dispose();
         }
 
 #if VLOXY_LOGGING

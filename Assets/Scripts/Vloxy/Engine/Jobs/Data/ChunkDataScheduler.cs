@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -73,12 +74,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         internal bool LateUpdate() {
             return _Scheduled && Complete();
         } 
+        
+        internal void Dispose() {
+            _Jobs.Dispose();
+            _Results.Dispose();
+        }
 
         /// <summary>
         /// Initial Generation
         /// </summary>
         /// <param name="jobs"></param>
-        public void GenerateChunks(NativeArray<int3> jobs) {
+        internal void GenerateChunks(NativeArray<int3> jobs) {
             var job = new ChunkDataJob {
                 Jobs = jobs,
                 ChunkSize = _ChunkSize,
@@ -105,10 +111,64 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             
             jobs.Dispose();
         }
+
+        internal void Reclaim(List<int3> positions) {
+            for (int i = 0; i < positions.Count; i++) {
+                var position = positions[i];
+                var state = _ChunkState.GetState(position);
+
+                switch (state) {
+                    case ChunkState.State.UNLOADED:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<ChunkDataScheduler>($"Invalid state : {state} for : {position}");
+#endif
+                        break;
+                    case ChunkState.State.STREAMING:
+                        _ChunkState.RemoveState(position);
+                        break;
+                    case ChunkState.State.LOADED:
+                        _ChunkStore.RemoveChunk(position);
+                        _ChunkState.RemoveState(position);
+                        break;
+                    case ChunkState.State.MESHING:
+                        _ChunkStore.RemoveChunk(position);
+                        _ChunkState.RemoveState(position);
+                        break;
+                    case ChunkState.State.ACTIVE:
+                        _ChunkStore.RemoveChunk(position);
+                        _ChunkState.RemoveState(position);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
         
-        public void Schedule(List<int3> jobs) {
+        internal void Schedule(List<int3> jobs) {
             for (int i = 0; i < jobs.Count; i++) {
-                _Queue.Enqueue(jobs[i]);
+                var position = jobs[i];
+                var state = _ChunkState.GetState(position);
+                
+                switch (state) {
+                    case ChunkState.State.UNLOADED:
+                        _Queue.Enqueue(position);
+                        _ChunkState.SetState(position, ChunkState.State.STREAMING);
+                        break;
+                    case ChunkState.State.STREAMING:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<ChunkDataScheduler>($"Waiting streaming for : {position}");
+#endif
+                        break;
+                    case ChunkState.State.LOADED:
+                    case ChunkState.State.MESHING:
+                    case ChunkState.State.ACTIVE:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<ChunkDataScheduler>($"Invalid state : {state} for : {position}");
+#endif
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
             
             Processing = _Queue.Count > 0;
@@ -118,7 +178,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             var count = _BatchSize;
             
             while (count > 0 && _Queue.Count > 0) {
-                _Jobs.Add(_Queue.Dequeue());
+                var position = _Queue.Dequeue();
+                
+                if (_ChunkState.GetState(position) != ChunkState.State.STREAMING) continue;
+                
+                _Jobs.Add(position);
                 count--;
             }
             
@@ -172,11 +236,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             return true;
         }
 
-        public void Dispose() {
-            _Jobs.Dispose();
-            _Results.Dispose();
-        }
-        
 #if VLOXY_LOGGING
         public float AvgTime => (float) _Timings.Sum() / 10;
 

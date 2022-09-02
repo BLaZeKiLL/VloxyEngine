@@ -159,11 +159,10 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
             var (claim, reclaim) = ChunkManager.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
             
+            if (claim == null || reclaim == null) return;
+            
             if (claim.Count != 0) MeshBuildScheduler.Schedule(claim);
-
-            for (var index = 0; index < reclaim.Count; index++) {
-                ChunkBehaviourPool.Reclaim(reclaim[index]);
-            }
+            if (reclaim.Count != 0) MeshBuildScheduler.Reclaim(reclaim);
         }
 
         private void ChunkRegionUpdate(int3 NewFocusChunkCoord) {

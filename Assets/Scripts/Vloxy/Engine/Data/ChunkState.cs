@@ -11,7 +11,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         public enum State {
             
-            // DEFAULT,
             UNLOADED,
             STREAMING,
             LOADED,
