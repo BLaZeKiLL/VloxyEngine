@@ -94,12 +94,12 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             };
 
             var handle = job.Schedule(jobs.Length, 4);
-            
+
             handle.Complete();
-            
+
             for (var index = 0; index < jobs.Length; index++) {
                 var position = jobs[index];
-                
+
                 if (_ChunkState.GetState(position) == ChunkState.State.STREAMING) {
                     _ChunkState.SetState(position, ChunkState.State.LOADED);
                 } else { // This is unnecessary, how can we avoid this ? 
@@ -108,7 +108,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 #endif
                 }
             }
-            
+
             jobs.Dispose();
         }
 
@@ -176,12 +176,12 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 
         private void Process() {
             var count = _BatchSize;
-            
+
             while (count > 0 && _Queue.Count > 0) {
                 var position = _Queue.Dequeue();
-                
+
                 if (_ChunkState.GetState(position) != ChunkState.State.STREAMING) continue;
-                
+
                 _Jobs.Add(position);
                 count--;
             }
