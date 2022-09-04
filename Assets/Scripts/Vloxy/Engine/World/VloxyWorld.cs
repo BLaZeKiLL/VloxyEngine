@@ -171,12 +171,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             if (claim == null || reclaim == null) return;
             
             if (claim.Count != 0) ChunkDataScheduler.Schedule(claim);
-            
-            for (var index = 0; index < reclaim.Count; index++) {
-                ChunkManager.State.RemoveState(reclaim[index]);
-                ChunkManager.Store.RemoveChunk(reclaim[index]);
-            }
-            
+            if (reclaim.Count != 0) ChunkDataScheduler.Reclaim(reclaim);
         }
 
     }

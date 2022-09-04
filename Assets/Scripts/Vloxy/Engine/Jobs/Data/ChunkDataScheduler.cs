@@ -30,7 +30,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 
         private NativeList<int3> _Jobs;
         private NativeParallelHashMap<int3, Chunk> _Results;
-        private Queue<int3> _Queue;
+        private Queue<VloxyBatch<int3>> _Batches;
+        private VloxyBatch<int3> _CurrentBatch;
+
         private bool _Scheduled;
         private int _BatchSize;
         
@@ -52,7 +54,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             _NoiseProfile = noiseProfile;
             _BurstFunctionPointers = burstFunctionPointers;
             
-            _Queue = new Queue<int3>();
+            _Batches = new Queue<VloxyBatch<int3>>();
             
             _Jobs = new NativeList<int3>(Allocator.Persistent);
             _Results = new NativeParallelHashMap<int3, Chunk>(settings.Chunk.LoadDistance.CubedSize(), Allocator.Persistent);
@@ -64,7 +66,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         }
         
         internal bool Update() {
-            if (_Scheduled || _Queue.Count <= 0) return false;
+            if (_Scheduled || !Processing) return false;
 
             Process();
 
@@ -145,13 +147,15 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         }
         
         internal void Schedule(List<int3> jobs) {
+            var batch = new VloxyBatch<int3>(jobs.Count);
+            
             for (int i = 0; i < jobs.Count; i++) {
                 var position = jobs[i];
                 var state = _ChunkState.GetState(position);
                 
                 switch (state) {
                     case ChunkState.State.UNLOADED:
-                        _Queue.Enqueue(position);
+                        batch.Enqueue(position);
                         _ChunkState.SetState(position, ChunkState.State.STREAMING);
                         break;
                     case ChunkState.State.STREAMING:
@@ -171,14 +175,18 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 }
             }
             
-            Processing = _Queue.Count > 0;
+            _Batches.Enqueue(batch);
+            
+            Processing = _Batches.Count > 0;
         }
 
         private void Process() {
+            _CurrentBatch ??= _Batches.Dequeue();
+
             var count = _BatchSize;
 
-            while (count > 0 && _Queue.Count > 0) {
-                var position = _Queue.Dequeue();
+            while (count > 0 && _CurrentBatch.Count > 0) {
+                var position = _CurrentBatch.Dequeue();
 
                 if (_ChunkState.GetState(position) != ChunkState.State.STREAMING) continue;
 
@@ -227,7 +235,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             
             _Scheduled = false;
             
-            Processing = _Queue.Count > 0;
+            if (_CurrentBatch.Count == 0) _CurrentBatch = null;
+            
+            Processing = _Batches.Count > 0 || _CurrentBatch != null;
             
 #if VLOXY_LOGGING
             _Watch.Stop();
