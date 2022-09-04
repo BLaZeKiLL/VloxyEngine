@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -6,6 +7,7 @@ using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Collections;
@@ -27,7 +29,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         private JobHandle _Handle;
 
         private NativeList<int3> _Jobs;
-        private Queue<int3> _Queue;
+        private NativeParallelHashMap<int3, Chunk> _Results;
+        private Queue<VloxyBatch<int3>> _Batches;
+        private VloxyBatch<int3> _CurrentBatch;
+
         private bool _Scheduled;
         private int _BatchSize;
         
@@ -49,8 +54,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             _NoiseProfile = noiseProfile;
             _BurstFunctionPointers = burstFunctionPointers;
             
-            _Queue = new Queue<int3>();
+            _Batches = new Queue<VloxyBatch<int3>>();
+            
             _Jobs = new NativeList<int3>(Allocator.Persistent);
+            _Results = new NativeParallelHashMap<int3, Chunk>(settings.Chunk.LoadDistance.CubedSize(), Allocator.Persistent);
             
 #if VLOXY_LOGGING
             _Watch = new Stopwatch();
@@ -59,7 +66,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         }
         
         internal bool Update() {
-            if (_Scheduled || _Queue.Count <= 0) return false;
+            if (_Scheduled || !Processing) return false;
 
             Process();
 
@@ -69,8 +76,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         internal bool LateUpdate() {
             return _Scheduled && Complete();
         } 
+        
+        internal void Dispose() {
+            _Jobs.Dispose();
+            _Results.Dispose();
+        }
 
-        public void GenerateChunks(NativeArray<int3> jobs) {
+        /// <summary>
+        /// Initial Generation
+        /// </summary>
+        /// <param name="jobs"></param>
+        internal void GenerateChunks(NativeArray<int3> jobs) {
             var job = new ChunkDataJob {
                 Jobs = jobs,
                 ChunkSize = _ChunkSize,
@@ -80,12 +96,12 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             };
 
             var handle = job.Schedule(jobs.Length, 4);
-            
+
             handle.Complete();
-            
+
             for (var index = 0; index < jobs.Length; index++) {
                 var position = jobs[index];
-                
+
                 if (_ChunkState.GetState(position) == ChunkState.State.STREAMING) {
                     _ChunkState.SetState(position, ChunkState.State.LOADED);
                 } else { // This is unnecessary, how can we avoid this ? 
@@ -94,23 +110,87 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 #endif
                 }
             }
-            
+
             jobs.Dispose();
         }
+
+        internal void Reclaim(List<int3> positions) {
+            for (int i = 0; i < positions.Count; i++) {
+                var position = positions[i];
+                var state = _ChunkState.GetState(position);
+
+                switch (state) {
+                    case ChunkState.State.UNLOADED:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<ChunkDataScheduler>($"Invalid state : {state} for : {position}");
+#endif
+                        break;
+                    case ChunkState.State.STREAMING:
+                        _ChunkState.RemoveState(position);
+                        break;
+                    case ChunkState.State.LOADED:
+                        _ChunkStore.RemoveChunk(position);
+                        _ChunkState.RemoveState(position);
+                        break;
+                    case ChunkState.State.MESHING:
+                        _ChunkStore.RemoveChunk(position);
+                        _ChunkState.RemoveState(position);
+                        break;
+                    case ChunkState.State.ACTIVE:
+                        _ChunkStore.RemoveChunk(position);
+                        _ChunkState.RemoveState(position);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
         
-        public void Schedule(List<int3> jobs) {
+        internal void Schedule(List<int3> jobs) {
+            var batch = new VloxyBatch<int3>(jobs.Count);
+            
             for (int i = 0; i < jobs.Count; i++) {
-                _Queue.Enqueue(jobs[i]);
+                var position = jobs[i];
+                var state = _ChunkState.GetState(position);
+                
+                switch (state) {
+                    case ChunkState.State.UNLOADED:
+                        batch.Enqueue(position);
+                        _ChunkState.SetState(position, ChunkState.State.STREAMING);
+                        break;
+                    case ChunkState.State.STREAMING:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<ChunkDataScheduler>($"Waiting streaming for : {position}");
+#endif
+                        break;
+                    case ChunkState.State.LOADED:
+                    case ChunkState.State.MESHING:
+                    case ChunkState.State.ACTIVE:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<ChunkDataScheduler>($"Invalid state : {state} for : {position}");
+#endif
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
             
-            Processing = _Queue.Count > 0;
+            _Batches.Enqueue(batch);
+            
+            Processing = _Batches.Count > 0;
         }
 
         private void Process() {
+            _CurrentBatch ??= _Batches.Dequeue();
+
             var count = _BatchSize;
-            
-            while (count > 0 && _Queue.Count > 0) {
-                _Jobs.Add(_Queue.Dequeue());
+
+            while (count > 0 && _CurrentBatch.Count > 0) {
+                var position = _CurrentBatch.Dequeue();
+
+                if (_ChunkState.GetState(position) != ChunkState.State.STREAMING) continue;
+
+                _Jobs.Add(position);
                 count--;
             }
             
@@ -122,7 +202,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 Jobs = _Jobs,
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,
-                Results = _ChunkStore.Chunks.AsParallelWriter(),
+                Results = _Results.AsParallelWriter(),
                 BurstFunctionPointers = _BurstFunctionPointers,
             };
             
@@ -140,6 +220,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 var position = _Jobs[index];
                 
                 if (_ChunkState.GetState(position) == ChunkState.State.STREAMING) {
+                    var chunk = _Results[position];
+                    _ChunkStore.Chunks.Add(position, chunk);
                     _ChunkState.SetState(position, ChunkState.State.LOADED);
                 } else { // This is unnecessary, how can we avoid this ? 
 #if VLOXY_LOGGING
@@ -149,9 +231,13 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             }
 
             _Jobs.Clear();
+            _Results.Clear();
+            
             _Scheduled = false;
             
-            Processing = _Queue.Count > 0;
+            if (_CurrentBatch.Count == 0) _CurrentBatch = null;
+            
+            Processing = _Batches.Count > 0 || _CurrentBatch != null;
             
 #if VLOXY_LOGGING
             _Watch.Stop();
@@ -160,10 +246,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             return true;
         }
 
-        public void Dispose() {
-            _Jobs.Dispose();
-        }
-        
 #if VLOXY_LOGGING
         public float AvgTime => (float) _Timings.Sum() / 10;
 

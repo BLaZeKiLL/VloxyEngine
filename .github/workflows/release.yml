@@ -108,17 +108,17 @@ jobs:
 
       - name: Zip artifacts
         run: |
-          zip -r android-mono.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease/
-          zip -r android-il2cpp.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease/
-          zip -r windows-mono.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease/
-          zip -r windows-il2cpp.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease/
+          zip -r android-mono-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease/
+          zip -r android-il2cpp-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease/
+          zip -r windows-mono-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease/
+          zip -r windows-il2cpp-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease/
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
-            android-mono.zip
-            android-il2cpp.zip
-            windows-mono.zip
-            windows-il2cpp.zip
+            android-mono-${{ github.ref_name }}.zip
+            android-il2cpp-${{ github.ref_name }}.zip
+            windows-mono-${{ github.ref_name }}.zip
+            windows-il2cpp-${{ github.ref_name }}.zip

@@ -48,8 +48,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _Reclaim.Clear();
             _Claim.Clear();
             
-            Update(_Claim, newFocusChunkCoord, diff, _ChunkSettings.LoadDistance, ChunkState.State.STREAMING);
-            Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.LoadDistance, ChunkState.State.UNLOADED);
+            Update(_Claim, newFocusChunkCoord, diff, _ChunkSettings.LoadDistance);
+            Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.LoadDistance);
 
 #if VLOXY_LOGGING
             VloxyLogger.Info<ChunkManager>($"Data Claim : {_Claim.Count()}, Data Reclaim : {_Reclaim.Count}");
@@ -65,8 +65,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _Claim.Clear();
             
             if (!initial.AndReduce()) {
-                Update(_Claim, newFocusChunkCoord, diff, _ChunkSettings.DrawDistance, ChunkState.State.MESHING);
-                Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.DrawDistance, ChunkState.State.LOADED);
+                Update(_Claim, newFocusChunkCoord, diff, _ChunkSettings.DrawDistance);
+                Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.DrawDistance);
             } else {
                 InitialViewRegion(newFocusChunkCoord);
             }
@@ -107,48 +107,29 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             for (int x = -_ChunkSettings.DrawDistance; x <= _ChunkSettings.DrawDistance; x++) {
                 for (int z = -_ChunkSettings.DrawDistance; z <= _ChunkSettings.DrawDistance; z++) {
                     for (int y = -_ChunkSettings.DrawDistance; y <= _ChunkSettings.DrawDistance; y++) {
-                        Add(_Claim, focus + new int3(x, y, z) * _ChunkSettings.ChunkSize, ChunkState.State.MESHING);
+                        _Claim.Add(focus + new int3(x, y, z) * _ChunkSettings.ChunkSize);
                     }
                 }
             }
         }
 
-        private void Update(ISet<int3> set, int3 focus, int3 diff, int distance, ChunkState.State state) {
+        private void Update(ISet<int3> set, int3 focus, int3 diff, int distance) {
             var size = _ChunkSettings.ChunkSize;
             
             for (int i = -distance; i <= distance; i++) {
                 for (int j = -distance; j <= distance; j++) {
                     if (diff.x != 0) {
-                        Add(set, new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z)), state);
+                        set.Add(new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z)));
                     }
 
                     if (diff.y != 0) {
-                        Add(set, new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z)), state);
+                        set.Add(new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z)));
                     }
 
                     if (diff.z != 0) {
-                        Add(set, new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance)), state);
+                        set.Add(new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance)));
                     }
                 }
-            }
-        }
-
-        private void Add(ISet<int3> set, int3 position, ChunkState.State state) {
-            var current = State.GetState(position);
-            
-            switch (state) {
-                case ChunkState.State.UNLOADED when current == ChunkState.State.LOADED:
-                case ChunkState.State.STREAMING when current == ChunkState.State.UNLOADED:
-                case ChunkState.State.LOADED when current == ChunkState.State.ACTIVE:
-                case ChunkState.State.MESHING when current == ChunkState.State.LOADED:
-                    set.Add(position);
-                    State.SetState(position, state);
-                    break;
-                default:
-#if VLOXY_LOGGING
-                    VloxyLogger.Warn<ChunkManager>($"Invalid Claim/Reclaim : Position : {position}, State : {state}, Current : {current}");
-#endif
-                    break;
             }
         }
 
