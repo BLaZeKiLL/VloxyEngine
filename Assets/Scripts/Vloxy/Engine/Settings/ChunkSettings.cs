@@ -21,9 +21,6 @@ namespace CodeBlaze.Vloxy.Engine.Settings {
         [HideInInspector]
         public int LoadDistance = 0;
 
-        [HideInInspector] 
-        public int HeightSize = 0;
-
     }
 
 }

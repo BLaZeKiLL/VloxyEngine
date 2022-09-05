@@ -108,7 +108,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private void ConfigureSettings() {
             _Settings.Chunk.LoadDistance = _Settings.Chunk.DrawDistance + 2;
-            _Settings.Chunk.HeightSize = _Settings.Noise.Height / _Settings.Chunk.ChunkSize.y / 2;
 
             _Settings.Scheduler.MeshingBatchSize = 2 * _Settings.Chunk.DrawDistance + 1;
             _Settings.Scheduler.StreamingBatchSize = 2 * _Settings.Chunk.LoadDistance + 1;
