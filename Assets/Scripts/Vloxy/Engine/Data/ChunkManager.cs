@@ -34,7 +34,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             Accessor = new ChunkAccessor(Store.Chunks, _ChunkSettings.ChunkSize);
 
             var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
-
+            
             _Claim = new HashSet<int3>(viewRegionSize);
             _Reclaim = new HashSet<int3>(viewRegionSize);
         }
@@ -84,14 +84,13 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         internal NativeArray<int3> InitialChunkRegion(Allocator handle) {
             var size = _ChunkSettings.LoadDistance;
-            var y_size = _ChunkSettings.HeightSize;
-            
-            var result = new NativeArray<int3>(size.YCubedSize(y_size), handle);
+
+            var result = new NativeArray<int3>(size.CubedSize(), handle);
             var index = 0;
              
             for (int x = -size; x <= size; x++) {
                 for (int z = -size; z <= size; z++) {
-                    for (int y = -y_size; y <= y_size; y++) {
+                    for (int y = -size; y <= size; y++) {
                         var position = new int3(x, y, z) * _ChunkSettings.ChunkSize;
                         result[index] = position;
                         State.SetState(position, ChunkState.State.STREAMING);
@@ -119,15 +118,21 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             for (int i = -distance; i <= distance; i++) {
                 for (int j = -distance; j <= distance; j++) {
                     if (diff.x != 0) {
-                        set.Add(new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z)));
+                        var position = new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z));
+                        
+                        set.Add(position);
                     }
 
                     if (diff.y != 0) {
-                        set.Add(new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z)));
+                        var position = new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z));
+                        
+                        set.Add(position);
                     }
 
                     if (diff.z != 0) {
-                        set.Add(new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance)));
+                        var position = new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance));
+                        
+                        set.Add(position);
                     }
                 }
             }

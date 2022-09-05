@@ -30,9 +30,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 
         internal void Update() {
             if (State == SchedulerState.IDLE) {
-                if (_MeshBuildScheduler.Processing) {
+                if (_MeshBuildScheduler.CanProcess) {
                     State = SchedulerState.MESHING;
-                } else if (_ChunkDataScheduler.Processing) {
+                } else if (_ChunkDataScheduler.CanProcess) {
                     State = SchedulerState.STREAMING;
                 }
             }
@@ -66,14 +66,14 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             }
 
             if (State == SchedulerState.MESHING && !_MeshBuildScheduler.Processing) {
-                if (_ChunkDataScheduler.Processing) State = SchedulerState.STREAMING;
+                if (_ChunkDataScheduler.CanProcess) State = SchedulerState.STREAMING;
                 else State = SchedulerState.IDLE;
 
 #if VLOXY_LOGGING
                 VloxyLogger.Info<VloxyScheduler>($"Meshing Avg Batch Time : {_MeshBuildScheduler.AvgTime:F3} MS");
 #endif
             } else if (State == SchedulerState.STREAMING && !_ChunkDataScheduler.Processing) {
-                if (_MeshBuildScheduler.Processing) State = SchedulerState.MESHING;
+                if (_MeshBuildScheduler.CanProcess) State = SchedulerState.MESHING;
                 else State = SchedulerState.IDLE;
                 
 #if VLOXY_LOGGING
