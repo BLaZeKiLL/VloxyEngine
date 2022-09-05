@@ -14,14 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Noise: {fileID: 11400000, guid: c28776072edff5743bd39aa43edd3f85, type: 2}
   Chunk:
-    PageSize: 4
-    DrawDistance: 2
+    DrawDistance: 4
     ChunkSize:
       x: 32
       y: 32
       z: 32
+    LoadDistance: 4
+    HeightSize: 4
   Renderer:
     Material: {fileID: 2100000, guid: 5859681f51610964abcbfb5326525a3d, type: 2}
     CastShadows: 0
   Scheduler:
-    BatchSize: 8
+    MeshingBatchSize: 5
+    StreamingBatchSize: 9
