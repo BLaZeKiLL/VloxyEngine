@@ -15,13 +15,14 @@ using Unity.Collections;
 using Unity.Mathematics;
 
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CodeBlaze.Vloxy.Engine.World {
 
     public class VloxyWorld : MonoBehaviour {
 
         [SerializeField] private Transform _Focus;
-        [SerializeField] private VloxySettings _Settings;
+        [SerializeField] protected VloxySettings Settings;
 
         protected int3 FocusChunkCoord;
 
@@ -54,7 +55,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             VloxyProvider.Initialize(Provider(), provider => {
                 ConfigureSettings();
                 
-                provider.Settings = _Settings;
+                provider.Settings = Settings;
 #if VLOXY_LOGGING
                 VloxyLogger.Info<VloxyWorld>("Provider Initialized");
 #endif
@@ -107,10 +108,10 @@ namespace CodeBlaze.Vloxy.Engine.World {
         #endregion
 
         private void ConfigureSettings() {
-            _Settings.Chunk.LoadDistance = _Settings.Chunk.DrawDistance + 2;
+            Settings.Chunk.LoadDistance = Settings.Chunk.DrawDistance + 2;
 
-            _Settings.Scheduler.MeshingBatchSize = 2 * _Settings.Chunk.DrawDistance + 1;
-            _Settings.Scheduler.StreamingBatchSize = 2 * _Settings.Chunk.LoadDistance + 1;
+            Settings.Scheduler.MeshingBatchSize = 2 * Settings.Chunk.DrawDistance + 1;
+            Settings.Scheduler.StreamingBatchSize = 2 * Settings.Chunk.LoadDistance + 1;
         }
         
         private void ConstructVloxyComponents() {
