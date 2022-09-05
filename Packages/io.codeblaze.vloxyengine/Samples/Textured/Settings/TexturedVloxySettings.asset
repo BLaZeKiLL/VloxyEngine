@@ -12,17 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de6253de127543aeb23d6596fc20fad2, type: 3}
   m_Name: TexturedVloxySettings
   m_EditorClassIdentifier: 
-  Noise: {fileID: 11400000, guid: e0264bb17d310154aa8c9bffdd50b67a, type: 2}
+  Noise: {fileID: 11400000, guid: c28776072edff5743bd39aa43edd3f85, type: 2}
   Chunk:
     DrawDistance: 4
     ChunkSize:
       x: 32
       y: 32
       z: 32
-    LoadDistance: 6
+    LoadDistance: 4
+    HeightSize: 4
   Renderer:
-    Material: {fileID: 2100000, guid: 1add20ccd0265e742a7bd8cb069f72ad, type: 2}
+    Material: {fileID: 2100000, guid: 5859681f51610964abcbfb5326525a3d, type: 2}
     CastShadows: 0
   Scheduler:
-    MeshingBatchSize: 9
-    StreamingBatchSize: 13
+    MeshingBatchSize: 5
+    StreamingBatchSize: 9
