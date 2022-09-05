@@ -161,8 +161,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
             
             if (claim == null || reclaim == null) return;
             
-            if (claim.Count != 0) MeshBuildScheduler.Schedule(claim);
-            if (reclaim.Count != 0) MeshBuildScheduler.Reclaim(reclaim);
+            if (claim.Count != 0) MeshBuildScheduler.ScheduleClaim(claim);
+            if (reclaim.Count != 0) MeshBuildScheduler.ScheduleReclaim(reclaim);
         }
 
         private void ChunkRegionUpdate(int3 NewFocusChunkCoord) {
@@ -170,8 +170,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
             
             if (claim == null || reclaim == null) return;
             
-            if (claim.Count != 0) ChunkDataScheduler.Schedule(claim);
-            if (reclaim.Count != 0) ChunkDataScheduler.Reclaim(reclaim);
+            if (claim.Count != 0) ChunkDataScheduler.ScheduleClaim(claim);
+            if (reclaim.Count != 0) ChunkDataScheduler.ScheduleReclaim(reclaim);
         }
 
     }
