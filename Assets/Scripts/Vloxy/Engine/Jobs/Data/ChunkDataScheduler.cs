@@ -18,6 +18,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 
     public class ChunkDataScheduler {
 
+        internal bool CanProcess { get; private set; }
         internal bool Processing { get; private set; }
         
         private int3 _ChunkSize;
@@ -66,7 +67,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         }
         
         internal bool Update() {
-            if (_Scheduled || !Processing) return false;
+            if (_Scheduled || !(Processing || CanProcess)) return false;
 
             Process();
 
@@ -177,10 +178,12 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             
             _Batches.Enqueue(batch);
             
-            Processing = _Batches.Count > 0;
+            CanProcess = _Batches.Count > 0;
         }
 
         private void Process() {
+            Processing = true;
+            
             _CurrentBatch ??= _Batches.Dequeue();
 
             var count = _BatchSize;
@@ -234,11 +237,13 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             _Results.Clear();
             
             _Scheduled = false;
-            
-            if (_CurrentBatch.Count == 0) _CurrentBatch = null;
-            
-            Processing = _Batches.Count > 0 || _CurrentBatch != null;
-            
+
+            if (_CurrentBatch.Count == 0) {
+                _CurrentBatch = null;
+                Processing = false;
+                CanProcess = _Batches.Count > 0;
+            }
+
 #if VLOXY_LOGGING
             _Watch.Stop();
             Timestamp(_Watch.ElapsedMilliseconds);
