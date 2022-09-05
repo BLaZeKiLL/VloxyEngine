@@ -27,16 +27,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         private NoiseProfile _NoiseProfile;
         private BurstFunctionPointers _BurstFunctionPointers;
         
-        private JobHandle _Handle;
-
-        private NativeList<int3> _Jobs;
-        private NativeParallelHashMap<int3, Chunk> _Results;
-        private Queue<VloxyBatch<int3>> _Batches;
-        private VloxyBatch<int3> _CurrentBatch;
-
         private bool _Scheduled;
         private int _BatchSize;
         
+        private List<int3> _ReclaimBatches;
+        private Queue<VloxyBatch<int3>> _ClaimBatches;
+        private VloxyBatch<int3> _CurrentClaimBatch;
+        
+        private JobHandle _Handle;
+        private NativeList<int3> _Jobs;
+        private NativeParallelHashMap<int3, Chunk> _Results;
+
 #if VLOXY_LOGGING
         private Queue<long> _Timings;
         private Stopwatch _Watch;
@@ -54,8 +55,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             _ChunkStore = chunkStore;
             _NoiseProfile = noiseProfile;
             _BurstFunctionPointers = burstFunctionPointers;
-            
-            _Batches = new Queue<VloxyBatch<int3>>();
+
+            _ReclaimBatches = new List<int3>();
+            _ClaimBatches = new Queue<VloxyBatch<int3>>();
             
             _Jobs = new NativeList<int3>(Allocator.Persistent);
             _Results = new NativeParallelHashMap<int3, Chunk>(settings.Chunk.LoadDistance.CubedSize(), Allocator.Persistent);
@@ -115,39 +117,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             jobs.Dispose();
         }
 
-        internal void Reclaim(List<int3> positions) {
-            for (int i = 0; i < positions.Count; i++) {
-                var position = positions[i];
-                var state = _ChunkState.GetState(position);
-
-                switch (state) {
-                    case ChunkState.State.UNLOADED:
-#if VLOXY_LOGGING
-                        VloxyLogger.Warn<ChunkDataScheduler>($"Invalid state : {state} for : {position}");
-#endif
-                        break;
-                    case ChunkState.State.STREAMING:
-                        _ChunkState.RemoveState(position);
-                        break;
-                    case ChunkState.State.LOADED:
-                        _ChunkStore.RemoveChunk(position);
-                        _ChunkState.RemoveState(position);
-                        break;
-                    case ChunkState.State.MESHING:
-                        _ChunkStore.RemoveChunk(position);
-                        _ChunkState.RemoveState(position);
-                        break;
-                    case ChunkState.State.ACTIVE:
-                        _ChunkStore.RemoveChunk(position);
-                        _ChunkState.RemoveState(position);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
+        internal void ScheduleReclaim(List<int3> positions) => _ReclaimBatches = positions;
         
-        internal void Schedule(List<int3> jobs) {
+        internal void ScheduleClaim(List<int3> jobs) {
             var batch = new VloxyBatch<int3>(jobs.Count);
             
             for (int i = 0; i < jobs.Count; i++) {
@@ -176,20 +148,61 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 }
             }
             
-            _Batches.Enqueue(batch);
+            _ClaimBatches.Enqueue(batch);
             
-            CanProcess = _Batches.Count > 0;
+            CanProcess = _ClaimBatches.Count > 0;
         }
 
         private void Process() {
+            ProcessReclaim();
+            ProcessClaim();
+        }
+        
+        private void ProcessReclaim() {
+            if (_ReclaimBatches.Count == 0) return;
+            
+            for (int i = 0; i < _ReclaimBatches.Count; i++) {
+                var position = _ReclaimBatches[i];
+                var state = _ChunkState.GetState(position);
+
+                switch (state) {
+                    case ChunkState.State.UNLOADED:
+#if VLOXY_LOGGING
+                        VloxyLogger.Warn<ChunkDataScheduler>($"Invalid state : {state} for : {position}");
+#endif
+                        break;
+                    case ChunkState.State.STREAMING:
+                        _ChunkState.RemoveState(position);
+                        break;
+                    case ChunkState.State.LOADED:
+                        _ChunkStore.RemoveChunk(position);
+                        _ChunkState.RemoveState(position);
+                        break;
+                    case ChunkState.State.MESHING:
+                        _ChunkStore.RemoveChunk(position);
+                        _ChunkState.RemoveState(position);
+                        break;
+                    case ChunkState.State.ACTIVE:
+                        _ChunkStore.RemoveChunk(position);
+                        _ChunkState.RemoveState(position);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            
+            _ReclaimBatches.Clear();
+        }
+        
+        private void ProcessClaim() {
             Processing = true;
             
-            _CurrentBatch ??= _Batches.Dequeue();
+            _CurrentClaimBatch ??= _ClaimBatches.Dequeue();
 
             var count = _BatchSize;
 
-            while (count > 0 && _CurrentBatch.Count > 0) {
-                var position = _CurrentBatch.Dequeue();
+            while (count > 0 && _CurrentClaimBatch.Count > 0) {
+                var position = _CurrentClaimBatch.Dequeue();
 
                 if (_ChunkState.GetState(position) != ChunkState.State.STREAMING) continue;
 
@@ -238,10 +251,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             
             _Scheduled = false;
 
-            if (_CurrentBatch.Count == 0) {
-                _CurrentBatch = null;
+            if (_CurrentClaimBatch.Count == 0) {
+                _CurrentClaimBatch = null;
                 Processing = false;
-                CanProcess = _Batches.Count > 0;
+                CanProcess = _ClaimBatches.Count > 0;
             }
 
 #if VLOXY_LOGGING
