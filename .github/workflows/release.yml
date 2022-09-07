@@ -6,6 +6,39 @@ on:
       - "v*"
 
 jobs:
+  package:
+    name: Unity Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+      
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key:
+            Library-${{ matrix.targetPlatform }}-${{ hashFiles('.') }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
+
+      - uses: game-ci/unity-builder@v2
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneLinux64
+          buildMethod: CodeBlaze.Editor.Build.Builder.Package
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: vloxyengine
+          path: Build/vloxyengine.unitypackage
+
   linux:
     name: Release Build For Android
     runs-on: ubuntu-latest
@@ -95,7 +128,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: [linux, windows]
+    needs: [package, linux, windows]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -113,11 +146,15 @@ jobs:
           zip -r windows-mono-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease/
           zip -r windows-il2cpp-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease/
 
+      - name: Move package
+        run: mv artifacts/vloxyengine.unitypackage vloxyengine-${{ github.ref_name }}.unitypackage
+
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
+            vloxyengine-${{ github.ref_name }}.unitypackage
             android-mono-${{ github.ref_name }}.zip
             android-il2cpp-${{ github.ref_name }}.zip
             windows-mono-${{ github.ref_name }}.zip

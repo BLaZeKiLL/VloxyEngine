@@ -2,11 +2,11 @@
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Mesher;
 using CodeBlaze.Vloxy.Engine.Noise;
-using CodeBlaze.Vloxy.Examples.Textured.Components;
+using CodeBlaze.Vloxy.Samples.Textured.Components;
 
 using Unity.Burst;
 
-namespace CodeBlaze.Vloxy.Examples.Textured {
+namespace CodeBlaze.Vloxy.Samples.Textured {
 
     public class TexturedVloxyProvider : VloxyProvider {
         

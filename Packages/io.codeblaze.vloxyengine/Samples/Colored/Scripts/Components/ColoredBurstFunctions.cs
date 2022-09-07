@@ -2,14 +2,14 @@
 
 using CodeBlaze.Vloxy.Engine.Mesher;
 using CodeBlaze.Vloxy.Engine.Noise;
-using CodeBlaze.Vloxy.Examples.Colored.Data;
+using CodeBlaze.Vloxy.Samples.Colored.Data;
 
 using Unity.Burst;
 using Unity.Mathematics;
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Examples.Colored.Components {
+namespace CodeBlaze.Vloxy.Samples.Colored.Components {
 
     [BurstCompile]
     public static class ColoredBurstFunctions {

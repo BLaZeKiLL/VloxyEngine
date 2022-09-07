@@ -2,7 +2,7 @@
 
 using Random = UnityEngine.Random;
 
-namespace CodeBlaze.Vloxy.Examples.Colored.Data {
+namespace CodeBlaze.Vloxy.Samples.Colored.Data {
 
     public static class ColoredBlocks {
 

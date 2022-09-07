@@ -3,7 +3,7 @@ using CodeBlaze.Vloxy.Engine.World;
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Examples.Textured.World {
+namespace CodeBlaze.Vloxy.Samples.Textured.World {
 
     public class TexturedWorld : VloxyWorld {
 
