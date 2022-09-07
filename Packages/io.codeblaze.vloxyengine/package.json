@@ -1,0 +1,25 @@
+{
+  "name": "io.codeblaze.vloxyengine",
+  "version": "1.1.0",
+  "displayName": "Vloxy Engine",
+  "description": "High performance voxel engine",
+  "unity": "2021.3",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://blazekill.github.io/vloxy-docs/docs/introduction/",
+  "changelogUrl": "https://github.com/BLaZeKiLL/VloxyEngine/releases",
+  "licensesUrl": "https://github.com/BLaZeKiLL/VloxyEngine/blob/main/LICENSE.md",
+  "dependencies": {
+    "com.unity.collections": "1.3.1"
+  },
+  "keywords": [
+    "voxel",
+    "jobs",
+    "burst",
+    "minecraft"
+  ],
+  "author": {
+    "name": "CodeBlaze",
+    "email": "blazeingamer10@gmail.com",
+    "url": "https://github.com/BLaZeKiLL"
+  }
+}
