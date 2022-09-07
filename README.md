@@ -8,7 +8,7 @@
     <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/BLaZeKiLL/VloxyEngine">
   </a>
   <a href="https://openupm.com/packages/io.codeblaze.vloxyengine/">
-    <img src="https://img.shields.io/npm/v/io.codeblaze.vloxyengine?label=openupm&amp;registry_uri=https://package.openupm.com" />
+    <img alt="OpenUPM" src="https://img.shields.io/npm/v/io.codeblaze.vloxyengine?label=openupm&amp;registry_uri=https://package.openupm.com" />
   </a>
   <a href="https://github.com/BLaZeKiLL/VloxyEngine/actions">
     <img alt="Build Status" src="https://img.shields.io/github/workflow/status/BLaZeKiLL/VloxyEngine/Build">
