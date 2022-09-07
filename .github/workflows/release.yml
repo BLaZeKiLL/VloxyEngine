@@ -37,7 +37,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: vloxyengine
-          path: Build/vloxyengine.unitypackage
+          path: vloxyengine.unitypackage
 
   linux:
     name: Release Build For Android
@@ -148,6 +148,22 @@ jobs:
 
       - name: Move package
         run: mv artifacts/vloxyengine.unitypackage vloxyengine-${{ github.ref_name }}.unitypackage
+
+      - name: UPM
+        run: |
+          git branch -d upm &> /dev/null || echo upm branch not found
+          git subtree split -P "$PKG_ROOT" -b upm
+          git checkout upm
+          if [[ -d "Samples" ]]; then
+            git mv Samples Samples~
+            rm -f Samples.meta
+            git config --global user.name 'github-bot'
+            git config --global user.email 'github-bot@users.noreply.github.com'
+            git commit -am "fix: Samples => Samples~"
+          fi
+          git push -f -u origin upm
+        env:
+          PKG_ROOT: Packages/io.codeblaze.vloxyengine
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
