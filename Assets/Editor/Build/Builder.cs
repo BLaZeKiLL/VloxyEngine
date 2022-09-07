@@ -5,6 +5,11 @@ namespace CodeBlaze.Editor.Build {
 
     public static class Builder {
 
+        [MenuItem("Build/Package")]
+        private static void Package() {
+            AssetDatabase.ExportPackage("Packages/io.codeblaze.vloxyengine", "Build/vloxyengine.unitypackage", ExportPackageOptions.Recurse);
+        }
+        
         #region Windows
 
         [MenuItem("Build/Windows/Mono/Debug")]
