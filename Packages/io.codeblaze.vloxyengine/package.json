@@ -17,6 +17,18 @@
     "burst",
     "minecraft"
   ],
+  "samples": [
+    {
+      "displayName": "Textured World",
+      "description": "Vloxy engine configuration and overries for textured based world",
+      "path": "Samples~/Textured"
+    },
+    {
+      "displayName": "Colored World",
+      "description": "Vloxy engine configuration and overries for vertex color based world",
+      "path": "Samples~/Colored"
+    }
+  ],
   "author": {
     "name": "CodeBlaze",
     "email": "blazeingamer10@gmail.com",
