@@ -36,8 +36,8 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: vloxyengine
-          path: Build/vloxyengine.unitypackage
+          name: Package
+          path: vloxyengine.unitypackage
 
   linux:
     name: Release Build For Android
@@ -128,7 +128,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: [package, linux, windows]
+    needs: [package, package, linux, windows]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -147,13 +147,30 @@ jobs:
           zip -r windows-il2cpp-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease/
 
       - name: Move package
-        run: mv artifacts/vloxyengine.unitypackage vloxyengine-${{ github.ref_name }}.unitypackage
+        run: mv artifacts/Package/vloxyengine.unitypackage vloxyengine-${{ github.ref_name }}.unitypackage
+
+      - name: UPM
+        run: |
+          git branch -d upm &> /dev/null || echo upm branch not found
+          git subtree split -P "$PKG_ROOT" -b upm
+          git checkout upm
+          if [[ -d "Samples" ]]; then
+            git mv Samples Samples~
+            rm -f Samples.meta
+            git config --global user.name 'github-bot'
+            git config --global user.email 'github-bot@users.noreply.github.com'
+            git commit -am "fix: Samples => Samples~"
+          fi
+          git push -f -u origin upm
+        env:
+          PKG_ROOT: Packages/io.codeblaze.vloxyengine
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
+            vloxyengine-${{ github.ref_name }}.unitypackage
             vloxyengine-${{ github.ref_name }}.unitypackage
             android-mono-${{ github.ref_name }}.zip
             android-il2cpp-${{ github.ref_name }}.zip
