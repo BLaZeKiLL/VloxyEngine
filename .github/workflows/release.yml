@@ -128,7 +128,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: [package, linux, windows]
+    needs: [package, package, linux, windows]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -170,6 +170,7 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
+            vloxyengine-${{ github.ref_name }}.unitypackage
             vloxyengine-${{ github.ref_name }}.unitypackage
             android-mono-${{ github.ref_name }}.zip
             android-il2cpp-${{ github.ref_name }}.zip
