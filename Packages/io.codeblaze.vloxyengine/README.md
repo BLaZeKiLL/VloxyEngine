@@ -69,7 +69,6 @@ openupm add io.codeblaze.vloxyengine
 in case you go the pre-fabe route make sure to set the focus parameter on the world object around which the world would be generated.
 
 ## Documentation & Dev-logs
-Documentation can be found [here](https://blazekill.github.io/vloxy-docs/) and it's source code is hosted [here](https://github.com/BLaZeKiLL/vloxy-docs)
+Documentation can be found [here](https://blazekill.github.io/vloxy-docs/), and it's source code is hosted [here](https://github.com/BLaZeKiLL/vloxy-docs)
 
-I'll try to create dev-logs for the major features in development as well as some tutorials which you can fin on my [youtube](https://www.youtube.com/c/CodeBlazeX) or on the vloxy engine [blog](https://blazekill.github.io/vloxy-docs/blog)
-
+I'll try to create dev-logs for the major features in development as well as some tutorials which you can find on my [YouTube](https://www.youtube.com/c/CodeBlazeX) or on the Vloxy Engine [blog](https://blazekill.github.io/vloxy-docs/blog)
