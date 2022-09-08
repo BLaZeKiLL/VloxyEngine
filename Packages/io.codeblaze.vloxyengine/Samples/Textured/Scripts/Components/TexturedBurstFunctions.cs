@@ -23,11 +23,17 @@ namespace CodeBlaze.Vloxy.Samples.Textured.Components {
             ref Vertex v4
         ) {
             switch (block) {
-                case (int) TexturedBlock.GRASS when normal.y is 1 or -1:
+                case (int) TexturedBlock.GRASS when normal.y is 1:
                     v1.UV0.z = 0;
                     v2.UV0.z = 0;
                     v3.UV0.z = 0;
                     v4.UV0.z = 0;
+                    break;
+                case (int) TexturedBlock.GRASS when normal.y is -1:
+                    v1.UV0.z = 2;
+                    v2.UV0.z = 2;
+                    v3.UV0.z = 2;
+                    v4.UV0.z = 2;
                     break;
                 case (int) TexturedBlock.GRASS:
                     v1.UV0.z = 1;
