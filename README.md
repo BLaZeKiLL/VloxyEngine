@@ -45,7 +45,7 @@ Along with package releases a demo application showcasing the capabilities is al
 - Windows
 - Android
 
-Head over to the [relase page](https://github.com/BLaZeKiLL/VloxyEngine/releases) to check them out
+Head over to the [release page](https://github.com/BLaZeKiLL/VloxyEngine/releases) to check them out
 
 ## Quick Start
 
@@ -57,7 +57,7 @@ openupm add io.codeblaze.vloxyengine
 ```
 
 > While UPM is supported via OpenUPM, it is still recommended to add **Vloxy Engine** directly too the project as a package.
-> With source access you would get the maximum control and freedom to tune the engine to you'r use case.
+> With source access you would get the maximum control and freedom to tune the engine to your use case.
 
 
 - Make sure the following dependencies are installed, they should be installed **automatically** regardless of the way you install **Vloxy Engine**
@@ -69,9 +69,9 @@ openupm add io.codeblaze.vloxyengine
 in case you go the pre-fabe route make sure to set the focus parameter on the world object around which the world would be generated.
 
 
-## Documentation & Devlogs
+## Documentation & Dev-logs
 Documentation can be found [here](https://blazekill.github.io/vloxy-docs/) and it's source code is hosted [here](https://github.com/BLaZeKiLL/vloxy-docs)
 
-I'll try to create devlogs for the major features in development as well as some tutorials which you can fin on my [youtube](https://www.youtube.com/c/CodeBlazeX) or on the vloxy engine [blog](https://blazekill.github.io/vloxy-docs/blog)
+I'll try to create dev-logs for the major features in development as well as some tutorials which you can fin on my [youtube](https://www.youtube.com/c/CodeBlazeX) or on the vloxy engine [blog](https://blazekill.github.io/vloxy-docs/blog)
 
 
