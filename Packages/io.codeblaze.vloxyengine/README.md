@@ -40,9 +40,15 @@ Performance oriented voxel engine for unity. Latest release for the engine and s
 | Physics & Fluids                |      |
 | Networking                      |      |
 
+## Demos
+Along with package releases a demo application showcasing the capabilities is also released for the following platforms
+- Windows
+- Android
+
+Head over to the [relase page](https://github.com/BLaZeKiLL/VloxyEngine/releases) to check them out
+
 ## Documentation & Devlogs
 Documentation can be found [here](https://blazekill.github.io/vloxy-docs/) and it's source code is hosted [here](https://github.com/BLaZeKiLL/vloxy-docs)
 
 I'll try to create devlogs for the major features in development as well as some tutorials which you can fin on my [youtube](https://www.youtube.com/c/CodeBlazeX) or on the vloxy engine [blog](https://blazekill.github.io/vloxy-docs/blog)
-
 
