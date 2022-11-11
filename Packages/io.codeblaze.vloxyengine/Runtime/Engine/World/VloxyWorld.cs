@@ -41,6 +41,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         #region Virtual
 
         protected virtual VloxyProvider Provider() => new();
+        protected virtual void WorldConfigure() { }
         protected virtual void WorldInitialize() { }
         protected virtual void WorldAwake() { }
         protected virtual void WorldStart() { }
@@ -112,6 +113,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             Settings.Scheduler.MeshingBatchSize = 2 * Settings.Chunk.DrawDistance + 1;
             Settings.Scheduler.StreamingBatchSize = 2 * Settings.Chunk.LoadDistance + 1;
+
+            WorldConfigure();
         }
         
         private void ConstructVloxyComponents() {
