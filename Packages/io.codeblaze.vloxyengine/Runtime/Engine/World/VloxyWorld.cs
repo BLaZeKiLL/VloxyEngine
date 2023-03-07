@@ -38,6 +38,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private bool _IsFocused;
 
+        private byte _UpdateFrame = 1;
+        private byte _LateUpdateFrame = 1;
+
         #region Virtual
 
         protected virtual VloxyProvider Provider() => new();
@@ -79,26 +82,37 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void Update() {
-            var NewFocusChunkCoord = _IsFocused ? VloxyUtils.GetChunkCoords(_Focus.position) : int3.zero;
-
-            if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) {
-                ViewRegionUpdate(NewFocusChunkCoord);
-                ChunkRegionUpdate(NewFocusChunkCoord);
+            if (_UpdateFrame % 16 == 0) {
+                _UpdateFrame = 1;
                 
-                WorldRegionUpdate();
+                var NewFocusChunkCoord = _IsFocused ? VloxyUtils.GetChunkCoords(_Focus.position) : int3.zero;
 
-                FocusChunkCoord = NewFocusChunkCoord;
-            }
+                if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) {
+                    ViewRegionUpdate(NewFocusChunkCoord);
+                    ChunkRegionUpdate(NewFocusChunkCoord);
+                
+                    WorldRegionUpdate();
+
+                    FocusChunkCoord = NewFocusChunkCoord;
+                }
             
-            VloxyScheduler.Update();
+                VloxyScheduler.Update();
 
-            WorldUpdate();
+                WorldUpdate();
+            } else {
+                _UpdateFrame++;
+            }
 
             // ChunkStore.ActiveChunkUpdate();
         }
 
         private void LateUpdate() {
-            VloxyScheduler.LateUpdate();
+            if (_LateUpdateFrame % 16 == 0) {
+                _LateUpdateFrame = 1;
+                VloxyScheduler.LateUpdate();
+            } else {
+                _LateUpdateFrame++;
+            }
         }
 
         private void OnDestroy() {
