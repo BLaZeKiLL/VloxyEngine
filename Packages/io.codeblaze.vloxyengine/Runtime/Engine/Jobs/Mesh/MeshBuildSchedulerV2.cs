@@ -65,7 +65,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 #endif
         }
 
-        internal bool IsReady;
+        internal bool IsReady = true;
         internal bool IsComplete => _Handle.IsCompleted;
 
         internal void Dispose() {

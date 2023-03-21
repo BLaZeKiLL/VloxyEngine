@@ -50,16 +50,16 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                             (z >= -draw && z <= draw)
                         ) {
                             if (_ViewQueue.Contains(pos)) {
-                                _ViewQueue.UpdatePriority(pos, 1.0f / (pos - focus).SqrMagnitude());
-                            } else {
-                                _ViewQueue.Enqueue(pos, 1.0f / (pos - focus).SqrMagnitude());
+                                _ViewQueue.UpdatePriority(pos, (pos - focus).SqrMagnitude());
+                            } else { // check if already active
+                                _ViewQueue.Enqueue(pos, (pos - focus).SqrMagnitude());
                             }
                         }
 
                         if (_DataQueue.Contains(pos)) {
-                            _DataQueue.UpdatePriority(pos, 1.0f / (pos - focus).SqrMagnitude());
-                        } else {
-                            _DataQueue.Enqueue(pos, 1.0f / (pos - focus).SqrMagnitude());
+                            _DataQueue.UpdatePriority(pos, (pos - focus).SqrMagnitude());
+                        } else { // check if already generated
+                            _DataQueue.Enqueue(pos, (pos - focus).SqrMagnitude());
                         }
                     }
                 }
@@ -93,7 +93,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         }
 
         internal void SchedulerLateUpdate() {
-            if (_MeshBuildScheduler.IsComplete) {
+            if (_MeshBuildScheduler.IsComplete && !_MeshBuildScheduler.IsReady) {
                 _MeshBuildScheduler.Complete();
 
                 // Safe to modify store here as no one is using it here
@@ -102,7 +102,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                 _ChunkDataScheduler.SyncChunkStore();
             } 
             
-            if (_ChunkDataScheduler.IsComplete) {
+            if (_ChunkDataScheduler.IsComplete && !_ChunkDataScheduler.IsReady) {
                 _ChunkDataScheduler.Complete();
             }
         }

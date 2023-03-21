@@ -64,11 +64,13 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         
         internal ChunkBehaviour Claim(int3 position) {
             if (_Queue.Contains(position)) {
-                throw new InvalidOperationException("Chunk already active");
+                throw new InvalidOperationException($"Chunk ({position}) already active");
             }
 
             // Reclaim
-            _Pool.Release(_Map[_Queue.Dequeue()]);
+            if (_Queue.Count > 0) {
+                _Pool.Release(_Map[_Queue.Dequeue()]);
+            }
                 
             // Claim
             var behaviour = _Pool.Get();

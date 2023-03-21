@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -55,7 +56,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 #endif
         }
 
-        internal bool IsReady;
+        internal bool IsReady = true;
         internal bool IsComplete => _Handle.IsCompleted;
         
         internal void Dispose() {
@@ -124,7 +125,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         internal void SyncChunkStore() {
             while (_ResultsQueue.Count > 0) {
                 var chunk = _ResultsQueue.Dequeue();
-                
+
+                if (_ChunkStore.Chunks.ContainsKey(chunk.Position)) {
+                    throw new InvalidOperationException($"Chunk ({chunk.Position}) already generated");
+                }
+
                 _ChunkStore.Chunks.Add(chunk.Position, chunk);
             }
         }
