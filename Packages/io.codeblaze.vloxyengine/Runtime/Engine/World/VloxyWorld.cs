@@ -32,14 +32,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private BurstFunctionPointers BurstFunctionPointers;
         private ChunkBehaviourPool ChunkBehaviourPool;
         
-        private VloxyScheduler VloxyScheduler;
-        private MeshBuildScheduler MeshBuildScheduler;
-        private ChunkDataScheduler ChunkDataScheduler;
+        private VloxySchedulerV2 VloxySchedulerV2;
+        private MeshBuildSchedulerV2 MeshBuildSchedulerV2;
+        private ChunkDataSchedulerV2 ChunkDataSchedulerV2;
 
         private bool _IsFocused;
 
         private byte _UpdateFrame = 1;
-        private byte _LateUpdateFrame = 1;
 
         #region Virtual
 
@@ -88,15 +87,14 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 var NewFocusChunkCoord = _IsFocused ? VloxyUtils.GetChunkCoords(_Focus.position) : int3.zero;
 
                 if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) {
-                    ViewRegionUpdate(NewFocusChunkCoord);
-                    ChunkRegionUpdate(NewFocusChunkCoord);
-                
+                    VloxySchedulerV2.FocusUpdate(NewFocusChunkCoord);
+                    
                     WorldRegionUpdate();
 
                     FocusChunkCoord = NewFocusChunkCoord;
                 }
             
-                VloxyScheduler.Update();
+                VloxySchedulerV2.SchedulerUpdate();
 
                 WorldUpdate();
             } else {
@@ -107,16 +105,11 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void LateUpdate() {
-            if (_LateUpdateFrame % 16 == 0) {
-                _LateUpdateFrame = 1;
-                VloxyScheduler.LateUpdate();
-            } else {
-                _LateUpdateFrame++;
-            }
+            VloxySchedulerV2.SchedulerLateUpdate();
         }
 
         private void OnDestroy() {
-            VloxyScheduler.Dispose();
+            VloxySchedulerV2.Dispose();
             ChunkManager.Dispose();
         }
         
@@ -138,22 +131,23 @@ namespace CodeBlaze.Vloxy.Engine.World {
             ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
             BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
 
-            MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(
-                ChunkManager.State, 
+            MeshBuildSchedulerV2 = VloxyProvider.Current.MeshBuildSchedulerV2(
                 ChunkManager.Accessor, 
                 ChunkBehaviourPool, 
                 BurstFunctionPointers
             );
             
-            ChunkDataScheduler = VloxyProvider.Current.ChunkDataScheduler(
-                ChunkManager.State,
+            ChunkDataSchedulerV2 = VloxyProvider.Current.ChunkDataSchedulerV2(
                 ChunkManager.Store,
                 NoiseProfile, 
                 BurstFunctionPointers
             );
 
-            VloxyScheduler = VloxyProvider.Current.VloxyScheduler(MeshBuildScheduler, ChunkDataScheduler);
-            
+            VloxySchedulerV2 = VloxyProvider.Current.VloxySchedulerV2(
+                MeshBuildSchedulerV2, 
+                ChunkDataSchedulerV2
+            );
+
 #if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
 #endif
@@ -164,31 +158,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
             var watch = new Stopwatch();
             watch.Start();
 #endif
-            ChunkDataScheduler.GenerateChunks(ChunkManager.InitialChunkRegion(Allocator.TempJob));
+            ChunkDataSchedulerV2.GenerateChunks(ChunkManager.InitialChunkRegion(Allocator.TempJob));
             
 #if VLOXY_LOGGING
             watch.Stop();
             VloxyLogger.Info<VloxyWorld>($"Initial Chunks Generated : {ChunkManager.Store.ChunkCount()}");
             VloxyLogger.Info<VloxyWorld>($"Vloxy World Generated : {watch.ElapsedMilliseconds} MS");
 #endif
-        }
-
-        private void ViewRegionUpdate(int3 NewFocusChunkCoord) {
-            var (claim, reclaim) = ChunkManager.ViewRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
-            
-            if (claim == null || reclaim == null) return;
-            
-            if (claim.Count != 0) MeshBuildScheduler.ScheduleClaim(claim);
-            if (reclaim.Count != 0) MeshBuildScheduler.ScheduleReclaim(reclaim);
-        }
-
-        private void ChunkRegionUpdate(int3 NewFocusChunkCoord) {
-            var (claim, reclaim) = ChunkManager.ChunkRegionUpdate(NewFocusChunkCoord, FocusChunkCoord);
-            
-            if (claim == null || reclaim == null) return;
-            
-            if (claim.Count != 0) ChunkDataScheduler.ScheduleClaim(claim);
-            if (reclaim.Count != 0) ChunkDataScheduler.ScheduleReclaim(reclaim);
         }
 
     }

@@ -34,7 +34,36 @@ namespace CodeBlaze.Vloxy.Engine {
         public virtual VloxyScheduler VloxyScheduler(
             MeshBuildScheduler meshBuildScheduler,
             ChunkDataScheduler chunkDataScheduler
-        ) => new VloxyScheduler(meshBuildScheduler, chunkDataScheduler);
+        ) => new(meshBuildScheduler, chunkDataScheduler);
+
+        public virtual VloxySchedulerV2 VloxySchedulerV2(
+            MeshBuildSchedulerV2 meshBuildScheduler,
+            ChunkDataSchedulerV2 chunkDataScheduler
+        ) => new(Settings, meshBuildScheduler, chunkDataScheduler);
+        
+        public virtual ChunkDataScheduler ChunkDataScheduler(
+            ChunkState chunkState,
+            ChunkStore chunkStore,
+            NoiseProfile noiseProfile,
+            BurstFunctionPointers burstFunctionPointers
+        ) => new(
+            Settings,
+            chunkState,
+            chunkStore,
+            noiseProfile,
+            burstFunctionPointers
+        );
+
+        public virtual ChunkDataSchedulerV2 ChunkDataSchedulerV2(
+            ChunkStore chunkStore,
+            NoiseProfile noiseProfile,
+            BurstFunctionPointers burstFunctionPointers
+        ) => new(
+            Settings,
+            chunkStore,
+            noiseProfile,
+            burstFunctionPointers
+        );
         
         public virtual MeshBuildScheduler MeshBuildScheduler(
             ChunkState chunkState,
@@ -48,17 +77,15 @@ namespace CodeBlaze.Vloxy.Engine {
             chunkBehaviourPool,
             burstFunctionPointers
         );
-
-        public virtual ChunkDataScheduler ChunkDataScheduler(
-            ChunkState chunkState,
-            ChunkStore chunkStore,
-            NoiseProfile noiseProfile,
+        
+        public virtual MeshBuildSchedulerV2 MeshBuildSchedulerV2(
+            ChunkAccessor chunkAccessor,
+            ChunkBehaviourPool chunkBehaviourPool, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,
-            chunkState,
-            chunkStore,
-            noiseProfile,
+            chunkAccessor,
+            chunkBehaviourPool,
             burstFunctionPointers
         );
 
