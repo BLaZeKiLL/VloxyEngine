@@ -30,6 +30,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             _ChunkDataScheduler = chunkDataScheduler;
 
             _ViewQueue = new SimplePriorityQueue<int3>();
+            _DataQueue = new SimplePriorityQueue<int3>();
 
             _Settings = settings;
         }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,7 +6,6 @@ using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Collections;
 using Unity.Jobs;
@@ -20,7 +18,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
     public class MeshBuildSchedulerV2 {
 
         private readonly ChunkAccessor _ChunkAccessor;
-        private readonly ChunkBehaviourPool _ChunkBehaviourPool;
+        private readonly ChunkPoolV2 _ChunkPool;
         private readonly BurstFunctionPointers _BurstFunctionPointers;
 
         private int3 _ChunkSize;
@@ -39,11 +37,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         public MeshBuildSchedulerV2(
             VloxySettings settings,
             ChunkAccessor chunkAccessor,
-            ChunkBehaviourPool chunkBehaviourPool, 
+            ChunkPoolV2 chunkPool, 
             BurstFunctionPointers burstFunctionPointers
         ) {
             _ChunkAccessor = chunkAccessor;
-            _ChunkBehaviourPool = chunkBehaviourPool;
+            _ChunkPool = chunkPool;
             _BurstFunctionPointers = burstFunctionPointers;
 
             _ChunkSize = settings.Chunk.ChunkSize;
@@ -109,7 +107,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             for (var index = 0; index < _Jobs.Length; index++) {
                 var position = _Jobs[index];
                 
-                meshes[_Results[position]] = _ChunkBehaviourPool.Claim(position).Mesh();
+                meshes[_Results[position]] = _ChunkPool.Claim(position).Mesh();
             }
 
             UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(_MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds);

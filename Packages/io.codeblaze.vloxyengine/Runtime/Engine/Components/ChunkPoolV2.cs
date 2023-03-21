@@ -15,7 +15,7 @@ using UnityEngine.Pool;
 
 namespace CodeBlaze.Vloxy.Engine.Components {
 
-    public class ChunkBehaviourPoolV2 {
+    public class ChunkPoolV2 {
 
         private IObjectPool<ChunkBehaviour> _Pool;
         private Dictionary<int3, ChunkBehaviour> _Map;
@@ -23,7 +23,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
         private int3 _Focus;
         
-        public ChunkBehaviourPoolV2(Transform transform, VloxySettings settings) {
+        public ChunkPoolV2(Transform transform, VloxySettings settings) {
             var viewRegionSize = settings.Chunk.DrawDistance.CubedSize();
 
             _Map = new Dictionary<int3, ChunkBehaviour>(viewRegionSize);

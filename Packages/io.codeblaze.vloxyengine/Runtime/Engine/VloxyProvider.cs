@@ -31,6 +31,8 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
 
+        public virtual ChunkPoolV2 ChunkPoolV2(Transform transform) => new (transform, Settings);
+
         public virtual VloxyScheduler VloxyScheduler(
             MeshBuildScheduler meshBuildScheduler,
             ChunkDataScheduler chunkDataScheduler
@@ -80,12 +82,12 @@ namespace CodeBlaze.Vloxy.Engine {
         
         public virtual MeshBuildSchedulerV2 MeshBuildSchedulerV2(
             ChunkAccessor chunkAccessor,
-            ChunkBehaviourPool chunkBehaviourPool, 
+            ChunkPoolV2 chunkPool, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,
             chunkAccessor,
-            chunkBehaviourPool,
+            chunkPool,
             burstFunctionPointers
         );
 

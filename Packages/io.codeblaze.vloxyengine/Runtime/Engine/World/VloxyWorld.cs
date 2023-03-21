@@ -15,7 +15,6 @@ using Unity.Collections;
 using Unity.Mathematics;
 
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace CodeBlaze.Vloxy.Engine.World {
 
@@ -30,8 +29,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected ChunkManager ChunkManager;
 
         private BurstFunctionPointers BurstFunctionPointers;
-        private ChunkBehaviourPool ChunkBehaviourPool;
         
+        private ChunkPoolV2 ChunkPoolV2;
         private VloxySchedulerV2 VloxySchedulerV2;
         private MeshBuildSchedulerV2 MeshBuildSchedulerV2;
         private ChunkDataSchedulerV2 ChunkDataSchedulerV2;
@@ -128,12 +127,12 @@ namespace CodeBlaze.Vloxy.Engine.World {
             NoiseProfile = VloxyProvider.Current.NoiseProfile();
             ChunkManager = VloxyProvider.Current.ChunkManager();
 
-            ChunkBehaviourPool = VloxyProvider.Current.ChunkPool(transform);
+            ChunkPoolV2 = VloxyProvider.Current.ChunkPoolV2(transform);
             BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
 
             MeshBuildSchedulerV2 = VloxyProvider.Current.MeshBuildSchedulerV2(
                 ChunkManager.Accessor, 
-                ChunkBehaviourPool, 
+                ChunkPoolV2, 
                 BurstFunctionPointers
             );
             
