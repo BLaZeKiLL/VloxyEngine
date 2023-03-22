@@ -6,6 +6,7 @@ using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Collections;
 using Unity.Jobs;
@@ -78,6 +79,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             IsReady = false;
 
 #if VLOXY_LOGGING
+            VloxyLogger.Info<MeshBuildSchedulerV2>($"Scheduling {jobs.Count} meshes to build");
             _Watch.Restart();
 #endif
             foreach (var j in jobs) {

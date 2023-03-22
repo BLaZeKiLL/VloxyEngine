@@ -1,5 +1,4 @@
-﻿
-using CodeBlaze.Vloxy.Engine.Components;
+﻿using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs;
 using CodeBlaze.Vloxy.Engine.Jobs.Data;
@@ -40,8 +39,10 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual VloxySchedulerV2 VloxySchedulerV2(
             MeshBuildSchedulerV2 meshBuildScheduler,
-            ChunkDataSchedulerV2 chunkDataScheduler
-        ) => new(Settings, meshBuildScheduler, chunkDataScheduler);
+            ChunkDataSchedulerV2 chunkDataScheduler,
+            ChunkStore chunkStore,
+            ChunkPoolV2 chunkPoolV2
+        ) => new(Settings, meshBuildScheduler, chunkDataScheduler, chunkStore, chunkPoolV2);
         
         public virtual ChunkDataScheduler ChunkDataScheduler(
             ChunkState chunkState,

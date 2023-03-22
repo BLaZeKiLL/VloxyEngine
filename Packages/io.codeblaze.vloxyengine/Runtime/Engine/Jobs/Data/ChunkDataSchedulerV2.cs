@@ -8,6 +8,7 @@ using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Collections;
 using Unity.Jobs;
@@ -46,7 +47,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             _BurstFunctionPointers = burstFunctionPointers;
 
             _Jobs = new NativeList<int3>(Allocator.Persistent);
-            _Results = new NativeParallelHashMap<int3, Chunk>(settings.Chunk.LoadDistance.CubedSize(), Allocator.Persistent);
+            _Results = new NativeParallelHashMap<int3, Chunk>(
+                settings.Chunk.LoadDistance.CubedSize(), 
+                Allocator.Persistent
+            );
 
             _ResultsQueue = new Queue<Chunk>();
             
@@ -88,6 +92,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             IsReady = false;
             
 #if VLOXY_LOGGING
+            VloxyLogger.Info<ChunkDataSchedulerV2>($"Scheduling {jobs.Count} chunks to generate");
             _Watch.Restart();
 #endif
             foreach (var j in jobs) {
@@ -109,7 +114,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             _Handle.Complete();
             
             for (var index = 0; index < _Jobs.Length; index++) {
-                _ResultsQueue.Enqueue(_Results[_Jobs[index]]);
+                _ChunkStore.AddChunk(_Results[_Jobs[index]]);
             }
 
             _Jobs.Clear();
@@ -122,18 +127,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             IsReady = true;
         }
 
-        internal void SyncChunkStore() {
-            while (_ResultsQueue.Count > 0) {
-                var chunk = _ResultsQueue.Dequeue();
-
-                if (_ChunkStore.Chunks.ContainsKey(chunk.Position)) {
-                    throw new InvalidOperationException($"Chunk ({chunk.Position}) already generated");
-                }
-
-                _ChunkStore.Chunks.Add(chunk.Position, chunk);
-            }
-        }
-        
 #if VLOXY_LOGGING
         public float AvgTime => (float) _Timings.Sum() / 10;
 

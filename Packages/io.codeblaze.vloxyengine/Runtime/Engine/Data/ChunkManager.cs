@@ -25,11 +25,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _ChunkSettings = settings.Chunk;
 
             State = new ChunkState(settings);
-            
-            Store = new ChunkStore(
-                int3.zero,
-                _ChunkSettings.LoadDistance
-            );
+            Store = new ChunkStore(settings);
 
             Accessor = new ChunkAccessor(Store.Chunks, _ChunkSettings.ChunkSize);
 

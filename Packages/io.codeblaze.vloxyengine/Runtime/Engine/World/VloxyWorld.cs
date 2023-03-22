@@ -115,10 +115,10 @@ namespace CodeBlaze.Vloxy.Engine.World {
         #endregion
 
         private void ConfigureSettings() {
-            Settings.Chunk.LoadDistance = Settings.Chunk.DrawDistance + 2;
+            Settings.Chunk.LoadDistance = Settings.Chunk.DrawDistance * 2;
 
-            Settings.Scheduler.MeshingBatchSize = 2 * Settings.Chunk.DrawDistance + 1;
-            Settings.Scheduler.StreamingBatchSize = 2 * Settings.Chunk.LoadDistance + 1;
+            Settings.Scheduler.MeshingBatchSize = 16;
+            Settings.Scheduler.StreamingBatchSize = 32;
 
             WorldConfigure();
         }
@@ -144,7 +144,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             VloxySchedulerV2 = VloxyProvider.Current.VloxySchedulerV2(
                 MeshBuildSchedulerV2, 
-                ChunkDataSchedulerV2
+                ChunkDataSchedulerV2,
+                ChunkManager.Store,
+                ChunkPoolV2
             );
 
 #if VLOXY_LOGGING

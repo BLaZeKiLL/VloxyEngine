@@ -22,11 +22,12 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         private SimplePriorityQueue<int3> _Queue;
 
         private int3 _Focus;
+        private int _ViewRegionSize;
         
         public ChunkPoolV2(Transform transform, VloxySettings settings) {
-            var viewRegionSize = settings.Chunk.DrawDistance.CubedSize();
+            _ViewRegionSize = settings.Chunk.DrawDistance.CubedSize();
 
-            _Map = new Dictionary<int3, ChunkBehaviour>(viewRegionSize);
+            _Map = new Dictionary<int3, ChunkBehaviour>(_ViewRegionSize);
             _Queue = new SimplePriorityQueue<int3>();
             
             _Pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
@@ -47,28 +48,30 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 },
                 chunkBehaviour => chunkBehaviour.gameObject.SetActive(true),
                 chunkBehaviour => chunkBehaviour.gameObject.SetActive(false),
-                null, false, viewRegionSize, viewRegionSize
+                null, false, _ViewRegionSize, _ViewRegionSize
             );
 #if VLOXY_LOGGING
-            VloxyLogger.Info<ChunkBehaviourPool>("Initialized Size : " + viewRegionSize);
+            VloxyLogger.Info<ChunkBehaviourPool>("Initialized Size : " + _ViewRegionSize);
 #endif
         }
+
+        public bool IsActive(int3 pos) => _Map.ContainsKey(pos);
 
         internal void ViewUpdate(int3 focus) {
             _Focus = focus;
 
             foreach (var position in _Queue) {
-                _Queue.UpdatePriority(position, (position - _Focus).SqrMagnitude());
+                _Queue.UpdatePriority(position, 1.0f / (position - _Focus).SqrMagnitude());
             }
         }
         
         internal ChunkBehaviour Claim(int3 position) {
-            if (_Queue.Contains(position)) {
+            if (_Map.ContainsKey(position)) {
                 throw new InvalidOperationException($"Chunk ({position}) already active");
             }
 
             // Reclaim
-            if (_Queue.Count > 0) {
+            if (_Queue.Count >= _ViewRegionSize) {
                 _Pool.Release(_Map[_Queue.Dequeue()]);
             }
                 
@@ -79,7 +82,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             behaviour.name = $"Chunk({position})";
                 
             _Map.Add(position, behaviour);
-            _Queue.Enqueue(position, (position - _Focus).SqrMagnitude());
+            _Queue.Enqueue(position, 1.0f / (position - _Focus).SqrMagnitude());
 
             return behaviour;
         }
