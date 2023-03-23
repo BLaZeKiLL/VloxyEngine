@@ -59,7 +59,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         internal void FocusUpdate(int3 focus) {
             var distance = _Settings.Chunk.LoadDistance;
             var draw = _Settings.Chunk.DrawDistance;
-
+            
             for (int x = -distance; x <= distance; x++) {
                 for (int z = -distance; z <= distance; z++) {
                     for (int y = -distance; y <= distance; y++) {
@@ -86,9 +86,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                 }
             }
             
-            // TODO : We can merge the bellow updates in the above loops
-            _ChunkStore.ViewUpdate(focus);
-            _ChunkPool.ViewUpdate(focus);
+            _ChunkStore.FocusUpdate(focus);
+            _ChunkPool.FocusUpdate(focus);
         }
 
         internal void SchedulerUpdate() {

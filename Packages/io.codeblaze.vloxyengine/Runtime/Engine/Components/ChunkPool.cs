@@ -60,7 +60,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
         public bool IsActive(int3 pos) => _Map.ContainsKey(pos);
 
-        internal void ViewUpdate(int3 focus) {
+        internal void FocusUpdate(int3 focus) {
             _Focus = focus;
 
             foreach (var position in _Queue) {

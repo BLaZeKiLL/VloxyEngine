@@ -13,8 +13,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
     public class ChunkStore {
 
-        public Dictionary<int3, Chunk> Chunks { get; }
-
+        private Dictionary<int3, Chunk> _Chunks;
         private SimplePriorityQueue<int3> _Queue;
 
         private int3 _Focus;
@@ -25,23 +24,23 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _ChunkSize = settings.Chunk.ChunkSize;
             _ChunkStoreSize = (settings.Chunk.LoadDistance + 2).CubedSize();
 
-            Chunks = new Dictionary<int3, Chunk>(_ChunkStoreSize);
+            _Chunks = new Dictionary<int3, Chunk>(_ChunkStoreSize);
             _Queue = new SimplePriorityQueue<int3>();
         }
 
-        public int ChunkCount() => Chunks.Count;
+        public int ChunkCount() => _Chunks.Count;
 
-        public bool ContainsChunk(int3 position) => Chunks.ContainsKey(position);
+        public bool ContainsChunk(int3 position) => _Chunks.ContainsKey(position);
 
-        public void RemoveChunk(int3 position) => Chunks.Remove(position);
+        public void RemoveChunk(int3 position) => _Chunks.Remove(position);
         
         internal void Dispose() {
-            foreach (var pair in Chunks) {
+            foreach (var pair in _Chunks) {
                 pair.Value.Data.Dispose();
             }
         }
         
-        internal void ViewUpdate(int3 focus) {
+        internal void FocusUpdate(int3 focus) {
             _Focus = focus;
 
             foreach (var position in _Queue) {
@@ -54,21 +53,21 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                 var position = pair.Key;
                 var chunk = pair.Value;
 
-                if (Chunks.ContainsKey(chunk.Position)) {
+                if (_Chunks.ContainsKey(chunk.Position)) {
                     throw new InvalidOperationException($"Chunk {position} already exists");
                 }
                 
                 if (_Queue.Count >= _ChunkStoreSize) {
-                    Chunks.Remove(_Queue.Dequeue());
+                    _Chunks.Remove(_Queue.Dequeue());
                 }
                 
-                Chunks.Add(position, chunk);
+                _Chunks.Add(position, chunk);
                 _Queue.Enqueue(position, 1.0f / (position - _Focus).SqrMagnitude());
             }
         }
         
         internal ChunkAccessor GetAccessor(List<int3> positions) {
-            var chunks = new NativeParallelHashMap<int3, Chunk>(
+            var slice = new NativeParallelHashMap<int3, Chunk>(
                 positions.Count * 27, 
                 Allocator.Persistent // TODO : Allocator cleanup, fit in the 4 frame limit
             );
@@ -79,17 +78,17 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                         for (int y = -1; y <= 1; y++) {
                             var pos = position + _ChunkSize.MemberMultiply(x,y,z);
 
-                            if (!Chunks.ContainsKey(pos)) {
+                            if (!_Chunks.ContainsKey(pos)) {
                                 throw new InvalidOperationException($"Chunk {pos} has not been generated");
                             }
                                 
-                            if (!chunks.ContainsKey(pos)) chunks.Add(pos, Chunks[pos]);
+                            if (!slice.ContainsKey(pos)) slice.Add(pos, _Chunks[pos]);
                         }
                     }
                 }
             }
 
-            return new ChunkAccessor(chunks, _ChunkSize);
+            return new ChunkAccessor(slice, _ChunkSize);
         }
 
     }
