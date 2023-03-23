@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Priority_Queue;
 
@@ -51,7 +50,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         }
 
         internal void AddChunks(NativeParallelHashMap<int3, Chunk> chunks) {
-            // VloxyLogger.Info<ChunkStore>($"Adding {chunks.Count()} chunks");
             foreach (var pair in chunks) {
                 var position = pair.Key;
                 var chunk = pair.Value;

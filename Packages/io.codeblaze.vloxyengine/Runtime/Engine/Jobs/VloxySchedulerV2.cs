@@ -14,9 +14,7 @@ using Priority_Queue;
 using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Jobs {
-
-    // TODO : I am messing up re-claim priorities which is messing up and causing infinite generation loops
-    // lower absolute value of priority gets picked first
+    
     public class VloxySchedulerV2 {
         
         private readonly MeshBuildSchedulerV2 _MeshBuildScheduler;
@@ -91,8 +89,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         }
 
         internal void SchedulerUpdate() {
-            // VloxyLogger.Info<VloxySchedulerV2>($"Data count : {_DataQueue.Count}");
-            
             if (_DataQueue.Count > 0 && _ChunkDataScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.StreamingBatchSize, _DataQueue.Count);
                 
@@ -103,9 +99,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                 _ChunkDataScheduler.Start(_DataSet.ToList());
             }  
             
-            // Build meshes only after chunks have been built (could be an issue if moving to fast)
-            // Would it be better to queue chunks for meshing who have chunks generated
-            // Will need to check if neighbours also exist
             if (_ViewQueue.Count > 0 && _MeshBuildScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.MeshingBatchSize, _ViewQueue.Count);
                 
