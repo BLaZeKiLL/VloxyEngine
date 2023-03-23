@@ -47,7 +47,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected virtual void WorldAwake() { }
         protected virtual void WorldStart() { }
         protected virtual void WorldUpdate() { }
-        protected virtual void WorldRegionUpdate() { }
+        protected virtual void WorldFocusUpdate() { }
 
         #endregion
 
@@ -80,26 +80,27 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void Update() {
+            var NewFocusChunkCoord = _IsFocused ? VloxyUtils.GetChunkCoords(_Focus.position) : int3.zero;
+
+            if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) {
+                WorldFocusUpdate();
+
+                FocusChunkCoord = NewFocusChunkCoord;
+            }
+            
+            // Kinda expensive but new meshes could be built
+            VloxySchedulerV2.FocusUpdate(FocusChunkCoord);
+
+            // Schedule every 16 frames (throttling)
             if (_UpdateFrame % 16 == 0) {
                 _UpdateFrame = 1;
-                
-                var NewFocusChunkCoord = _IsFocused ? VloxyUtils.GetChunkCoords(_Focus.position) : int3.zero;
 
-                if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) {
-                    VloxySchedulerV2.FocusUpdate(NewFocusChunkCoord);
-                    
-                    WorldRegionUpdate();
-
-                    FocusChunkCoord = NewFocusChunkCoord;
-                }
-            
                 VloxySchedulerV2.SchedulerUpdate();
-
-                WorldUpdate();
             } else {
                 _UpdateFrame++;
             }
 
+            WorldUpdate();
             // ChunkStore.ActiveChunkUpdate();
         }
 
@@ -115,10 +116,10 @@ namespace CodeBlaze.Vloxy.Engine.World {
         #endregion
 
         private void ConfigureSettings() {
-            Settings.Chunk.LoadDistance = Settings.Chunk.DrawDistance * 2;
+            Settings.Chunk.LoadDistance = Settings.Chunk.DrawDistance + 2;
 
-            Settings.Scheduler.MeshingBatchSize = 8;
-            Settings.Scheduler.StreamingBatchSize = 8;
+            Settings.Scheduler.MeshingBatchSize = 16;
+            Settings.Scheduler.StreamingBatchSize = 24;
 
             WorldConfigure();
         }

@@ -60,7 +60,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             for (int x = -distance; x <= distance; x++) {
                 for (int z = -distance; z <= distance; z++) {
                     for (int y = -distance; y <= distance; y++) {
-                        var pos = focus + (_Settings.Chunk.ChunkSize.MemberMultiply(x, y, z));
+                        var pos = focus + _Settings.Chunk.ChunkSize.MemberMultiply(x, y, z);
 
                         if (
                             (x >= -draw && x <= draw) &&
@@ -69,7 +69,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                         ) {
                             if (_ViewQueue.Contains(pos)) {
                                 _ViewQueue.UpdatePriority(pos, (pos - focus).SqrMagnitude());
-                            } else if (ShouldScheduleForMeshing(pos)) {
+                            } else if (ShouldScheduleForMeshing(pos) && IsChunkGenerated(pos)) {
                                 _ViewQueue.Enqueue(pos, (pos - focus).SqrMagnitude());
                             }
                         }
@@ -89,6 +89,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         }
 
         internal void SchedulerUpdate() {
+            VloxyLogger.Info<VloxySchedulerV2>($"Data count : {_DataQueue.Count}");
+            
             if (_DataQueue.Count > 0 && _ChunkDataScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.StreamingBatchSize, _DataQueue.Count);
                 
@@ -99,6 +101,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                 _ChunkDataScheduler.Start(_DataSet.ToList());
             }  
             
+            // Build meshes only after chunks have been built (could be an issue if moving to fast)
+            // Would it be better to queue chunks for meshing who have chunks generated
+            // Will need to check if neighbours also exist
             if (_ViewQueue.Count > 0 && _MeshBuildScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.MeshingBatchSize, _ViewQueue.Count);
                 
@@ -137,6 +142,21 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 
         private bool ShouldScheduleForGenerating(int3 position) => !(_ChunkStore.ContainsChunk(position) || _DataSet.Contains(position));
         private bool ShouldScheduleForMeshing(int3 position) => !(_ChunkPool.IsActive(position) || _ViewSet.Contains(position));
+
+        private bool IsChunkGenerated(int3 position) {
+            var result = true;
+            
+            for (int x = -1; x <= 1; x++) {
+                for (int z = -1; z <= 1; z++) {
+                    for (int y = -1; y <= 1; y++) {
+                        var pos = position + _Settings.Chunk.ChunkSize.MemberMultiply(x, y, z);
+                        result &= _ChunkStore.ContainsChunk(pos);
+                    }
+                }
+            }
+
+            return result;
+        }
 
     }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Priority_Queue;
 
@@ -45,11 +46,12 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _Focus = focus;
 
             foreach (var position in _Queue) {
-                _Queue.UpdatePriority(position, (position - _Focus).SqrMagnitude());
+                _Queue.UpdatePriority(position, 1.0f / (position - _Focus).SqrMagnitude());
             }
         }
 
         internal void AddChunks(NativeParallelHashMap<int3, Chunk> chunks) {
+            VloxyLogger.Info<ChunkStore>($"Adding {chunks.Count()} chunks");
             foreach (var pair in chunks) {
                 var position = pair.Key;
                 var chunk = pair.Value;
