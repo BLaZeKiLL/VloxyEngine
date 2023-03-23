@@ -1,5 +1,4 @@
-﻿
-using CodeBlaze.Vloxy.Engine.Components;
+﻿using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs;
 using CodeBlaze.Vloxy.Engine.Jobs.Data;
@@ -29,36 +28,34 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual ChunkManager ChunkManager() => new(Settings);
 
-        public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
+        public virtual ChunkPool ChunkPoolV2(Transform transform) => new (transform, Settings);
 
-        public virtual VloxyScheduler VloxyScheduler(
+        public virtual VloxyScheduler VloxySchedulerV2(
             MeshBuildScheduler meshBuildScheduler,
-            ChunkDataScheduler chunkDataScheduler
-        ) => new VloxyScheduler(meshBuildScheduler, chunkDataScheduler);
-        
-        public virtual MeshBuildScheduler MeshBuildScheduler(
-            ChunkState chunkState,
-            ChunkAccessor chunkAccessor,
-            ChunkBehaviourPool chunkBehaviourPool, 
-            BurstFunctionPointers burstFunctionPointers
-        ) => new(
-            Settings,
-            chunkState,
-            chunkAccessor,
-            chunkBehaviourPool,
-            burstFunctionPointers
-        );
+            ChunkDataScheduler chunkDataScheduler,
+            ChunkStore chunkStore,
+            ChunkPool chunkPool
+        ) => new(Settings, meshBuildScheduler, chunkDataScheduler, chunkStore, chunkPool);
 
-        public virtual ChunkDataScheduler ChunkDataScheduler(
-            ChunkState chunkState,
+        public virtual ChunkDataScheduler ChunkDataSchedulerV2(
             ChunkStore chunkStore,
             NoiseProfile noiseProfile,
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,
-            chunkState,
             chunkStore,
             noiseProfile,
+            burstFunctionPointers
+        );
+
+        public virtual MeshBuildScheduler MeshBuildSchedulerV2(
+            ChunkStore chunkStore,
+            ChunkPool chunkPool, 
+            BurstFunctionPointers burstFunctionPointers
+        ) => new(
+            Settings,
+            chunkStore,
+            chunkPool,
             burstFunctionPointers
         );
 

@@ -14,7 +14,9 @@ namespace CodeBlaze.Editor.Config {
 
         [MenuItem("Config/Release")]
         private static void Release() {
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] { "UNITY_POST_PROCESSING_STACK_V2" });
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
+                "UNITY_POST_PROCESSING_STACK_V2"
+            });
             UnityEngine.Debug.Log("Release config set");
         }
 

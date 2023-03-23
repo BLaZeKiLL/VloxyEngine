@@ -6,16 +6,17 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
     [BurstCompile]
     public struct ChunkAccessor {
-
-        /// <summary>
-        /// Reference to the chunk store hash map
-        /// </summary>
+        
         private NativeParallelHashMap<int3, Chunk> Chunks;
         private int3 ChunkSize;
 
         public ChunkAccessor(NativeParallelHashMap<int3, Chunk> chunks, int3 chunkSize) {
             Chunks = chunks;
             ChunkSize = chunkSize;
+        }
+
+        public void Dispose() {
+            Chunks.Dispose();
         }
 
         public int GetBlockInChunk(int3 chunk_pos, int3 block_pos) {
