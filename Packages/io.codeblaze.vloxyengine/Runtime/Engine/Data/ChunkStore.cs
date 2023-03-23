@@ -20,13 +20,13 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         private int3 _Focus;
         private int3 _ChunkSize;
-        private int _StreamRegionSize;
+        private int _ChunkStoreSize;
 
         public ChunkStore(VloxySettings settings) {
             _ChunkSize = settings.Chunk.ChunkSize;
-            _StreamRegionSize = settings.Chunk.LoadDistance.CubedSize();
+            _ChunkStoreSize = (settings.Chunk.LoadDistance + 2).CubedSize();
 
-            Chunks = new Dictionary<int3, Chunk>(_StreamRegionSize);
+            Chunks = new Dictionary<int3, Chunk>(_ChunkStoreSize);
             _Queue = new SimplePriorityQueue<int3>();
         }
 
@@ -51,7 +51,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         }
 
         internal void AddChunks(NativeParallelHashMap<int3, Chunk> chunks) {
-            VloxyLogger.Info<ChunkStore>($"Adding {chunks.Count()} chunks");
+            // VloxyLogger.Info<ChunkStore>($"Adding {chunks.Count()} chunks");
             foreach (var pair in chunks) {
                 var position = pair.Key;
                 var chunk = pair.Value;
@@ -60,7 +60,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                     throw new InvalidOperationException($"Chunk {position} already exists");
                 }
                 
-                if (_Queue.Count >= _StreamRegionSize) {
+                if (_Queue.Count >= _ChunkStoreSize) {
                     Chunks.Remove(_Queue.Dequeue());
                 }
                 

@@ -22,12 +22,12 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         private SimplePriorityQueue<int3> _Queue;
 
         private int3 _Focus;
-        private int _ViewRegionSize;
+        private int _ChunkPoolSize;
         
         public ChunkPoolV2(Transform transform, VloxySettings settings) {
-            _ViewRegionSize = settings.Chunk.DrawDistance.CubedSize();
+            _ChunkPoolSize = (settings.Chunk.DrawDistance + 2).CubedSize();
 
-            _Map = new Dictionary<int3, ChunkBehaviour>(_ViewRegionSize);
+            _Map = new Dictionary<int3, ChunkBehaviour>(_ChunkPoolSize);
             _Queue = new SimplePriorityQueue<int3>();
             
             _Pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
@@ -48,10 +48,10 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 },
                 chunkBehaviour => chunkBehaviour.gameObject.SetActive(true),
                 chunkBehaviour => chunkBehaviour.gameObject.SetActive(false),
-                null, false, _ViewRegionSize, _ViewRegionSize
+                null, false, _ChunkPoolSize, _ChunkPoolSize
             );
 #if VLOXY_LOGGING
-            VloxyLogger.Info<ChunkBehaviourPool>("Initialized Size : " + _ViewRegionSize);
+            VloxyLogger.Info<ChunkBehaviourPool>("Initialized Size : " + _ChunkPoolSize);
 #endif
         }
 
@@ -71,7 +71,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             }
 
             // Reclaim
-            if (_Queue.Count >= _ViewRegionSize) {
+            if (_Queue.Count >= _ChunkPoolSize) {
                 _Pool.Release(_Map[_Queue.Dequeue()]);
             }
                 
