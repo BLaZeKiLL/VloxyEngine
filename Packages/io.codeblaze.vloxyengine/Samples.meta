@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Packages/io.codeblaze.vloxyengine/Samples.meta
 guid: 231709ba6c4921145827117abe9e0d78
+========
+guid: 3e9c6c9cd373a804588f2b1daff377e6
+>>>>>>>> main:Packages/io.codeblaze.vloxyengine/Samples/Colored.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

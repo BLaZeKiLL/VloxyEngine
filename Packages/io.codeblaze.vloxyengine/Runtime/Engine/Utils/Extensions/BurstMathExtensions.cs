@@ -7,7 +7,7 @@ using UnityEngine;
 namespace CodeBlaze.Vloxy.Engine.Utils.Extensions {
 
     [BurstCompatible]
-    public static class MathExtensions {
+    public static class BurstMathExtensions {
 
         [BurstCompile]
         public static int CubedSize(this int num) => (2 * num + 1) * (2 * num + 1) * (2 * num + 1);
@@ -47,4 +47,14 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Extensions {
 
     }
 
+    public static class MathExtension {
+
+        public static int SqrMagnitude(this int3 vec) => vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
+
+        public static int3 MemberMultiply(this int3 a, int3 b) => new(a.x * b.x, a.y * b.y, a.z * b.z);
+        
+        public static int3 MemberMultiply(this int3 a, int x, int y, int z) => new(a.x * x, a.y * y, a.z * z);
+
+    }
+    
 }
