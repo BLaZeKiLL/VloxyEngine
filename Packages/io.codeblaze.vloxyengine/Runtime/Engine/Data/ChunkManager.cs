@@ -12,9 +12,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
     public class ChunkManager {
 
-        internal ChunkAccessor Accessor { get; }
         internal ChunkStore Store { get; }
-        internal ChunkState State { get; }
         
         private ChunkSettings _ChunkSettings;
         
@@ -24,15 +22,8 @@ namespace CodeBlaze.Vloxy.Engine.Data {
         public ChunkManager(VloxySettings settings) {
             _ChunkSettings = settings.Chunk;
 
-            State = new ChunkState(settings);
+            Store = new ChunkStore(settings);
             
-            Store = new ChunkStore(
-                int3.zero,
-                _ChunkSettings.LoadDistance
-            );
-
-            Accessor = new ChunkAccessor(Store.Chunks, _ChunkSettings.ChunkSize);
-
             var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
             
             _Claim = new HashSet<int3>(viewRegionSize);
@@ -93,7 +84,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                     for (int y = -size; y <= size; y++) {
                         var position = new int3(x, y, z) * _ChunkSettings.ChunkSize;
                         result[index] = position;
-                        State.SetState(position, ChunkState.State.STREAMING);
                         index++;
                     }
                 }

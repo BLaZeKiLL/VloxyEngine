@@ -41,6 +41,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 for (int z = 0; z < ChunkSize.z; z++) {
                     for (int x = 0; x < ChunkSize.x; x++) {
                         noise = NoiseProfile.GetNoise(position + new int3(x, y, z));
+                        
                         var block = BurstFunctionPointers.ComputeBlockOverridePointer.Invoke(ref noise);
         
                         if (block == current_block) {
