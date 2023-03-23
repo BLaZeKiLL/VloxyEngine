@@ -94,7 +94,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 Jobs = jobs,
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,
-                Results = _ChunkStore.Chunks.AsParallelWriter(),
+                Results = _Results.AsParallelWriter(),
                 BurstFunctionPointers = _BurstFunctionPointers,
             };
 

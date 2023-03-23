@@ -13,29 +13,25 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
     public class ChunkStore {
 
-        public NativeParallelHashMap<int3, Chunk> Chunks { get; }
+        public Dictionary<int3, Chunk> Chunks { get; }
 
         private SimplePriorityQueue<int3> _Queue;
-        private Dictionary<int3, Chunk> _SyncChunks;
 
         private int3 _Focus;
+        private int3 _ChunkSize;
         private int _StreamRegionSize;
 
         public ChunkStore(VloxySettings settings) {
+            _ChunkSize = settings.Chunk.ChunkSize;
             _StreamRegionSize = settings.Chunk.LoadDistance.CubedSize();
 
-            Chunks = new NativeParallelHashMap<int3, Chunk>(
-                _StreamRegionSize, 
-                Allocator.Persistent
-            );
-
+            Chunks = new Dictionary<int3, Chunk>(_StreamRegionSize);
             _Queue = new SimplePriorityQueue<int3>();
-            _SyncChunks = new Dictionary<int3, Chunk>();
         }
 
-        public int ChunkCount() => Chunks.Count();
+        public int ChunkCount() => Chunks.Count;
 
-        public bool ContainsChunk(int3 position) => Chunks.ContainsKey(position) || _SyncChunks.ContainsKey(position);
+        public bool ContainsChunk(int3 position) => Chunks.ContainsKey(position);
 
         public void RemoveChunk(int3 position) => Chunks.Remove(position);
         
@@ -43,8 +39,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             foreach (var pair in Chunks) {
                 pair.Value.Data.Dispose();
             }
-            
-            Chunks.Dispose();
         }
         
         internal void ViewUpdate(int3 focus) {
@@ -55,16 +49,15 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             }
         }
 
-        internal void AddChunk(Chunk chunk) {
-            if (!_SyncChunks.ContainsKey(chunk.Position) && !Chunks.ContainsKey(chunk.Position)) {
-                _SyncChunks.Add(chunk.Position, chunk);
-            } else {
-                throw new InvalidOperationException($"Chunk {chunk.Position} already exists");
-            }
-        }
-        
-        internal void Sync() {
-            foreach (var (position, chunk) in _SyncChunks) {
+        internal void AddChunks(NativeParallelHashMap<int3, Chunk> chunks) {
+            foreach (var pair in chunks) {
+                var position = pair.Key;
+                var chunk = pair.Value;
+
+                if (Chunks.ContainsKey(chunk.Position)) {
+                    throw new InvalidOperationException($"Chunk {position} already exists");
+                }
+                
                 if (_Queue.Count >= _StreamRegionSize) {
                     Chunks.Remove(_Queue.Dequeue());
                 }
@@ -72,8 +65,31 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                 Chunks.Add(position, chunk);
                 _Queue.Enqueue(position, 1.0f / (position - _Focus).SqrMagnitude());
             }
-            
-            _SyncChunks.Clear();
+        }
+        
+        internal ChunkAccessor GetAccessor(List<int3> positions) {
+            var chunks = new NativeParallelHashMap<int3, Chunk>(
+                positions.Count * 27, 
+                Allocator.Persistent // TODO : Allocator cleanup, fit in the 4 frame limit
+            );
+
+            foreach (var position in positions) {
+                for (int x = -1; x <= 1; x++) {
+                    for (int z = -1; z <= 1; z++) {
+                        for (int y = -1; y <= 1; y++) {
+                            var pos = position + _ChunkSize.MemberMultiply(x,y,z);
+
+                            if (!Chunks.ContainsKey(pos)) {
+                                throw new InvalidOperationException($"Chunk {pos} has not been generated");
+                            }
+                                
+                            if (!chunks.ContainsKey(pos)) chunks.Add(pos, Chunks[pos]);
+                        }
+                    }
+                }
+            }
+
+            return new ChunkAccessor(chunks, _ChunkSize);
         }
 
     }

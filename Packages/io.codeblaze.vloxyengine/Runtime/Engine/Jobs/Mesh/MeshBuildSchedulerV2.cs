@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
     public class MeshBuildSchedulerV2 {
 
-        private readonly ChunkAccessor _ChunkAccessor;
+        private readonly ChunkStore _ChunkStore;
         private readonly ChunkPoolV2 _ChunkPool;
         private readonly BurstFunctionPointers _BurstFunctionPointers;
 
@@ -26,6 +27,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         private JobHandle _Handle;
 
         private NativeList<int3> _Jobs;
+        private ChunkAccessor _ChunkAccessor;
         private NativeParallelHashMap<int3, int> _Results;
         private UnityEngine.Mesh.MeshDataArray _MeshDataArray;
         private NativeArray<VertexAttributeDescriptor> _VertexParams;
@@ -37,11 +39,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         
         public MeshBuildSchedulerV2(
             VloxySettings settings,
-            ChunkAccessor chunkAccessor,
+            ChunkStore chunkStore,
             ChunkPoolV2 chunkPool, 
             BurstFunctionPointers burstFunctionPointers
         ) {
-            _ChunkAccessor = chunkAccessor;
+            _ChunkStore = chunkStore;
             _ChunkPool = chunkPool;
             _BurstFunctionPointers = burstFunctionPointers;
 
@@ -80,8 +82,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
 #if VLOXY_LOGGING
             VloxyLogger.Info<MeshBuildSchedulerV2>($"Scheduling {jobs.Count} meshes to build");
+            VloxyLogger.Info<MeshBuildSchedulerV2>(string.Join(", ", jobs));
             _Watch.Restart();
 #endif
+            _ChunkAccessor = _ChunkStore.GetAccessor(jobs);
+            
             foreach (var j in jobs) {
                 _Jobs.Add(j);
             }
@@ -112,12 +117,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
                 meshes[_Results[position]] = _ChunkPool.Claim(position).Mesh();
             }
 
-            UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(_MeshDataArray, meshes, MeshUpdateFlags.DontRecalculateBounds);
+            UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(
+                _MeshDataArray, 
+                meshes, 
+                MeshUpdateFlags.DontRecalculateBounds
+            );
             
             for (var index = 0; index < meshes.Length; index++) {
                 meshes[index].RecalculateBounds();
             }
             
+            _ChunkAccessor.Dispose();
             _Results.Clear();
             _Jobs.Clear();
 

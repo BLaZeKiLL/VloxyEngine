@@ -12,7 +12,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
     public class ChunkManager {
 
-        internal ChunkAccessor Accessor { get; }
         internal ChunkStore Store { get; }
         internal ChunkState State { get; }
         
@@ -26,9 +25,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
             State = new ChunkState(settings);
             Store = new ChunkStore(settings);
-
-            Accessor = new ChunkAccessor(Store.Chunks, _ChunkSettings.ChunkSize);
-
+            
             var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
             
             _Claim = new HashSet<int3>(viewRegionSize);

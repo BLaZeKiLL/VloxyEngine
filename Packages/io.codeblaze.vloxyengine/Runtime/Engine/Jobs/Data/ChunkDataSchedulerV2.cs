@@ -77,7 +77,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 Jobs = jobs,
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,
-                Results = _ChunkStore.Chunks.AsParallelWriter(),
+                Results = _Results.AsParallelWriter(),
                 BurstFunctionPointers = _BurstFunctionPointers,
             };
 
@@ -85,6 +85,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 
             handle.Complete();
 
+            _ChunkStore.AddChunks(_Results);
+            
+            _Results.Clear();
+            
             jobs.Dispose();
         }
 
@@ -93,6 +97,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             
 #if VLOXY_LOGGING
             VloxyLogger.Info<ChunkDataSchedulerV2>($"Scheduling {jobs.Count} chunks to generate");
+            VloxyLogger.Info<ChunkDataSchedulerV2>(string.Join(", ", jobs));
             _Watch.Restart();
 #endif
             foreach (var j in jobs) {
@@ -113,9 +118,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         internal void Complete() {
             _Handle.Complete();
             
-            for (var index = 0; index < _Jobs.Length; index++) {
-                _ChunkStore.AddChunk(_Results[_Jobs[index]]);
-            }
+            _ChunkStore.AddChunks(_Results);
 
             _Jobs.Clear();
             _Results.Clear();

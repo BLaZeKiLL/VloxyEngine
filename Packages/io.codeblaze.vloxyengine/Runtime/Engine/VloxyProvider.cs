@@ -82,12 +82,12 @@ namespace CodeBlaze.Vloxy.Engine {
         );
         
         public virtual MeshBuildSchedulerV2 MeshBuildSchedulerV2(
-            ChunkAccessor chunkAccessor,
+            ChunkStore chunkStore,
             ChunkPoolV2 chunkPool, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,
-            chunkAccessor,
+            chunkStore,
             chunkPool,
             burstFunctionPointers
         );

@@ -69,20 +69,21 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                         ) {
                             if (_ViewQueue.Contains(pos)) {
                                 _ViewQueue.UpdatePriority(pos, (pos - focus).SqrMagnitude());
-                            } else if (ShouldScheduleForMeshing(pos)) { // check if already active
+                            } else if (ShouldScheduleForMeshing(pos)) {
                                 _ViewQueue.Enqueue(pos, (pos - focus).SqrMagnitude());
                             }
                         }
 
                         if (_DataQueue.Contains(pos)) {
                             _DataQueue.UpdatePriority(pos, (pos - focus).SqrMagnitude());
-                        } else if (ShouldScheduleForGenerating(pos)) { // check if already generated
+                        } else if (ShouldScheduleForGenerating(pos)) {
                             _DataQueue.Enqueue(pos, (pos - focus).SqrMagnitude());
                         }
                     }
                 }
             }
             
+            // TODO : We can merge the bellow updates in the above loops
             _ChunkStore.ViewUpdate(focus);
             _ChunkPool.ViewUpdate(focus);
         }
@@ -90,8 +91,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         internal void SchedulerUpdate() {
             if (_DataQueue.Count > 0 && _ChunkDataScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.StreamingBatchSize, _DataQueue.Count);
-
-
+                
                 for (int i = 0; i < count; i++) {
                     _DataSet.Add(_DataQueue.Dequeue());
                 }
@@ -127,11 +127,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 #if VLOXY_LOGGING
                 VloxyLogger.Info<VloxySchedulerV2>($"Meshing Avg Batch Time : {_MeshBuildScheduler.AvgTime:F3} MS");
 #endif
-
-                // Safe to modify store here as no one is using it here
-                // This can completely be non-blocking if mesh build works on
-                // slice of store which contains only the chunks it requires
-                _ChunkStore.Sync();
             }
         }
 

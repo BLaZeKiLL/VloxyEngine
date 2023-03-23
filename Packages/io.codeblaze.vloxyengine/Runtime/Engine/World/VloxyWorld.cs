@@ -117,8 +117,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void ConfigureSettings() {
             Settings.Chunk.LoadDistance = Settings.Chunk.DrawDistance * 2;
 
-            Settings.Scheduler.MeshingBatchSize = 16;
-            Settings.Scheduler.StreamingBatchSize = 32;
+            Settings.Scheduler.MeshingBatchSize = 8;
+            Settings.Scheduler.StreamingBatchSize = 8;
 
             WorldConfigure();
         }
@@ -131,7 +131,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
 
             MeshBuildSchedulerV2 = VloxyProvider.Current.MeshBuildSchedulerV2(
-                ChunkManager.Accessor, 
+                ChunkManager.Store, 
                 ChunkPoolV2, 
                 BurstFunctionPointers
             );
