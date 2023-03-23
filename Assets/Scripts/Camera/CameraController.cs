@@ -128,8 +128,7 @@ namespace CodeBlaze.Camera
         
         private void Update()
         {
-            // Exit Sample  
-
+            // Exit Sample
             if (IsEscapePressed())
             {
                 SceneManager.LoadScene(0);

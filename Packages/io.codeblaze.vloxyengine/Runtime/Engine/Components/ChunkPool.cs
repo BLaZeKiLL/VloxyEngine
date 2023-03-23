@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using CodeBlaze.Vloxy.Engine.Behaviour;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+
+#if VLOXY_LOGGING
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
+#endif
 
 using Priority_Queue;
 
@@ -15,7 +18,7 @@ using UnityEngine.Pool;
 
 namespace CodeBlaze.Vloxy.Engine.Components {
 
-    public class ChunkPoolV2 {
+    public class ChunkPool {
 
         private IObjectPool<ChunkBehaviour> _Pool;
         private Dictionary<int3, ChunkBehaviour> _Map;
@@ -24,7 +27,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         private int3 _Focus;
         private int _ChunkPoolSize;
         
-        public ChunkPoolV2(Transform transform, VloxySettings settings) {
+        public ChunkPool(Transform transform, VloxySettings settings) {
             _ChunkPoolSize = (settings.Chunk.DrawDistance + 2).CubedSize();
 
             _Map = new Dictionary<int3, ChunkBehaviour>(_ChunkPoolSize);
@@ -51,7 +54,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 null, false, _ChunkPoolSize, _ChunkPoolSize
             );
 #if VLOXY_LOGGING
-            VloxyLogger.Info<ChunkBehaviourPool>("Initialized Size : " + _ChunkPoolSize);
+            VloxyLogger.Info<ChunkPool>("Initialized Size : " + _ChunkPoolSize);
 #endif
         }
 

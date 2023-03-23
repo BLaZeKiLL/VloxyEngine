@@ -45,7 +45,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             _Focus = focus;
 
             foreach (var position in _Queue) {
-                _Queue.UpdatePriority(position, 1.0f / (position - _Focus).SqrMagnitude());
+                _Queue.UpdatePriority(position, 1.0f / (position - focus).SqrMagnitude());
             }
         }
 

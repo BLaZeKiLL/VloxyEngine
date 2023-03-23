@@ -28,36 +28,16 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual ChunkManager ChunkManager() => new(Settings);
 
-        public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
+        public virtual ChunkPool ChunkPoolV2(Transform transform) => new (transform, Settings);
 
-        public virtual ChunkPoolV2 ChunkPoolV2(Transform transform) => new (transform, Settings);
-
-        public virtual VloxyScheduler VloxyScheduler(
+        public virtual VloxyScheduler VloxySchedulerV2(
             MeshBuildScheduler meshBuildScheduler,
-            ChunkDataScheduler chunkDataScheduler
-        ) => new(meshBuildScheduler, chunkDataScheduler);
-
-        public virtual VloxySchedulerV2 VloxySchedulerV2(
-            MeshBuildSchedulerV2 meshBuildScheduler,
-            ChunkDataSchedulerV2 chunkDataScheduler,
+            ChunkDataScheduler chunkDataScheduler,
             ChunkStore chunkStore,
-            ChunkPoolV2 chunkPoolV2
-        ) => new(Settings, meshBuildScheduler, chunkDataScheduler, chunkStore, chunkPoolV2);
-        
-        public virtual ChunkDataScheduler ChunkDataScheduler(
-            ChunkState chunkState,
-            ChunkStore chunkStore,
-            NoiseProfile noiseProfile,
-            BurstFunctionPointers burstFunctionPointers
-        ) => new(
-            Settings,
-            chunkState,
-            chunkStore,
-            noiseProfile,
-            burstFunctionPointers
-        );
+            ChunkPool chunkPool
+        ) => new(Settings, meshBuildScheduler, chunkDataScheduler, chunkStore, chunkPool);
 
-        public virtual ChunkDataSchedulerV2 ChunkDataSchedulerV2(
+        public virtual ChunkDataScheduler ChunkDataSchedulerV2(
             ChunkStore chunkStore,
             NoiseProfile noiseProfile,
             BurstFunctionPointers burstFunctionPointers
@@ -67,23 +47,10 @@ namespace CodeBlaze.Vloxy.Engine {
             noiseProfile,
             burstFunctionPointers
         );
-        
-        public virtual MeshBuildScheduler MeshBuildScheduler(
-            ChunkState chunkState,
-            ChunkAccessor chunkAccessor,
-            ChunkBehaviourPool chunkBehaviourPool, 
-            BurstFunctionPointers burstFunctionPointers
-        ) => new(
-            Settings,
-            chunkState,
-            chunkAccessor,
-            chunkBehaviourPool,
-            burstFunctionPointers
-        );
-        
-        public virtual MeshBuildSchedulerV2 MeshBuildSchedulerV2(
+
+        public virtual MeshBuildScheduler MeshBuildSchedulerV2(
             ChunkStore chunkStore,
-            ChunkPoolV2 chunkPool, 
+            ChunkPool chunkPool, 
             BurstFunctionPointers burstFunctionPointers
         ) => new(
             Settings,

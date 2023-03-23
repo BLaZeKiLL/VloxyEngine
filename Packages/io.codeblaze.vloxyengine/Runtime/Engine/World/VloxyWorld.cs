@@ -30,10 +30,10 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private BurstFunctionPointers BurstFunctionPointers;
         
-        private ChunkPoolV2 ChunkPoolV2;
-        private VloxySchedulerV2 VloxySchedulerV2;
-        private MeshBuildSchedulerV2 MeshBuildSchedulerV2;
-        private ChunkDataSchedulerV2 ChunkDataSchedulerV2;
+        private ChunkPool _ChunkPool;
+        private VloxyScheduler _VloxyScheduler;
+        private MeshBuildScheduler _MeshBuildScheduler;
+        private ChunkDataScheduler _ChunkDataScheduler;
 
         private bool _IsFocused;
 
@@ -48,6 +48,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
         protected virtual void WorldStart() { }
         protected virtual void WorldUpdate() { }
         protected virtual void WorldFocusUpdate() { }
+        protected virtual void WorldSchedulerUpdate() { }
+        protected virtual void WorldLateUpdate() {}
 
         #endregion
 
@@ -83,33 +85,36 @@ namespace CodeBlaze.Vloxy.Engine.World {
             var NewFocusChunkCoord = _IsFocused ? VloxyUtils.GetChunkCoords(_Focus.position) : int3.zero;
 
             if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) {
-                WorldFocusUpdate();
-
                 FocusChunkCoord = NewFocusChunkCoord;
+                
+                WorldFocusUpdate();
             }
             
-            // Kinda expensive but new meshes could be built
-            VloxySchedulerV2.FocusUpdate(FocusChunkCoord);
+            // We can change this, so that update happens only when required
+            _VloxyScheduler.FocusUpdate(FocusChunkCoord);
 
-            // Schedule every 16 frames (throttling)
-            if (_UpdateFrame % 16 == 0) {
+            // Schedule every 'x' frames (throttling)
+            if (_UpdateFrame % Settings.Scheduler.TickRate == 0) {
                 _UpdateFrame = 1;
 
-                VloxySchedulerV2.SchedulerUpdate();
+                _VloxyScheduler.SchedulerUpdate();
+
+                WorldSchedulerUpdate();
             } else {
                 _UpdateFrame++;
             }
 
             WorldUpdate();
-            // ChunkStore.ActiveChunkUpdate();
         }
 
         private void LateUpdate() {
-            VloxySchedulerV2.SchedulerLateUpdate();
+            _VloxyScheduler.SchedulerLateUpdate();
+
+            WorldLateUpdate();
         }
 
         private void OnDestroy() {
-            VloxySchedulerV2.Dispose();
+            _VloxyScheduler.Dispose();
             ChunkManager.Dispose();
         }
         
@@ -118,6 +123,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private void ConfigureSettings() {
             Settings.Chunk.LoadDistance = Settings.Chunk.DrawDistance + 2;
 
+            // TODO : Should these be dynamic or manual ?
             Settings.Scheduler.MeshingBatchSize = 16;
             Settings.Scheduler.StreamingBatchSize = 24;
 
@@ -128,26 +134,26 @@ namespace CodeBlaze.Vloxy.Engine.World {
             NoiseProfile = VloxyProvider.Current.NoiseProfile();
             ChunkManager = VloxyProvider.Current.ChunkManager();
 
-            ChunkPoolV2 = VloxyProvider.Current.ChunkPoolV2(transform);
+            _ChunkPool = VloxyProvider.Current.ChunkPoolV2(transform);
             BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
 
-            MeshBuildSchedulerV2 = VloxyProvider.Current.MeshBuildSchedulerV2(
+            _MeshBuildScheduler = VloxyProvider.Current.MeshBuildSchedulerV2(
                 ChunkManager.Store, 
-                ChunkPoolV2, 
+                _ChunkPool, 
                 BurstFunctionPointers
             );
             
-            ChunkDataSchedulerV2 = VloxyProvider.Current.ChunkDataSchedulerV2(
+            _ChunkDataScheduler = VloxyProvider.Current.ChunkDataSchedulerV2(
                 ChunkManager.Store,
                 NoiseProfile, 
                 BurstFunctionPointers
             );
 
-            VloxySchedulerV2 = VloxyProvider.Current.VloxySchedulerV2(
-                MeshBuildSchedulerV2, 
-                ChunkDataSchedulerV2,
+            _VloxyScheduler = VloxyProvider.Current.VloxySchedulerV2(
+                _MeshBuildScheduler, 
+                _ChunkDataScheduler,
                 ChunkManager.Store,
-                ChunkPoolV2
+                _ChunkPool
             );
 
 #if VLOXY_LOGGING
@@ -160,7 +166,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             var watch = new Stopwatch();
             watch.Start();
 #endif
-            ChunkDataSchedulerV2.GenerateChunks(ChunkManager.InitialChunkRegion(Allocator.TempJob));
+            _ChunkDataScheduler.GenerateChunks(ChunkManager.InitialChunkRegion(Allocator.TempJob));
             
 #if VLOXY_LOGGING
             watch.Stop();
