@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Components;
@@ -118,7 +118,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                 _DataSet.Clear();
                 
 #if VLOXY_LOGGING
-                VloxyLogger.Info<VloxySchedulerV2>($"Streaming Avg Batch Time : {_ChunkDataScheduler.AvgTime:F3} MS");
+                VloxyLogger.Info<VloxyScheduler>($"Streaming Avg Batch Time : {_ChunkDataScheduler.AvgTime:F3} MS");
 #endif
             }
             
@@ -127,7 +127,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                 _ViewSet.Clear();
                 
 #if VLOXY_LOGGING
-                VloxyLogger.Info<VloxySchedulerV2>($"Meshing Avg Batch Time : {_MeshBuildScheduler.AvgTime:F3} MS");
+                VloxyLogger.Info<VloxyScheduler>($"Meshing Avg Batch Time : {_MeshBuildScheduler.AvgTime:F3} MS");
 #endif
             }
         }
