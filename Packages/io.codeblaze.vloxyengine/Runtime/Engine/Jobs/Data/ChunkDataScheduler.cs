@@ -49,8 +49,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 Allocator.Persistent
             );
 
-            new Queue<Chunk>();
-            
 #if VLOXY_LOGGING
             _Watch = new Stopwatch();
             _Timings = new Queue<long>(10);
@@ -63,30 +61,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         internal void Dispose() {
             _Jobs.Dispose();
             _Results.Dispose();
-        }
-
-        /// <summary>
-        /// Initial Generation
-        /// </summary>
-        /// <param name="jobs"></param>
-        internal void GenerateChunks(NativeArray<int3> jobs) {
-            var job = new ChunkDataJob {
-                Jobs = jobs,
-                ChunkSize = _ChunkSize,
-                NoiseProfile = _NoiseProfile,
-                Results = _Results.AsParallelWriter(),
-                BurstFunctionPointers = _BurstFunctionPointers,
-            };
-
-            var handle = job.Schedule(jobs.Length, 4);
-
-            handle.Complete();
-
-            _ChunkStore.AddChunks(_Results);
-            
-            _Results.Clear();
-            
-            jobs.Dispose();
         }
 
         internal void Start(List<int3> jobs) {
