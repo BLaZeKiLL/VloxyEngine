@@ -75,8 +75,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private void Start() {
             _IsFocused = _Focus != null;
-            
-            GenerateWorld();
 
             WorldStart();
         }
@@ -158,20 +156,6 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
 #if VLOXY_LOGGING
             VloxyLogger.Info<VloxyWorld>("Vloxy Components Constructed");
-#endif
-        }
-
-        private void GenerateWorld() {
-#if VLOXY_LOGGING
-            var watch = new Stopwatch();
-            watch.Start();
-#endif
-            _ChunkDataScheduler.GenerateChunks(ChunkManager.InitialChunkRegion(Allocator.TempJob));
-            
-#if VLOXY_LOGGING
-            watch.Stop();
-            VloxyLogger.Info<VloxyWorld>($"Initial Chunks Generated : {ChunkManager.Store.ChunkCount()}");
-            VloxyLogger.Info<VloxyWorld>($"Vloxy World Generated : {watch.ElapsedMilliseconds} MS");
 #endif
         }
 
