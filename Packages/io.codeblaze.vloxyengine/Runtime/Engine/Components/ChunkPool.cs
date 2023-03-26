@@ -75,7 +75,10 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
             // Reclaim
             if (_Queue.Count >= _ChunkPoolSize) {
-                _Pool.Release(_Map[_Queue.Dequeue()]);
+                var reclaim = _Queue.Dequeue();
+                
+                _Pool.Release(_Map[reclaim]);
+                _Map.Remove(reclaim);
             }
                 
             // Claim
