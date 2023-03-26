@@ -1,4 +1,7 @@
-﻿name: Build
+﻿# For ci we just need testing, as that would check compilation also
+# Need to create a test suit and change this workflow
+
+name: Build
 
 on:
   push:
@@ -9,6 +12,7 @@ on:
 jobs:
   linux:
     name: Build For Android
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -52,7 +56,8 @@ jobs:
   
   windows:
     name: Build For Windows
-    runs-on: windows-2019
+    timeout-minutes: 60
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
