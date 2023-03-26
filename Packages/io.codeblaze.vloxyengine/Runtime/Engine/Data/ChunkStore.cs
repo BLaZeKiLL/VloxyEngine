@@ -79,6 +79,7 @@ namespace CodeBlaze.Vloxy.Engine.Data {
                             var pos = position + _ChunkSize.MemberMultiply(x,y,z);
 
                             if (!_Chunks.ContainsKey(pos)) {
+                                // Anytime this exception is thrown, mesh building completely stops
                                 throw new InvalidOperationException($"Chunk {pos} has not been generated");
                             }
                                 

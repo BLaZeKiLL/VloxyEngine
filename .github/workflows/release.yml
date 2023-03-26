@@ -9,7 +9,7 @@ jobs:
   package:
     name: Unity Package
     runs-on: ubuntu-latest
-
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
         with:
@@ -42,6 +42,7 @@ jobs:
   linux:
     name: Release Build For Android
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -84,7 +85,8 @@ jobs:
   
   windows:
     name: Release Build For Windows
-    runs-on: windows-2019
+    runs-on: windows-latest
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:

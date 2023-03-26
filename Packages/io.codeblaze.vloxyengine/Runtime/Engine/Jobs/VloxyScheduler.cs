@@ -72,7 +72,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                         ) {
                             if (_ViewQueue.Contains(pos)) {
                                 _ViewQueue.UpdatePriority(pos, (pos - focus).SqrMagnitude());
-                            } else if (ShouldScheduleForMeshing(pos) && IsChunkGenerated(pos)) {
+                            } else if (ShouldScheduleForMeshing(pos) && IsChunkLoaded(pos)) {
                                 _ViewQueue.Enqueue(pos, (pos - focus).SqrMagnitude());
                             }
                         }
@@ -105,7 +105,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                 var count = math.min(_Settings.Scheduler.MeshingBatchSize, _ViewQueue.Count);
                 
                 for (int i = 0; i < count; i++) {
-                    _ViewSet.Add(_ViewQueue.Dequeue());
+                    var chunk = _ViewQueue.Dequeue();
+                    
+                    // The chunk may be removed from memory by the time we schedule,
+                    // Should we check this only here ?
+                    if (IsChunkLoaded(chunk)) _ViewSet.Add(chunk);
                 }
 
                 _MeshBuildScheduler.Start(_ViewSet.ToList());
@@ -140,7 +144,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         private bool ShouldScheduleForGenerating(int3 position) => !(_ChunkStore.ContainsChunk(position) || _DataSet.Contains(position));
         private bool ShouldScheduleForMeshing(int3 position) => !(_ChunkPool.IsActive(position) || _ViewSet.Contains(position));
 
-        private bool IsChunkGenerated(int3 position) {
+        private bool IsChunkLoaded(int3 position) {
             var result = true;
             
             for (int x = -1; x <= 1; x++) {
