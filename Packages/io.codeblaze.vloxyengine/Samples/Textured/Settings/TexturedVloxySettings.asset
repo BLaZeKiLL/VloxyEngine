@@ -26,3 +26,4 @@ MonoBehaviour:
   Scheduler:
     MeshingBatchSize: 9
     StreamingBatchSize: 13
+    TickRate: 4
