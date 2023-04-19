@@ -32,7 +32,8 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             ) {
             var mesh = new MeshBuffer {
                 VertexBuffer = new NativeList<Vertex>(Allocator.Temp),
-                IndexBuffer = new NativeList<int>(Allocator.Temp)
+                Index0Buffer = new NativeList<int>(Allocator.Temp),
+                Index1Buffer = new NativeList<int>(Allocator.Temp)
             };
 
             int vertex_count = 0;
@@ -224,19 +225,19 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             mesh.VertexBuffer.Add(vertex4);
 
             if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) { // + -
-                mesh.IndexBuffer.Add(vertex_count); // 0 0
-                mesh.IndexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
-                mesh.IndexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
-                mesh.IndexBuffer.Add(vertex_count + 3); // 3 3
-                mesh.IndexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
-                mesh.IndexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+                mesh.Index0Buffer.Add(vertex_count); // 0 0
+                mesh.Index0Buffer.Add(vertex_count + 2 - mask.Normal); // 1 3
+                mesh.Index0Buffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+                mesh.Index0Buffer.Add(vertex_count + 3); // 3 3
+                mesh.Index0Buffer.Add(vertex_count + 1 + mask.Normal); // 2 0
+                mesh.Index0Buffer.Add(vertex_count + 1 - mask.Normal); // 0 2
             } else { // + -
-                mesh.IndexBuffer.Add(vertex_count + 1); // 1 1
-                mesh.IndexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
-                mesh.IndexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
-                mesh.IndexBuffer.Add(vertex_count + 2); // 2 2
-                mesh.IndexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
-                mesh.IndexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+                mesh.Index0Buffer.Add(vertex_count + 1); // 1 1
+                mesh.Index0Buffer.Add(vertex_count + 1 + mask.Normal); // 2 0
+                mesh.Index0Buffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+                mesh.Index0Buffer.Add(vertex_count + 2); // 2 2
+                mesh.Index0Buffer.Add(vertex_count + 2 - mask.Normal); // 1 3
+                mesh.Index0Buffer.Add(vertex_count + 2 + mask.Normal); // 3 1
             }
         }
 

@@ -22,11 +22,13 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
     internal struct MeshBuffer {
 
         public NativeList<Vertex> VertexBuffer;
-        public NativeList<int> IndexBuffer;
+        public NativeList<int> Index0Buffer;
+        public NativeList<int> Index1Buffer;
 
         internal void Dispose() {
             VertexBuffer.Dispose();
-            IndexBuffer.Dispose();
+            Index0Buffer.Dispose();
+            Index1Buffer.Dispose();
         }
 
     }

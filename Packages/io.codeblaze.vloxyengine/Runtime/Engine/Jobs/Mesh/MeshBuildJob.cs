@@ -31,24 +31,24 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             var mesh = MeshDataArray[index];
             var position = Jobs[index];
 
-            var buffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize, vertexOverride);
-            var vertex_count = buffer.VertexBuffer.Length;
-            var index_count = buffer.IndexBuffer.Length;
+            var mesh_buffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize, vertexOverride);
+            var vertex_count = mesh_buffer.VertexBuffer.Length;
+            var index_0_count = mesh_buffer.Index0Buffer.Length;
 
-            var descriptor = new SubMeshDescriptor(0, index_count);
+            var descriptor0 = new SubMeshDescriptor(0, index_0_count);
             
             mesh.SetVertexBufferParams(vertex_count, VertexParams);
-            mesh.SetIndexBufferParams(index_count, IndexFormat.UInt32);
+            mesh.SetIndexBufferParams(index_0_count, IndexFormat.UInt32);
 
-            mesh.GetVertexData<Vertex>().CopyFrom(buffer.VertexBuffer);
-            mesh.GetIndexData<int>().CopyFrom(buffer.IndexBuffer);
+            mesh.GetVertexData<Vertex>().CopyFrom(mesh_buffer.VertexBuffer);
+            mesh.GetIndexData<int>().CopyFrom(mesh_buffer.Index0Buffer);
 
             mesh.subMeshCount = 1;
-            mesh.SetSubMesh(0, descriptor, MeshUpdateFlags.DontRecalculateBounds);
+            mesh.SetSubMesh(0, descriptor0, MeshUpdateFlags.DontRecalculateBounds);
 
             Results.TryAdd(position, index);
 
-            buffer.Dispose();
+            mesh_buffer.Dispose();
         }
 
     }

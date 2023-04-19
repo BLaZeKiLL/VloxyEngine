@@ -19,6 +19,7 @@ namespace CodeBlaze.Vloxy.Engine {
         
         public virtual NoiseProfile NoiseProfile() => new (new NoiseProfile.Settings {
             Height = Settings.Noise.Height,
+            WaterLevel = Settings.Noise.WaterLevel,
             Seed = Settings.Noise.Seed,
             Scale = Settings.Noise.Scale,
             Lacunarity = Settings.Noise.Lacunarity,

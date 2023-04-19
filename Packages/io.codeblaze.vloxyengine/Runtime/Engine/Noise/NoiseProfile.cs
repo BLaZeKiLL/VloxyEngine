@@ -13,7 +13,8 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
         private int _HalfHeight;
 
         public NoiseValue GetNoise(int3 position) => new() {
-            Position = position, 
+            Position = position,
+            WaterLevel = _Settings.WaterLevel,
             Value = ComputeNoise(position),
         };
 
@@ -50,6 +51,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
         public struct Settings {
 
             public int Height;
+            public int WaterLevel;
             public int Seed;
             public float Scale;
             public float Persistance;
@@ -65,6 +67,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
     public struct NoiseValue {
 
         public int3 Position;
+        public int WaterLevel;
         public int Value;
 
     }
