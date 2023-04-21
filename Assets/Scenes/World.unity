@@ -3911,7 +3911,7 @@ GameObject:
   - component: {fileID: 892864101}
   - component: {fileID: 892864100}
   m_Layer: 0
-  m_Name: TexturedWorld
+  m_Name: DemoWorld
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

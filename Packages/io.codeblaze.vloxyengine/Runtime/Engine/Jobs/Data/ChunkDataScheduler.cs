@@ -55,6 +55,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         internal bool IsComplete => _Handle.IsCompleted;
         
         internal void Dispose() {
+            _Handle.Complete();
+            
             _Jobs.Dispose();
             _Results.Dispose();
         }

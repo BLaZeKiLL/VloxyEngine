@@ -20,7 +20,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
         private readonly ChunkStore _ChunkStore;
         private readonly ChunkPool _ChunkPool;
-        private readonly BurstFunctionPointers _BurstFunctionPointers;
 
         private int3 _ChunkSize;
         private JobHandle _Handle;
@@ -39,12 +38,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         public MeshBuildScheduler(
             VloxySettings settings,
             ChunkStore chunkStore,
-            ChunkPool chunkPool, 
-            BurstFunctionPointers burstFunctionPointers
+            ChunkPool chunkPool
         ) {
             _ChunkStore = chunkStore;
             _ChunkPool = chunkPool;
-            _BurstFunctionPointers = burstFunctionPointers;
 
             _ChunkSize = settings.Chunk.ChunkSize;
 
@@ -71,6 +68,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         internal bool IsComplete => _Handle.IsCompleted;
 
         internal void Dispose() {
+            _Handle.Complete();
+            
             _VertexParams.Dispose();
             _Results.Dispose();
             _Jobs.Dispose();
@@ -93,7 +92,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _MeshDataArray = UnityEngine.Mesh.AllocateWritableMeshData(_Jobs.Length);
 
             var job = new MeshBuildJob {
-                BurstFunctionPointers = _BurstFunctionPointers,
                 Accessor = _ChunkAccessor,
                 ChunkSize = _ChunkSize,
                 Jobs = _Jobs,

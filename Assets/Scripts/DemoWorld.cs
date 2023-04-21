@@ -3,12 +3,10 @@ using CodeBlaze.Vloxy.Engine.World;
 
 using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Samples.Textured.World {
+namespace CodeBlaze.Vloxy.Demo {
 
-    public class TexturedWorld : VloxyWorld {
-
-        protected override VloxyProvider Provider() => new TexturedVloxyProvider();
-
+    public class DemoWorld : VloxyWorld {
+        
         protected override void WorldInitialize() {
             RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogEndDistance = Settings.Chunk.DrawDistance * 32 - 16;

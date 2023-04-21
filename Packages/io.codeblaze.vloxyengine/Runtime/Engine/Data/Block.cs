@@ -1,6 +1,6 @@
 ﻿namespace CodeBlaze.Vloxy.Engine.Data {
 
-    public enum TexturedBlock {
+    public enum BlockBlock {
 
         AIR,
         STONE,

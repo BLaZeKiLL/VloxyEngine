@@ -62,11 +62,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             var Y = noise.Position.y;
             
             // if (Y > noise.Value ) return Y > noise.WaterLevel ? (int) TexturedBlock.AIR : (int) TexturedBlock.WATER;
-            if (Y > noise.Value ) return (int) TexturedBlock.AIR;
-            if (Y == noise.Value) return (int) TexturedBlock.GRASS;
-            if (Y <= noise.Value - 1 && Y >= noise.Value - 3) return (int)TexturedBlock.DIRT;
+            if (Y > noise.Value ) return (int) BlockBlock.AIR;
+            if (Y == noise.Value) return (int) BlockBlock.GRASS;
+            if (Y <= noise.Value - 1 && Y >= noise.Value - 3) return (int)BlockBlock.DIRT;
 
-            return (int) TexturedBlock.STONE;
+            return (int) BlockBlock.STONE;
         }
 
     }

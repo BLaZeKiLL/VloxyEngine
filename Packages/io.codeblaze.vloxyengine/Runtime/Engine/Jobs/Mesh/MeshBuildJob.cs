@@ -1,5 +1,4 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Data;
+﻿using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Mesher;
 
 using Unity.Burst;
@@ -15,7 +14,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
     internal struct MeshBuildJob : IJobParallelFor {
 
         [ReadOnly] public int3 ChunkSize;
-        [ReadOnly] public BurstFunctionPointers BurstFunctionPointers;
         [ReadOnly] public NativeArray<VertexAttributeDescriptor> VertexParams;
 
         [ReadOnly] public ChunkAccessor Accessor;
@@ -26,12 +24,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         public UnityEngine.Mesh.MeshDataArray MeshDataArray;
 
         public void Execute(int index) {
-            var vertexOverride = BurstFunctionPointers.VertexOverridePointer;
-            
             var mesh = MeshDataArray[index];
             var position = Jobs[index];
 
-            var mesh_buffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize, vertexOverride);
+            var mesh_buffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize);
             var vertex_count = mesh_buffer.VertexBuffer.Length;
             var index_0_count = mesh_buffer.Index0Buffer.Length;
 

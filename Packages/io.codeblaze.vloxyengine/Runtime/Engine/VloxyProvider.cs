@@ -55,8 +55,7 @@ namespace CodeBlaze.Vloxy.Engine {
         ) => new(
             Settings,
             chunkStore,
-            chunkPool,
-            burstFunctionPointers
+            chunkPool
         );
 
     }
