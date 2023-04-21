@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.tayx.graphy": {
+      "version": "3.0.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
     "com.unity.burst": {
       "version": "1.8.2",
       "depth": 1,
