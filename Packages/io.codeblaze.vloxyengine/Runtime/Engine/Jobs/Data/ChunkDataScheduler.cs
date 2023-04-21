@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -19,7 +18,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         private int3 _ChunkSize;
         private ChunkStore _ChunkStore;
         private NoiseProfile _NoiseProfile;
-        private BurstFunctionPointers _BurstFunctionPointers;
 
         private JobHandle _Handle;
         
@@ -35,13 +33,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         public ChunkDataScheduler(
             VloxySettings settings,
             ChunkStore chunkStore,
-            NoiseProfile noiseProfile,
-            BurstFunctionPointers burstFunctionPointers
+            NoiseProfile noiseProfile
         ) {
             _ChunkSize = settings.Chunk.ChunkSize;
             _ChunkStore = chunkStore;
             _NoiseProfile = noiseProfile;
-            _BurstFunctionPointers = burstFunctionPointers;
 
             _Jobs = new NativeList<int3>(Allocator.Persistent);
             _Results = new NativeParallelHashMap<int3, Chunk>(
@@ -80,7 +76,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,
                 Results = _Results.AsParallelWriter(),
-                BurstFunctionPointers = _BurstFunctionPointers,
             };
             
             _Handle = job.Schedule(_Jobs.Length, 1);

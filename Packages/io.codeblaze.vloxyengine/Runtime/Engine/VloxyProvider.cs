@@ -45,8 +45,7 @@ namespace CodeBlaze.Vloxy.Engine {
         ) => new(
             Settings,
             chunkStore,
-            noiseProfile,
-            burstFunctionPointers
+            noiseProfile
         );
 
         public virtual MeshBuildScheduler MeshBuildSchedulerV2(

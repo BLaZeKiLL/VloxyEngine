@@ -1,17 +1,15 @@
 ﻿namespace CodeBlaze.Vloxy.Engine.Data {
 
-    public interface IBlock {
+    public enum TexturedBlock {
 
-        bool IsOpaque();
-
-        bool IsTransparent();
-
-        bool IsTranslucent();
-
-        int GetId();
-
-        IBlock FromId(int id);
-
+        AIR,
+        STONE,
+        DIRT,
+        GRASS,
+        WATER,
+        WOOD,
+        LEAFS,
+        ERROR,
     }
 
 }
