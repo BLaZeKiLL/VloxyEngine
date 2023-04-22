@@ -29,7 +29,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
             var mesh_buffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize);
             var vertex_count = mesh_buffer.VertexBuffer.Length;
-            var index_0_count = mesh_buffer.Index0Buffer.Length;
+            var index_0_count = mesh_buffer.IndexBuffer0.Length;
 
             var descriptor0 = new SubMeshDescriptor(0, index_0_count);
             
@@ -37,7 +37,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             mesh.SetIndexBufferParams(index_0_count, IndexFormat.UInt32);
 
             mesh.GetVertexData<Vertex>().CopyFrom(mesh_buffer.VertexBuffer);
-            mesh.GetIndexData<int>().CopyFrom(mesh_buffer.Index0Buffer);
+            mesh.GetIndexData<int>().CopyFrom(mesh_buffer.IndexBuffer0);
 
             mesh.subMeshCount = 1;
             mesh.SetSubMesh(0, descriptor0, MeshUpdateFlags.DontRecalculateBounds);
