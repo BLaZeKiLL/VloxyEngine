@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 
@@ -30,14 +28,6 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             Index0Buffer.Dispose();
             Index1Buffer.Dispose();
         }
-
-    }
-
-    [BurstCompile]
-    public static class MeshOverrides {
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void VertexOverride(int block, ref int3 normal, ref Vertex v1, ref Vertex v2, ref Vertex v3, ref Vertex v4);
 
     }
 

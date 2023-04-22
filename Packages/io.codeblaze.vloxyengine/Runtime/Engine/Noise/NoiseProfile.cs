@@ -15,7 +15,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
         public NoiseValue GetNoise(int3 position) => new() {
             Position = position,
             WaterLevel = _Settings.WaterLevel,
-            Value = ComputeNoise(position),
+            Height = ComputeNoise(position),
         };
 
         public NoiseProfile(Settings settings) {
@@ -68,15 +68,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
 
         public int3 Position;
         public int WaterLevel;
-        public int Value;
-
-    }
-
-    [BurstCompile]
-    public static class NoiseOverrides {
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate int ComputeBlockOverride(ref NoiseValue noise);
+        public int Height;
 
     }
 

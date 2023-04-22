@@ -30,7 +30,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             var data = new ChunkData(ChunkSize);
             
             var noise = NoiseProfile.GetNoise(position);
-            int current_block = TexturedComputeBlockOverride(ref noise);
+            int current_block = GetBlock(ref noise);
             
             int count = 0;
         
@@ -40,7 +40,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                     for (int x = 0; x < ChunkSize.x; x++) {
                         noise = NoiseProfile.GetNoise(position + new int3(x, y, z));
                         
-                        var block = TexturedComputeBlockOverride(ref noise);
+                        var block = GetBlock(ref noise);
         
                         if (block == current_block) {
                             count++;
@@ -58,13 +58,13 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             return data;
         }
         
-        private static int TexturedComputeBlockOverride(ref NoiseValue noise) {
+        private static int GetBlock(ref NoiseValue noise) {
             var Y = noise.Position.y;
             
             // if (Y > noise.Value ) return Y > noise.WaterLevel ? (int) TexturedBlock.AIR : (int) TexturedBlock.WATER;
-            if (Y > noise.Value ) return (int) BlockBlock.AIR;
-            if (Y == noise.Value) return (int) BlockBlock.GRASS;
-            if (Y <= noise.Value - 1 && Y >= noise.Value - 3) return (int)BlockBlock.DIRT;
+            if (Y > noise.Height ) return (int) BlockBlock.AIR;
+            if (Y == noise.Height) return (int) BlockBlock.GRASS;
+            if (Y <= noise.Height - 1 && Y >= noise.Height - 3) return (int)BlockBlock.DIRT;
 
             return (int) BlockBlock.STONE;
         }

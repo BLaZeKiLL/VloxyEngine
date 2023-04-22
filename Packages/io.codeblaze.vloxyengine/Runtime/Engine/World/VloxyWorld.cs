@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-using CodeBlaze.Vloxy.Engine.Components;
+﻿using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs;
 using CodeBlaze.Vloxy.Engine.Jobs.Data;
@@ -11,7 +9,6 @@ using CodeBlaze.Vloxy.Engine.Utils;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
-using Unity.Collections;
 using Unity.Mathematics;
 
 using UnityEngine;
@@ -21,18 +18,17 @@ namespace CodeBlaze.Vloxy.Engine.World {
     public class VloxyWorld : MonoBehaviour {
 
         [SerializeField] private Transform _Focus;
-        [SerializeField] protected VloxySettings Settings;
+        [SerializeField] private VloxySettings _Settings;
         
         #region API
-
         public Transform Focus => _Focus;
+        public VloxySettings Settings => _Settings;
         public int3 FocusChunkCoord { get; private set; }
         public VloxyScheduler Scheduler { get; private set; }
+        public NoiseProfile NoiseProfile { get; private set; }
+        public ChunkManager ChunkManager { get; private set; }
 
         #endregion
-        
-        protected NoiseProfile NoiseProfile;
-        protected ChunkManager ChunkManager;
         
         private ChunkPool _ChunkPool;
         private MeshBuildScheduler _MeshBuildScheduler;
