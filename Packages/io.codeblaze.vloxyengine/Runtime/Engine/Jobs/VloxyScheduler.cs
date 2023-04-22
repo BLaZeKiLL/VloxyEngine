@@ -34,7 +34,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 
         private readonly VloxySettings _Settings;
 
-        public VloxyScheduler(
+        internal VloxyScheduler(
             VloxySettings settings, 
             MeshBuildScheduler meshBuildScheduler,
             ChunkDataScheduler chunkDataScheduler,
@@ -158,6 +158,16 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 
             return result;
         }
+
+        #region DebugAPI
+
+        public float DataAvgTiming => _ChunkDataScheduler.AvgTime;
+        public float MeshAvgTiming => _MeshBuildScheduler.AvgTime;
+
+        public int DataQueueCount => _DataQueue.Count;
+        public int MeshQueueCount => _ViewQueue.Count;
+
+        #endregion
 
     }
 

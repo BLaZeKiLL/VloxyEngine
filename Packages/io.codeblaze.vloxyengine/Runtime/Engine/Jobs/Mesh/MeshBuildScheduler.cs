@@ -30,10 +30,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         private UnityEngine.Mesh.MeshDataArray _MeshDataArray;
         private NativeArray<VertexAttributeDescriptor> _VertexParams;
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
         private Queue<long> _Timings;
         private Stopwatch _Watch;
-#endif
+// #endif
         
         public MeshBuildScheduler(
             VloxySettings settings,
@@ -58,10 +58,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             
             _Results = new NativeParallelHashMap<int3, int>(settings.Chunk.DrawDistance.CubedSize(),Allocator.Persistent);
             _Jobs = new NativeList<int3>(Allocator.Persistent);
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
             _Watch = new Stopwatch();
             _Timings = new Queue<long>(10);
-#endif
+// #endif
         }
 
         internal bool IsReady = true;
@@ -81,8 +81,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 #if VLOXY_LOGGING
             VloxyLogger.Info<MeshBuildScheduler>($"Scheduling {jobs.Count} meshes to build");
             VloxyLogger.Info<MeshBuildScheduler>(string.Join(", ", jobs));
-            _Watch.Restart();
 #endif
+            _Watch.Restart();
+
             _ChunkAccessor = _ChunkStore.GetAccessor(jobs);
             
             foreach (var j in jobs) {
@@ -128,15 +129,15 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _Results.Clear();
             _Jobs.Clear();
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
             _Watch.Stop();
             Timestamp(_Watch.ElapsedMilliseconds);
-#endif
+// #endif
 
             IsReady = true;
         }
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
         public float AvgTime => (float) _Timings.Sum() / 10;
 
         private void Timestamp(long ms) {
@@ -146,7 +147,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
                 _Timings.Enqueue(ms);
             }
         }
-#endif
+// #endif
 
     }
 

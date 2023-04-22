@@ -22,16 +22,19 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         [SerializeField] private Transform _Focus;
         [SerializeField] protected VloxySettings Settings;
+        
+        #region API
 
-        protected int3 FocusChunkCoord;
+        public Transform Focus => _Focus;
+        public int3 FocusChunkCoord { get; private set; }
+        public VloxyScheduler Scheduler { get; private set; }
 
+        #endregion
+        
         protected NoiseProfile NoiseProfile;
         protected ChunkManager ChunkManager;
-
-        private BurstFunctionPointers BurstFunctionPointers;
         
         private ChunkPool _ChunkPool;
-        private VloxyScheduler _VloxyScheduler;
         private MeshBuildScheduler _MeshBuildScheduler;
         private ChunkDataScheduler _ChunkDataScheduler;
 
@@ -89,13 +92,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
             }
             
             // We can change this, so that update happens only when required
-            _VloxyScheduler.FocusUpdate(FocusChunkCoord);
+            Scheduler.FocusUpdate(FocusChunkCoord);
 
             // Schedule every 'x' frames (throttling)
             if (_UpdateFrame % Settings.Scheduler.TickRate == 0) {
                 _UpdateFrame = 1;
 
-                _VloxyScheduler.SchedulerUpdate();
+                Scheduler.SchedulerUpdate();
 
                 WorldSchedulerUpdate();
             } else {
@@ -106,13 +109,13 @@ namespace CodeBlaze.Vloxy.Engine.World {
         }
 
         private void LateUpdate() {
-            _VloxyScheduler.SchedulerLateUpdate();
+            Scheduler.SchedulerLateUpdate();
 
             WorldLateUpdate();
         }
 
         private void OnDestroy() {
-            _VloxyScheduler.Dispose();
+            Scheduler.Dispose();
             ChunkManager.Dispose();
         }
         
@@ -133,21 +136,18 @@ namespace CodeBlaze.Vloxy.Engine.World {
             ChunkManager = VloxyProvider.Current.ChunkManager();
 
             _ChunkPool = VloxyProvider.Current.ChunkPoolV2(transform);
-            BurstFunctionPointers = VloxyProvider.Current.SetupBurstFunctionPointers();
 
             _MeshBuildScheduler = VloxyProvider.Current.MeshBuildSchedulerV2(
                 ChunkManager.Store, 
-                _ChunkPool, 
-                BurstFunctionPointers
+                _ChunkPool
             );
             
             _ChunkDataScheduler = VloxyProvider.Current.ChunkDataSchedulerV2(
                 ChunkManager.Store,
-                NoiseProfile, 
-                BurstFunctionPointers
+                NoiseProfile
             );
 
-            _VloxyScheduler = VloxyProvider.Current.VloxySchedulerV2(
+            Scheduler = VloxyProvider.Current.VloxySchedulerV2(
                 _MeshBuildScheduler, 
                 _ChunkDataScheduler,
                 ChunkManager.Store,

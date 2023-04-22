@@ -25,10 +25,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         private NativeList<int3> _Jobs;
         private NativeParallelHashMap<int3, Chunk> _Results;
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
         private Queue<long> _Timings;
         private Stopwatch _Watch;
-#endif
+// #endif
 
         public ChunkDataScheduler(
             VloxySettings settings,
@@ -45,10 +45,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 Allocator.Persistent
             );
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
             _Watch = new Stopwatch();
             _Timings = new Queue<long>(10);
-#endif
+// #endif
         }
 
         internal bool IsReady = true;
@@ -67,8 +67,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 #if VLOXY_LOGGING
             VloxyLogger.Info<ChunkDataScheduler>($"Scheduling {jobs.Count} chunks to generate");
             VloxyLogger.Info<ChunkDataScheduler>(string.Join(", ", jobs));
-            _Watch.Restart();
 #endif
+            _Watch.Restart();
+
             foreach (var j in jobs) {
                 _Jobs.Add(j);
             }
@@ -91,14 +92,14 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             _Jobs.Clear();
             _Results.Clear();
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
             _Watch.Stop();
             Timestamp(_Watch.ElapsedMilliseconds);
-#endif
+// #endif
             IsReady = true;
         }
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
         public float AvgTime => (float) _Timings.Sum() / 10;
 
         private void Timestamp(long ms) {
@@ -108,7 +109,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 _Timings.Enqueue(ms);
             }
         }
-#endif
+// #endif
 
     }
 
