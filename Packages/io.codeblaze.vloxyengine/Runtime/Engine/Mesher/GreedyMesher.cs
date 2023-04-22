@@ -231,8 +231,8 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             mesh.VertexBuffer.Add(vertex3);
             mesh.VertexBuffer.Add(vertex4);
 
-            // var indexBuffer = mask.MeshIndex == 0 ? mesh.IndexBuffer0 : mesh.IndexBuffer1;
-            var indexBuffer = mesh.IndexBuffer0;
+            var indexBuffer = mask.MeshIndex == 0 ? mesh.IndexBuffer0 : mesh.IndexBuffer1;
+            // var indexBuffer = mesh.IndexBuffer0;
 
             if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) { // + -
                 indexBuffer.Add(vertex_count); // 0 0

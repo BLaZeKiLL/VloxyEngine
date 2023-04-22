@@ -17,7 +17,8 @@ namespace CodeBlaze.Vloxy.Engine.Behaviour {
         }
 
         public void SetRenderSettings(RendererSettings settings) {
-            _Renderer.material = settings.Material;
+            _Renderer.sharedMaterials = settings.Materials;
+
             if (!settings.CastShadows) _Renderer.shadowCastingMode = ShadowCastingMode.Off;
         }
 

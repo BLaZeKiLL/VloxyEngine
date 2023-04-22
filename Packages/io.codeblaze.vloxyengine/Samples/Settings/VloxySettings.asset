@@ -19,9 +19,11 @@ MonoBehaviour:
       x: 32
       y: 32
       z: 32
-    LoadDistance: 3
+    LoadDistance: 6
   Renderer:
-    Material: {fileID: 2100000, guid: 1add20ccd0265e742a7bd8cb069f72ad, type: 2}
+    Materials:
+    - {fileID: 2100000, guid: 1add20ccd0265e742a7bd8cb069f72ad, type: 2}
+    - {fileID: 2100000, guid: 25fdd7c3100144ffbb60d3d5224231fd, type: 2}
     CastShadows: 0
   Scheduler:
     MeshingBatchSize: 16
