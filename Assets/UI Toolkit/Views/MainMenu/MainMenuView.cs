@@ -13,7 +13,8 @@ namespace CodeBlaze {
 
         [SerializeField] private VloxySettings _settings;
 
-        private Button _button;
+        private Button _generate_button;
+        private Button _quit_button;
         private ProgressBar _loader;
 
         private MainMenuController _controller;
@@ -23,15 +24,15 @@ namespace CodeBlaze {
 
             _controller = new MainMenuController(document.rootVisualElement);
 
-            _button = document.rootVisualElement.Q<Button>("Generate");
+            _generate_button = document.rootVisualElement.Q<Button>("Generate");
+            _quit_button = document.rootVisualElement.Q<Button>("Quit");
             _loader = document.rootVisualElement.Q<ProgressBar>("LoadingBar");
 
-            _button.RegisterCallback<ClickEvent>(OnGenerateWorld);
+            _generate_button.RegisterCallback<ClickEvent>(OnGenerateWorld);
+            _quit_button.RegisterCallback<ClickEvent>(OnQuit);
         }
 
-        private void Update() {
-            if (!IsEscapePressed()) return;
-
+        private void OnQuit(ClickEvent _) {
             Application.Quit();
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false; 
@@ -57,9 +58,9 @@ namespace CodeBlaze {
             }
         }
         
-        private bool IsEscapePressed()
+        private bool IsEscapePressedThisFrame()
         {
-            return Keyboard.current != null && Keyboard.current.escapeKey.isPressed; 
+            return Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
         }
 
     }

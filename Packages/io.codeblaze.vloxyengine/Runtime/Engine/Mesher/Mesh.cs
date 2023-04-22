@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 
@@ -22,20 +20,14 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
     internal struct MeshBuffer {
 
         public NativeList<Vertex> VertexBuffer;
-        public NativeList<int> IndexBuffer;
+        public NativeList<int> IndexBuffer0;
+        public NativeList<int> IndexBuffer1;
 
         internal void Dispose() {
             VertexBuffer.Dispose();
-            IndexBuffer.Dispose();
+            IndexBuffer0.Dispose();
+            IndexBuffer1.Dispose();
         }
-
-    }
-
-    [BurstCompile]
-    public static class MeshOverrides {
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void VertexOverride(int block, ref int3 normal, ref Vertex v1, ref Vertex v2, ref Vertex v3, ref Vertex v4);
 
     }
 

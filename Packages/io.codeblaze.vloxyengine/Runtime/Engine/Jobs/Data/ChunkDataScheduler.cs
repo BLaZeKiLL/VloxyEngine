@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -19,7 +18,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         private int3 _ChunkSize;
         private ChunkStore _ChunkStore;
         private NoiseProfile _NoiseProfile;
-        private BurstFunctionPointers _BurstFunctionPointers;
 
         private JobHandle _Handle;
         
@@ -27,21 +25,19 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         private NativeList<int3> _Jobs;
         private NativeParallelHashMap<int3, Chunk> _Results;
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
         private Queue<long> _Timings;
         private Stopwatch _Watch;
-#endif
+// #endif
 
         public ChunkDataScheduler(
             VloxySettings settings,
             ChunkStore chunkStore,
-            NoiseProfile noiseProfile,
-            BurstFunctionPointers burstFunctionPointers
+            NoiseProfile noiseProfile
         ) {
             _ChunkSize = settings.Chunk.ChunkSize;
             _ChunkStore = chunkStore;
             _NoiseProfile = noiseProfile;
-            _BurstFunctionPointers = burstFunctionPointers;
 
             _Jobs = new NativeList<int3>(Allocator.Persistent);
             _Results = new NativeParallelHashMap<int3, Chunk>(
@@ -49,16 +45,18 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 Allocator.Persistent
             );
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
             _Watch = new Stopwatch();
             _Timings = new Queue<long>(10);
-#endif
+// #endif
         }
 
         internal bool IsReady = true;
         internal bool IsComplete => _Handle.IsCompleted;
         
         internal void Dispose() {
+            _Handle.Complete();
+            
             _Jobs.Dispose();
             _Results.Dispose();
         }
@@ -69,8 +67,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 #if VLOXY_LOGGING
             VloxyLogger.Info<ChunkDataScheduler>($"Scheduling {jobs.Count} chunks to generate");
             VloxyLogger.Info<ChunkDataScheduler>(string.Join(", ", jobs));
-            _Watch.Restart();
 #endif
+            _Watch.Restart();
+
             foreach (var j in jobs) {
                 _Jobs.Add(j);
             }
@@ -80,7 +79,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,
                 Results = _Results.AsParallelWriter(),
-                BurstFunctionPointers = _BurstFunctionPointers,
             };
             
             _Handle = job.Schedule(_Jobs.Length, 1);
@@ -94,14 +92,14 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             _Jobs.Clear();
             _Results.Clear();
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
             _Watch.Stop();
             Timestamp(_Watch.ElapsedMilliseconds);
-#endif
+// #endif
             IsReady = true;
         }
 
-#if VLOXY_LOGGING
+// #if VLOXY_LOGGING
         public float AvgTime => (float) _Timings.Sum() / 10;
 
         private void Timestamp(long ms) {
@@ -111,7 +109,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                 _Timings.Enqueue(ms);
             }
         }
-#endif
+// #endif
 
     }
 

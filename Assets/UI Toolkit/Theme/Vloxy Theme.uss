@@ -1,3 +1,13 @@
+:root {
+    --vloxy_primary: #28a745;
+    --vloxy_primary_d1: #218838;
+    --vloxy_primary_d2: #1e7e34;
+    
+    --vloxy_danger: #dc3545;
+    --vloxy_danger_d1: #c82333;
+    --vloxy_danger_d2: #bd2130;
+}
+
 #unity-text-input {
     background-color: #1C1C1C;
     border-color: #111111;
@@ -30,6 +40,61 @@
 }
 
 #unity-progress-bar .unity-progress-bar__progress {
-    background-color: #62E55C;
+    background-color: var(--vloxy_primary);
     border-radius: 8px;
+}
+
+.vloxy-card {
+    border-radius: 16px;
+    background-color: rgb(34, 34, 34);
+    padding: 16px;
+}
+
+.vloxy-button {
+    border-radius: 16px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-left-color: black;
+    border-right-color: black;
+    border-top-color: black;
+    border-bottom-color: black;
+}
+
+.vloxy-button.vloxy-button-primary {
+    background-color: var(--vloxy_primary);
+}
+
+.vloxy-button.vloxy-button-primary:hover {
+    background-color: var(--vloxy_primary_d1);
+}
+
+.vloxy-button.vloxy-button-primary:active {
+    background-color: var(--vloxy_primary_d2);
+}
+
+.vloxy-button.vloxy-button-danger {
+    background-color: var(--vloxy_danger);
+}
+
+.vloxy-button.vloxy-button-danger:hover {
+    background-color: var(--vloxy_danger_d1);
+}
+
+.vloxy-button.vloxy-button-danger:active {
+    background-color: var(--vloxy_danger_d2);
+}
+
+.vloxy-text {
+    color: white;
+    -unity-text-align: middle-center;
+}
+
+.vloxy-text-primary {
+    color: var(--vloxy_primary);
+}
+
+.vloxy-display-none {
+    display: none;
 }
