@@ -26,6 +26,44 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             }
 
         }
+        
+        [BurstCompile]
+        private static bool CompareMask(Mask m1, Mask m2) {
+            return
+                m1.MeshIndex == m2.MeshIndex &&
+                m1.Block == m2.Block &&
+                m1.Normal == m2.Normal &&
+                m1.AO[0] == m2.AO[0] &&
+                m1.AO[1] == m2.AO[1] &&
+                m1.AO[2] == m2.AO[2] &&
+                m1.AO[3] == m2.AO[3];
+        }
+        
+        [BurstCompile]
+        private static int GetUV0Index(
+            int block,
+            int3 normal
+        ) {
+            switch (block) {
+                case (int) Block.GRASS when normal.y is 1: return 15;
+                case (int) Block.GRASS when normal.y is -1: return 52;
+                case (int) Block.GRASS: return 43;
+                case (int) Block.DIRT: return 52;
+                case (int) Block.STONE: return 39;
+                case (int) Block.WATER: return 54;
+            }
+
+            return 0;
+        }
+
+        [BurstCompile]
+        private static byte GetMeshIndex(int block) {
+            switch (block) {
+                case (int) Block.AIR: return 2;
+                case (int) Block.WATER: return 1;
+                default: return 0;
+            }
+        }
 
         [BurstCompile]
         internal static MeshBuffer GenerateMesh(
@@ -252,18 +290,6 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         }
 
         [BurstCompile]
-        private static bool CompareMask(Mask m1, Mask m2) {
-            return
-                m1.MeshIndex == m2.MeshIndex &&
-                m1.Block == m2.Block &&
-                m1.Normal == m2.Normal &&
-                m1.AO[0] == m2.AO[0] &&
-                m1.AO[1] == m2.AO[1] &&
-                m1.AO[2] == m2.AO[2] &&
-                m1.AO[3] == m2.AO[3];
-        }
-
-        [BurstCompile]
         private static int4 ComputeAOMask(ChunkAccessor accessor, int3 pos, int3 coord, int axis1, int axis2) {
             var L = coord;
             var R = coord;
@@ -314,32 +340,6 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             }
 
             return 3 - (s1 + s2 + c);
-        }
-        
-        [BurstCompile]
-        private static int GetUV0Index(
-            int block,
-            int3 normal
-        ) {
-            switch (block) {
-                case (int) Block.GRASS when normal.y is 1: return 15;
-                case (int) Block.GRASS when normal.y is -1: return 52;
-                case (int) Block.GRASS: return 43;
-                case (int) Block.DIRT: return 52;
-                case (int) Block.STONE: return 39;
-                case (int) Block.WATER: return 54;
-            }
-
-            return 0;
-        }
-
-        [BurstCompile]
-        private static byte GetMeshIndex(int block) {
-            switch (block) {
-                case (int) Block.AIR: return 2;
-                case (int) Block.WATER: return 1; // Should be 2
-                default: return 0;
-            }
         }
 
     }
