@@ -15,10 +15,9 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public VloxySettings Settings { get; set; }
 
-        public virtual BurstFunctionPointers SetupBurstFunctionPointers() => new();
-        
         public virtual NoiseProfile NoiseProfile() => new (new NoiseProfile.Settings {
             Height = Settings.Noise.Height,
+            WaterLevel = Settings.Noise.WaterLevel,
             Seed = Settings.Noise.Seed,
             Scale = Settings.Noise.Scale,
             Lacunarity = Settings.Noise.Lacunarity,
@@ -39,24 +38,20 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public virtual ChunkDataScheduler ChunkDataSchedulerV2(
             ChunkStore chunkStore,
-            NoiseProfile noiseProfile,
-            BurstFunctionPointers burstFunctionPointers
+            NoiseProfile noiseProfile
         ) => new(
             Settings,
             chunkStore,
-            noiseProfile,
-            burstFunctionPointers
+            noiseProfile
         );
 
         public virtual MeshBuildScheduler MeshBuildSchedulerV2(
             ChunkStore chunkStore,
-            ChunkPool chunkPool, 
-            BurstFunctionPointers burstFunctionPointers
+            ChunkPool chunkPool
         ) => new(
             Settings,
             chunkStore,
-            chunkPool,
-            burstFunctionPointers
+            chunkPool
         );
 
     }

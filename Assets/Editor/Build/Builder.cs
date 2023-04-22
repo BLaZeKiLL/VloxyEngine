@@ -38,7 +38,8 @@ namespace CodeBlaze.Editor.Build {
         private static void BuildWindowsMonoRelease() {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
-                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING"
+                "UNITY_POST_PROCESSING_STACK_V2", 
+                // "VLOXY_LOGGING",
             });
             
             var options = new BuildPlayerOptions {
@@ -82,7 +83,8 @@ namespace CodeBlaze.Editor.Build {
         private static void BuildWindowsIL2CPPRelease() {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.IL2CPP);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
-                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING"
+                "UNITY_POST_PROCESSING_STACK_V2", 
+                // "VLOXY_LOGGING",
             });
             
             var options = new BuildPlayerOptions {
@@ -130,7 +132,8 @@ namespace CodeBlaze.Editor.Build {
         private static void BuildMacMonoRelease() {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
-                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING"
+                "UNITY_POST_PROCESSING_STACK_V2", 
+                // "VLOXY_LOGGING",
             });
             
             var options = new BuildPlayerOptions {
@@ -174,7 +177,8 @@ namespace CodeBlaze.Editor.Build {
         private static void BuildMacIL2CPPRelease() {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.IL2CPP);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
-                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING"
+                "UNITY_POST_PROCESSING_STACK_V2", 
+                // "VLOXY_LOGGING",
             });
             
             var options = new BuildPlayerOptions {
@@ -222,7 +226,8 @@ namespace CodeBlaze.Editor.Build {
         private static void BuildAndroidMonoRelease() {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
-                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING"
+                "UNITY_POST_PROCESSING_STACK_V2", 
+                // "VLOXY_LOGGING",
             });
             
             var options = new BuildPlayerOptions {
@@ -266,7 +271,8 @@ namespace CodeBlaze.Editor.Build {
         private static void BuildAndroidIL2CPPRelease() {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.IL2CPP);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
-                "UNITY_POST_PROCESSING_STACK_V2", "VLOXY_LOGGING"
+                "UNITY_POST_PROCESSING_STACK_V2", 
+                // "VLOXY_LOGGING",
             });
             
             var options = new BuildPlayerOptions {
