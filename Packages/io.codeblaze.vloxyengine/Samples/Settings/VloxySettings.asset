@@ -19,7 +19,7 @@ MonoBehaviour:
       x: 32
       y: 32
       z: 32
-    LoadDistance: 10
+    LoadDistance: 3
   Renderer:
     Material: {fileID: 2100000, guid: 1add20ccd0265e742a7bd8cb069f72ad, type: 2}
     CastShadows: 0

@@ -5,16 +5,20 @@ using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Noise {
 
+    /// <summary>
+    /// ! Height is shifted by h - h/2 to make 0 actual 0
+    /// </summary>
     [BurstCompile]
     public struct NoiseProfile {
 
         private Settings _Settings;
 
         private int _HalfHeight;
+        private int _WaterLevel;
 
         public NoiseValue GetNoise(int3 position) => new() {
             Position = position,
-            WaterLevel = _Settings.WaterLevel,
+            WaterLevel = _WaterLevel,
             Height = ComputeNoise(position),
         };
 
@@ -26,6 +30,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
             }
 
             _HalfHeight = _Settings.Height / 2;
+            _WaterLevel = _Settings.WaterLevel - _HalfHeight;
         }
 
         private int ComputeNoise(int3 position) {
@@ -45,6 +50,7 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
                 frequency *= _Settings.Lacunarity;
             }
 
+            // Note the height shift here
             return math.clamp((int) math.round(height * _HalfHeight), -_HalfHeight, _HalfHeight);
         }
         

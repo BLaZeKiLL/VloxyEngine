@@ -64,12 +64,12 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                             var currentBlock = accessor.GetBlockInChunk(pos, chunkItr);
                             var compareBlock = accessor.GetBlockInChunk(pos, chunkItr + directionMask);
 
-                            var currentBlockOpaque = currentBlock != 0;
-                            var compareBlockOpaque = compareBlock != 0;
+                            var currentBlockOpaque = GetMeshIndex(currentBlock);
+                            var compareBlockOpaque = GetMeshIndex(compareBlock);
 
                             if (currentBlockOpaque == compareBlockOpaque) {
                                 normalMask[n++] = default;
-                            } else if (currentBlockOpaque) {
+                            } else if (currentBlockOpaque != 0) {
                                 normalMask[n++] = new Mask(currentBlock, 1, ComputeAOMask(accessor, pos, chunkItr + directionMask, axis1, axis2));
                             } else {
                                 normalMask[n++] = new Mask(compareBlock, -1, ComputeAOMask(accessor, pos, chunkItr, axis1, axis2));
@@ -307,15 +307,24 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             int3 normal
         ) {
             switch (block) {
-                case (int) BlockBlock.GRASS when normal.y is 1: return 15;
-                case (int) BlockBlock.GRASS when normal.y is -1: return 52;
-                case (int) BlockBlock.GRASS: return 43;
-                case (int) BlockBlock.DIRT: return 52;
-                case (int) BlockBlock.STONE: return 39;
-                case (int) BlockBlock.WATER: return 54;
+                case (int) Block.GRASS when normal.y is 1: return 15;
+                case (int) Block.GRASS when normal.y is -1: return 52;
+                case (int) Block.GRASS: return 43;
+                case (int) Block.DIRT: return 52;
+                case (int) Block.STONE: return 39;
+                case (int) Block.WATER: return 54;
             }
 
             return 0;
+        }
+
+        [BurstCompile]
+        private static int GetMeshIndex(int block) {
+            switch (block) {
+                case (int) Block.AIR: return 0;
+                case (int) Block.WATER: return 1; // Should be 2
+                default: return 1;
+            }
         }
 
     }

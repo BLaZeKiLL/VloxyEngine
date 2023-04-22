@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: NoiseSettings2D
   m_EditorClassIdentifier: 
   Height: 256
-  Seed: 123456
+  WaterLevel: 128
+  Seed: 777
   Scale: 256
   Persistance: 0.5
   Lacunarity: 2
