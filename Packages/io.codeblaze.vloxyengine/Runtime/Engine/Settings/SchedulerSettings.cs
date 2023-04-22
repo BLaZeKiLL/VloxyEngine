@@ -14,7 +14,7 @@ namespace CodeBlaze.Vloxy.Engine.Settings {
         public int StreamingBatchSize;
 
         [Tooltip("Framerate at which the scheduler updates")]
-        public int TickRate = 16;
+        public int TickRate = 4;
 
     }
 

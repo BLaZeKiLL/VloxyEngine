@@ -129,7 +129,7 @@ namespace CodeBlaze.Camera
         private void Update()
         {
             // Exit Sample
-            if (IsEscapePressed())
+            if (IsEscapePressedThisFrame())
             {
                 SceneManager.LoadScene(0);
             }
@@ -201,9 +201,9 @@ namespace CodeBlaze.Camera
             return boost;
         }
 
-        private bool IsEscapePressed()
+        private bool IsEscapePressedThisFrame()
         {
-            return Keyboard.current != null && Keyboard.current.escapeKey.isPressed;
+            return Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
         }
 
         private bool IsCameraRotationAllowed()

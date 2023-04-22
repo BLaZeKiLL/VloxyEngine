@@ -1,5 +1,4 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Data;
+﻿using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Noise;
 
 using Unity.Burst;
@@ -14,7 +13,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
 
         [ReadOnly] public int3 ChunkSize;
         [ReadOnly] public NoiseProfile NoiseProfile;
-        [ReadOnly] public BurstFunctionPointers BurstFunctionPointers;
 
         [ReadOnly] public NativeArray<int3> Jobs;
         
@@ -32,7 +30,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             var data = new ChunkData(ChunkSize);
             
             var noise = NoiseProfile.GetNoise(position);
-            int current_block = BurstFunctionPointers.ComputeBlockOverridePointer.Invoke(ref noise);
+            int current_block = GetBlock(ref noise);
             
             int count = 0;
         
@@ -42,7 +40,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
                     for (int x = 0; x < ChunkSize.x; x++) {
                         noise = NoiseProfile.GetNoise(position + new int3(x, y, z));
                         
-                        var block = BurstFunctionPointers.ComputeBlockOverridePointer.Invoke(ref noise);
+                        var block = GetBlock(ref noise);
         
                         if (block == current_block) {
                             count++;
@@ -58,6 +56,16 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
             data.AddBlocks(current_block, count); // Finale interval
 
             return data;
+        }
+        
+        private static int GetBlock(ref NoiseValue noise) {
+            var Y = noise.Position.y;
+
+            if (Y > noise.Height) return Y > noise.WaterLevel ? (int)Block.AIR : (int)Block.WATER;
+            if (Y == noise.Height) return (int) Block.GRASS;
+            if (Y <= noise.Height - 1 && Y >= noise.Height - 3) return (int)Block.DIRT;
+
+            return (int) Block.STONE;
         }
 
     }
