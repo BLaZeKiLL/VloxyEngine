@@ -61,7 +61,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Data {
         private static int GetBlock(ref NoiseValue noise) {
             var Y = noise.Position.y;
 
-            if (Y > noise.Height) return Y > noise.WaterLevel ? (int)Block.AIR : (int)Block.WATER;
+            if (Y > noise.Height) return Y > noise.WaterLevel ? (int) Block.AIR : (int) Block.WATER;
             if (Y == noise.Height) return (int) Block.GRASS;
             if (Y <= noise.Height - 1 && Y >= noise.Height - 3) return (int)Block.DIRT;
 
