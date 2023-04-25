@@ -5,10 +5,9 @@ using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
-using Unity.Collections;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Data {
+namespace CodeBlaze.Vloxy.Engine.Components {
 
     public class ChunkManager {
 
@@ -71,25 +70,6 @@ namespace CodeBlaze.Vloxy.Engine.Data {
 
         internal void Dispose() {
             Store.Dispose();
-        }
-
-        internal NativeArray<int3> InitialChunkRegion(Allocator handle) {
-            var size = _ChunkSettings.LoadDistance;
-
-            var result = new NativeArray<int3>(size.CubedSize(), handle);
-            var index = 0;
-             
-            for (int x = -size; x <= size; x++) {
-                for (int z = -size; z <= size; z++) {
-                    for (int y = -size; y <= size; y++) {
-                        var position = new int3(x, y, z) * _ChunkSettings.ChunkSize;
-                        result[index] = position;
-                        index++;
-                    }
-                }
-            }
-
-            return result;
         }
 
         private void InitialViewRegion(int3 focus) {
