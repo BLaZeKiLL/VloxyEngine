@@ -116,16 +116,9 @@ namespace CodeBlaze.Camera
 
         private Vector3 GetInputTranslationDirection()
         {
-            Vector3 direction = Vector3.zero;
-            
-            var moveDelta = movementAction.ReadValue<Vector2>();
-            direction.x = moveDelta.x;
-            direction.z = moveDelta.y;
-            // direction.y = verticalMovementAction.ReadValue<Vector2>().y;
-
-            return direction;
+            return movementAction.ReadValue<Vector3>();
         }
-        
+
         private void Update()
         {
             // Exit Sample  
