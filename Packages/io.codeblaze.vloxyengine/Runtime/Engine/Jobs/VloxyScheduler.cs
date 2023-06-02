@@ -2,8 +2,8 @@
 using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Data;
-using CodeBlaze.Vloxy.Engine.Jobs.Data;
+using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
+using CodeBlaze.Vloxy.Engine.Jobs.Collider;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
@@ -22,15 +22,18 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         
         private readonly MeshBuildScheduler _MeshBuildScheduler;
         private readonly ChunkDataScheduler _ChunkDataScheduler;
+        private readonly ColliderBuildScheduler _ColliderBuildScheduler;
 
         private readonly ChunkStore _ChunkStore;
         private readonly ChunkPool _ChunkPool;
 
         private readonly SimplePriorityQueue<int3> _ViewQueue;
         private readonly SimplePriorityQueue<int3> _DataQueue;
+        private readonly SimplePriorityQueue<int3> _ColliderQueue;
 
         private readonly HashSet<int3> _ViewSet;
         private readonly HashSet<int3> _DataSet;
+        private readonly HashSet<int3> _ColliderSet;
 
         private readonly VloxySettings _Settings;
 
@@ -38,31 +41,36 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             VloxySettings settings, 
             MeshBuildScheduler meshBuildScheduler,
             ChunkDataScheduler chunkDataScheduler,
+            ColliderBuildScheduler colliderBuildScheduler,
             ChunkStore chunkStore,
             ChunkPool chunkPool
         ) {
             _MeshBuildScheduler = meshBuildScheduler;
             _ChunkDataScheduler = chunkDataScheduler;
+            _ColliderBuildScheduler = colliderBuildScheduler;
 
             _ChunkStore = chunkStore;
             _ChunkPool = chunkPool;
 
             _ViewQueue = new SimplePriorityQueue<int3>();
             _DataQueue = new SimplePriorityQueue<int3>();
+            _ColliderQueue = new SimplePriorityQueue<int3>();
 
             _ViewSet = new HashSet<int3>();
             _DataSet = new HashSet<int3>();
+            _ColliderSet = new HashSet<int3>();
 
             _Settings = settings;
         }
 
         internal void FocusUpdate(int3 focus) {
-            var distance = _Settings.Chunk.LoadDistance;
+            var load = _Settings.Chunk.LoadDistance;
             var draw = _Settings.Chunk.DrawDistance;
-            
-            for (int x = -distance; x <= distance; x++) {
-                for (int z = -distance; z <= distance; z++) {
-                    for (int y = -distance; y <= distance; y++) {
+            var update = _Settings.Chunk.UpdateDistance;
+
+            for (int x = -load; x <= load; x++) {
+                for (int z = -load; z <= load; z++) {
+                    for (int y = -load; y <= load; y++) {
                         var pos = focus + _Settings.Chunk.ChunkSize.MemberMultiply(x, y, z);
 
                         if (
@@ -72,8 +80,20 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                         ) {
                             if (_ViewQueue.Contains(pos)) {
                                 _ViewQueue.UpdatePriority(pos, (pos - focus).SqrMagnitude());
-                            } else if (ShouldScheduleForMeshing(pos) && IsChunkLoaded(pos)) {
+                            } else if (ShouldScheduleForMeshing(pos) && CanGenerateMeshForChunk(pos)) {
                                 _ViewQueue.Enqueue(pos, (pos - focus).SqrMagnitude());
+                            }
+                        }
+                        
+                        if (
+                            (x >= -update && x <= update) &&
+                            (y >= -update && y <= update) &&
+                            (z >= -update && z <= update)
+                        ) {
+                            if (_ColliderQueue.Contains(pos)) {
+                                _ColliderQueue.UpdatePriority(pos, (pos - focus).SqrMagnitude());
+                            } else if (ShouldScheduleForBaking(pos) && CanBakeColliderForChunk(pos)) {
+                                _ColliderQueue.Enqueue(pos, (pos - focus).SqrMagnitude());
                             }
                         }
 
@@ -109,10 +129,22 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                     
                     // The chunk may be removed from memory by the time we schedule,
                     // Should we check this only here ?
-                    if (IsChunkLoaded(chunk)) _ViewSet.Add(chunk);
+                    if (CanGenerateMeshForChunk(chunk)) _ViewSet.Add(chunk);
                 }
 
                 _MeshBuildScheduler.Start(_ViewSet.ToList());
+            }
+
+            if (_ColliderQueue.Count > 0 && _ColliderBuildScheduler.IsReady) {
+                var count = math.min(_Settings.Scheduler.ColliderBatchSize, _ColliderQueue.Count);
+
+                for (int i = 0; i < count; i++) {
+                    var position = _ColliderQueue.Dequeue();
+
+                    if (CanBakeColliderForChunk(position)) _ColliderSet.Add(position);
+                }
+                
+                _ColliderBuildScheduler.Start(_ColliderSet.ToList());
             }
         }
 
@@ -120,31 +152,37 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             if (_ChunkDataScheduler.IsComplete && !_ChunkDataScheduler.IsReady) {
                 _ChunkDataScheduler.Complete();
                 _DataSet.Clear();
-                
-#if VLOXY_LOGGING
-                VloxyLogger.Info<VloxyScheduler>($"Streaming Avg Batch Time : {_ChunkDataScheduler.AvgTime:F3} MS");
-#endif
             }
             
             if (_MeshBuildScheduler.IsComplete && !_MeshBuildScheduler.IsReady) {
                 _MeshBuildScheduler.Complete();
                 _ViewSet.Clear();
-                
-#if VLOXY_LOGGING
-                VloxyLogger.Info<VloxyScheduler>($"Meshing Avg Batch Time : {_MeshBuildScheduler.AvgTime:F3} MS");
-#endif
+            }
+
+            if (_ColliderBuildScheduler.IsComplete && !_ColliderBuildScheduler.IsReady) {
+                _ColliderBuildScheduler.Complete();
+                _ColliderSet.Clear();
             }
         }
 
         internal void Dispose() {
             _ChunkDataScheduler.Dispose();
             _MeshBuildScheduler.Dispose();
+            _ColliderBuildScheduler.Dispose();
         }
 
         private bool ShouldScheduleForGenerating(int3 position) => !(_ChunkStore.ContainsChunk(position) || _DataSet.Contains(position));
         private bool ShouldScheduleForMeshing(int3 position) => !(_ChunkPool.IsActive(position) || _ViewSet.Contains(position));
 
-        private bool IsChunkLoaded(int3 position) {
+        private bool ShouldScheduleForBaking(int3 position) =>
+            !(_ChunkPool.IsCollidable(position) || _ColliderSet.Contains(position));
+
+        /// <summary>
+        /// Checks if the specified chunks and it's neighbours are generated
+        /// </summary>
+        /// <param name="position">Position of chunk to check</param>
+        /// <returns>Is it ready to be meshed</returns>
+        private bool CanGenerateMeshForChunk(int3 position) {
             var result = true;
             
             for (int x = -1; x <= 1; x++) {
@@ -159,13 +197,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             return result;
         }
 
+        private bool CanBakeColliderForChunk(int3 position) => _ChunkPool.IsActive(position);
+
         #region DebugAPI
 
         public float DataAvgTiming => _ChunkDataScheduler.AvgTime;
         public float MeshAvgTiming => _MeshBuildScheduler.AvgTime;
+        public float BakeAvgTiming => _ColliderBuildScheduler.AvgTime;
 
         public int DataQueueCount => _DataQueue.Count;
         public int MeshQueueCount => _ViewQueue.Count;
+        public int BakeQueueCount => _ColliderQueue.Count;
 
         #endregion
 

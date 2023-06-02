@@ -51,6 +51,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 case (int) Block.DIRT: return 52;
                 case (int) Block.STONE: return 39;
                 case (int) Block.WATER: return 54;
+                case (int) Block.SAND: return 57;
             }
 
             return 0;
