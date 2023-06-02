@@ -14,7 +14,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
         [ReadOnly] public int3 ChunkSize;
         [ReadOnly] public NoiseProfile NoiseProfile;
 
-        [ReadOnly] public NativeArray<int3> Jobs;
+        [ReadOnly] public NativeList<int3> Jobs;
         
         [WriteOnly] public NativeParallelHashMap<int3, Data.Chunk>.ParallelWriter Results;
 

@@ -6,7 +6,7 @@ using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Mesher {
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     public static class GreedyMesher {
 
         [BurstCompile]
