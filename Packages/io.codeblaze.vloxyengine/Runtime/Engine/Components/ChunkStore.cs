@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
@@ -9,7 +10,7 @@ using Priority_Queue;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace CodeBlaze.Vloxy.Engine.Data {
+namespace CodeBlaze.Vloxy.Engine.Components {
 
     public class ChunkStore {
 

@@ -1,5 +1,4 @@
-﻿using CodeBlaze.Vloxy.Engine;
-using CodeBlaze.Vloxy.Engine.World;
+﻿using CodeBlaze.Vloxy.Engine.World;
 
 using Unity.Mathematics;
 
@@ -7,7 +6,7 @@ using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Demo {
 
-    public class DemoWorld : VloxyWorld {
+    public class World : VloxyWorld {
         
         protected override void WorldInitialize() {
             RenderSettings.fogMode = FogMode.Linear;

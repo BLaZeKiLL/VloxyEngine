@@ -1,7 +1,6 @@
 ﻿using System;
 
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace CodeBlaze.Vloxy.Engine.Settings {
 

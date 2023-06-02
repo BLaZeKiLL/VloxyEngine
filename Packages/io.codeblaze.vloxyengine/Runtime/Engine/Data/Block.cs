@@ -7,6 +7,7 @@
         DIRT,
         GRASS,
         WATER,
+        SAND,
         WOOD,
         LEAFS,
         ERROR,

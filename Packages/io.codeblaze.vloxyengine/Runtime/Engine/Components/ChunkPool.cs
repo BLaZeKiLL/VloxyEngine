@@ -21,7 +21,8 @@ namespace CodeBlaze.Vloxy.Engine.Components {
     public class ChunkPool {
 
         private IObjectPool<ChunkBehaviour> _Pool;
-        private Dictionary<int3, ChunkBehaviour> _Map;
+        private Dictionary<int3, ChunkBehaviour> _MeshMap;
+        private HashSet<int3> _ColliderSet;
         private SimplePriorityQueue<int3> _Queue;
 
         private int3 _Focus;
@@ -30,9 +31,10 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         public ChunkPool(Transform transform, VloxySettings settings) {
             _ChunkPoolSize = (settings.Chunk.DrawDistance + 2).CubedSize();
 
-            _Map = new Dictionary<int3, ChunkBehaviour>(_ChunkPoolSize);
+            _MeshMap = new Dictionary<int3, ChunkBehaviour>(_ChunkPoolSize);
+            _ColliderSet = new HashSet<int3>((settings.Chunk.UpdateDistance + 2).CubedSize());
             _Queue = new SimplePriorityQueue<int3>();
-            
+
             _Pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
                 () => {
                     var go = new GameObject("Chunk", typeof(ChunkBehaviour)) {
@@ -40,12 +42,18 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                             parent = transform
                         }
                     };
-                    
+
+                    var collider = new GameObject("Collider", typeof(MeshCollider)) {
+                        transform = {
+                            parent = go.transform
+                        }
+                    };
+
                     go.SetActive(false);
-            
+
                     var chunkBehaviour = go.GetComponent<ChunkBehaviour>();
-                    
-                    chunkBehaviour.SetRenderSettings(settings.Renderer);
+
+                    chunkBehaviour.Init(settings.Renderer, collider.GetComponent<MeshCollider>());
 
                     return chunkBehaviour;
                 },
@@ -53,12 +61,14 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 chunkBehaviour => chunkBehaviour.gameObject.SetActive(false),
                 null, false, _ChunkPoolSize, _ChunkPoolSize
             );
+            
 #if VLOXY_LOGGING
             VloxyLogger.Info<ChunkPool>("Initialized Size : " + _ChunkPoolSize);
 #endif
         }
 
-        public bool IsActive(int3 pos) => _Map.ContainsKey(pos);
+        public bool IsActive(int3 pos) => _MeshMap.ContainsKey(pos);
+        public bool IsCollidable(int3 pos) => _ColliderSet.Contains(pos);
 
         internal void FocusUpdate(int3 focus) {
             _Focus = focus;
@@ -69,7 +79,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
         
         internal ChunkBehaviour Claim(int3 position) {
-            if (_Map.ContainsKey(position)) {
+            if (_MeshMap.ContainsKey(position)) {
                 throw new InvalidOperationException($"Chunk ({position}) already active");
             }
 
@@ -77,8 +87,9 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             if (_Queue.Count >= _ChunkPoolSize) {
                 var reclaim = _Queue.Dequeue();
                 
-                _Pool.Release(_Map[reclaim]);
-                _Map.Remove(reclaim);
+                _Pool.Release(_MeshMap[reclaim]);
+                _MeshMap.Remove(reclaim);
+                _ColliderSet.Remove(reclaim);
             }
                 
             // Claim
@@ -87,10 +98,26 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             behaviour.transform.position = position.GetVector3();
             behaviour.name = $"Chunk({position})";
                 
-            _Map.Add(position, behaviour);
+            _MeshMap.Add(position, behaviour);
             _Queue.Enqueue(position, 1.0f / (position - _Focus).SqrMagnitude());
 
             return behaviour;
+        }
+
+        internal Dictionary<int3, ChunkBehaviour> GetActiveMeshes(List<int3> positions) {
+            var map = new Dictionary<int3, ChunkBehaviour>();
+            
+            for (int i = 0; i < positions.Count; i++) {
+                var position = positions[i];
+                
+                if (IsActive(position)) map.Add(position, _MeshMap[position]);
+            }
+
+            return map;
+        }
+
+        internal void ColliderBaked(int3 position) {
+            _ColliderSet.Add(position);
         }
 
     }
