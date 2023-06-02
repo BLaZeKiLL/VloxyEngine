@@ -1,7 +1,6 @@
 using System.Collections;
 
 using CodeBlaze.Vloxy.Engine.Settings;
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using UnityEngine;
 using UnityEngine.InputSystem;

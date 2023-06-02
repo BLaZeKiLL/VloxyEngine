@@ -1,13 +1,12 @@
 ﻿using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs;
 using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
+using CodeBlaze.Vloxy.Engine.Jobs.Collider;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Mathematics;
 
@@ -33,6 +32,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         private ChunkPool _ChunkPool;
         private MeshBuildScheduler _MeshBuildScheduler;
         private ChunkDataScheduler _ChunkDataScheduler;
+        private ColliderBuildScheduler _ColliderBuildScheduler;
 
         private bool _IsFocused;
 
@@ -119,10 +119,12 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private void ConfigureSettings() {
             Settings.Chunk.LoadDistance = Settings.Chunk.DrawDistance + 2;
+            Settings.Chunk.UpdateDistance = Settings.Chunk.DrawDistance; // can reduce this by 2 maybe
 
             // TODO : Should these be dynamic or manual ?
             Settings.Scheduler.MeshingBatchSize = 16;
             Settings.Scheduler.StreamingBatchSize = 24;
+            Settings.Scheduler.ColliderBatchSize = 32;
 
             WorldConfigure();
         }
@@ -143,9 +145,14 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 NoiseProfile
             );
 
+            _ColliderBuildScheduler = VloxyProvider.Current.ColliderBuildScheduler(
+                _ChunkPool
+            );
+
             Scheduler = VloxyProvider.Current.VloxySchedulerV2(
                 _MeshBuildScheduler, 
                 _ChunkDataScheduler,
+                _ColliderBuildScheduler,
                 ChunkManager.Store,
                 _ChunkPool
             );
