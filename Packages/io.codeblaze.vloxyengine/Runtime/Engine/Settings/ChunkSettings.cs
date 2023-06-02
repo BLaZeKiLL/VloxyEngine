@@ -21,6 +21,10 @@ namespace CodeBlaze.Vloxy.Engine.Settings {
         [HideInInspector]
         [Tooltip("Number of chunks in memory = (draw_distance + 2)")]
         public int LoadDistance = 0;
+        
+        [HideInInspector]
+        [Tooltip("Should be less than equal to DrawDistance")]
+        public int UpdateDistance = 0;
 
     }
 

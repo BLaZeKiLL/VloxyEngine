@@ -4,9 +4,9 @@ using System.Linq;
 
 using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Data;
+using CodeBlaze.Vloxy.Engine.Jobs.Core;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Collections;
 using Unity.Jobs;
@@ -16,7 +16,7 @@ using UnityEngine.Rendering;
 
 namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
-    public class MeshBuildScheduler {
+    public class MeshBuildScheduler : JobScheduler {
 
         private readonly ChunkStore _ChunkStore;
         private readonly ChunkPool _ChunkPool;
@@ -30,11 +30,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         private UnityEngine.Mesh.MeshDataArray _MeshDataArray;
         private NativeArray<VertexAttributeDescriptor> _VertexParams;
 
-// #if VLOXY_LOGGING
-        private Queue<long> _Timings;
-        private Stopwatch _Watch;
-// #endif
-        
         public MeshBuildScheduler(
             VloxySettings settings,
             ChunkStore chunkStore,
@@ -58,31 +53,15 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             
             _Results = new NativeParallelHashMap<int3, int>(settings.Chunk.DrawDistance.CubedSize(),Allocator.Persistent);
             _Jobs = new NativeList<int3>(Allocator.Persistent);
-// #if VLOXY_LOGGING
-            _Watch = new Stopwatch();
-            _Timings = new Queue<long>(10);
-// #endif
         }
 
         internal bool IsReady = true;
         internal bool IsComplete => _Handle.IsCompleted;
 
-        internal void Dispose() {
-            _Handle.Complete();
-            
-            _VertexParams.Dispose();
-            _Results.Dispose();
-            _Jobs.Dispose();
-        }
-        
         internal void Start(List<int3> jobs) {
+            StartRecord();
+            
             IsReady = false;
-
-#if VLOXY_LOGGING
-            VloxyLogger.Info<MeshBuildScheduler>($"Scheduling {jobs.Count} meshes to build");
-            VloxyLogger.Info<MeshBuildScheduler>(string.Join(", ", jobs));
-#endif
-            _Watch.Restart();
 
             _ChunkAccessor = _ChunkStore.GetAccessor(jobs);
             
@@ -112,7 +91,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             for (var index = 0; index < _Jobs.Length; index++) {
                 var position = _Jobs[index];
                 
-                meshes[_Results[position]] = _ChunkPool.Claim(position).Mesh();
+                meshes[_Results[position]] = _ChunkPool.Claim(position).Mesh;
             }
 
             UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(
@@ -128,26 +107,19 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             _ChunkAccessor.Dispose();
             _Results.Clear();
             _Jobs.Clear();
-
-// #if VLOXY_LOGGING
-            _Watch.Stop();
-            Timestamp(_Watch.ElapsedMilliseconds);
-// #endif
-
+            
             IsReady = true;
+            
+            StopRecord();
         }
-
-// #if VLOXY_LOGGING
-        public float AvgTime => (float) _Timings.Sum() / 10;
-
-        private void Timestamp(long ms) {
-            if (_Timings.Count <= 10) _Timings.Enqueue(ms);
-            else {
-                _Timings.Dequeue();
-                _Timings.Enqueue(ms);
-            }
+        
+        internal void Dispose() {
+            _Handle.Complete();
+            
+            _VertexParams.Dispose();
+            _Results.Dispose();
+            _Jobs.Dispose();
         }
-// #endif
 
     }
 

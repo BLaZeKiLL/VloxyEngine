@@ -7,23 +7,23 @@ namespace CodeBlaze.Vloxy.Engine.Behaviour {
 
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
     public class ChunkBehaviour : MonoBehaviour {
-        
-        private Mesh _Mesh;
+
         private MeshRenderer _Renderer;
 
+        public Mesh Mesh { get; private set; }
+        public MeshCollider Collider { get; private set; }
+
         private void Awake() {
-            _Mesh = GetComponent<MeshFilter>().mesh;
+            Mesh = GetComponent<MeshFilter>().mesh;
             _Renderer = GetComponent<MeshRenderer>();
         }
 
-        public void SetRenderSettings(RendererSettings settings) {
+        public void Init(RendererSettings settings, MeshCollider m_collider) {
             _Renderer.sharedMaterials = settings.Materials;
+            Collider = m_collider;
 
             if (!settings.CastShadows) _Renderer.shadowCastingMode = ShadowCastingMode.Off;
         }
-
-        public Mesh Mesh() => _Mesh;
-
     }
 
 }
