@@ -16,7 +16,7 @@ namespace CodeBlaze.Vloxy.Demo {
         protected override void WorldAwake() {
             var height = NoiseProfile.GetNoise(int3.zero).Height + 16;
             
-            Focus.transform.SetPositionAndRotation(new Vector3(0, height, 0), Quaternion.Euler(45, 45 ,0));
+            Focus.transform.SetPositionAndRotation(new Vector3(0, height, 0), Quaternion.Euler(0, 0 ,0));
         }
 
     }
