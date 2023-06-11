@@ -34,7 +34,7 @@ namespace CodeBlaze.Vloxy.Demo.Player {
         [SerializeField] private float Drag = 0.1f;
 
         [Header("Misc")]
-        [SerializeField] private Vector3 Gravity = new Vector3(0, -30f, 0);
+        [SerializeField] private Vector3 Gravity = new(0, -30f, 0);
 
         private KinematicCharacterMotor _Motor;
 
@@ -50,8 +50,6 @@ namespace CodeBlaze.Vloxy.Demo.Player {
         }
 
         public void SetInput(ref Input input) {
-            UnityEngine.Debug.Log(input.Move);
-            
             // Calculate camera direction and rotation on the character plane
             var cameraPlanarDirection = Vector3.ProjectOnPlane(input.Look * Vector3.forward, _Motor.CharacterUp).normalized;
             if (cameraPlanarDirection.sqrMagnitude == 0f) // Why check 2 axis ?
@@ -63,14 +61,12 @@ namespace CodeBlaze.Vloxy.Demo.Player {
             // Move and look inputs
             _MoveInput = cameraPlanarRotation * input.Move;
             _LookInput = cameraPlanarDirection;
-            
-            UnityEngine.Debug.Log(_MoveInput);
         }
 
         public void UpdateRotation(ref Quaternion currentRotation, float deltaTime) {
             if (_LookInput != Vector3.zero)
             {
-                currentRotation *= Quaternion.LookRotation(_LookInput, _Motor.CharacterUp);
+                currentRotation = Quaternion.LookRotation(_LookInput, _Motor.CharacterUp);
             }
         }
 
