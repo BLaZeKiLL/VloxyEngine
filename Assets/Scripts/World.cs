@@ -13,10 +13,8 @@ namespace CodeBlaze.Vloxy.Demo {
             RenderSettings.fogEndDistance = Settings.Chunk.DrawDistance * 32 - 16;
         }
 
-        protected override void WorldAwake() {
-            var height = NoiseProfile.GetNoise(int3.zero).Height + 16;
-            
-            Focus.transform.SetPositionAndRotation(new Vector3(0, height, 0), Quaternion.Euler(45, 45 ,0));
+        public Vector3 GetSpawnPoint() {
+            return new Vector3(0, NoiseProfile.GetNoise(int3.zero).Height + 16, 0);
         }
 
     }
