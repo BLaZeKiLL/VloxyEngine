@@ -24,15 +24,19 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 
             _Input.Player.Enable();
             
+            _Input.Player.Toggle.performed += ToggleOnPerformed;
+            
             Cursor.lockState = CursorLockMode.Locked;
         }
 
         private void OnDisable() {
-            _Input?.Player.Disable();
-            
+            _Input.Player.Toggle.performed -= ToggleOnPerformed;
+
+            _Input.Player.Disable();
+
             Cursor.lockState = CursorLockMode.None;
         }
-
+        
         private void Start() {
             _CharacterController.transform.SetPositionAndRotation(_World.GetSpawnPoint(), Quaternion.identity);
         }
@@ -45,6 +49,10 @@ namespace CodeBlaze.Vloxy.Demo.Player {
             CameraInput();
         }
 
+        private void ToggleOnPerformed(InputAction.CallbackContext obj) {
+            _CharacterController.ToggleState();
+        }
+        
         private void CharacterInput() {
             if (!_Input.Player.enabled) return;
             
@@ -54,7 +62,8 @@ namespace CodeBlaze.Vloxy.Demo.Player {
                 Move = Vector3.ClampMagnitude(new Vector3(move.x, 0, move.y), 1f),
                 Look = _CameraController.transform.rotation,
                 JumpDown = _Input.Player.Jump.WasPressedThisFrame(),
-                SprintDown = Math.Abs(_Input.Player.Sprint.ReadValue<float>() - 1f) < float.Epsilon
+                SprintDown = Math.Abs(_Input.Player.Sprint.ReadValue<float>() - 1f) < float.Epsilon,
+                Altitude = _Input.Player.Altitude.ReadValue<float>()
             };
 
             _CharacterController.SetInput(ref input);

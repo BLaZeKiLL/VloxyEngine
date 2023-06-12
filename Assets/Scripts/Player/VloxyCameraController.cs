@@ -1,5 +1,3 @@
-using System;
-
 using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Demo.Player {

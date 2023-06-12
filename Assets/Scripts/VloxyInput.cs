@@ -48,6 +48,15 @@ namespace CodeBlaze.Vloxy.Demo
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""Altitude"",
+                    ""type"": ""Value"",
+                    ""id"": ""072eb426-8097-435a-b0c4-7a6139b856fd"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
                     ""name"": ""Sprint"",
                     ""type"": ""Value"",
                     ""id"": ""ceb33f9a-a572-4420-86fd-315454c24630"",
@@ -304,6 +313,72 @@ namespace CodeBlaze.Vloxy.Demo
                     ""action"": ""Toggle"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""Keyboard"",
+                    ""id"": ""2145d8d8-218b-41ed-a1e7-0f8f49ebde8d"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Altitude"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""bc9839e1-7428-4a6f-bb36-8632a9d71eb2"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Altitude"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""fea80930-fce1-4564-9f5e-45a1cbad0203"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Altitude"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""Gamepad"",
+                    ""id"": ""7c08cd90-da5b-4520-bbff-8d1ff5eef0a2"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Altitude"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""1fac65f9-348b-4d80-9cb7-4c4b06f20fb1"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Altitude"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""12f85979-1fc6-4632-871d-61001d19220a"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Altitude"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -939,6 +1014,7 @@ namespace CodeBlaze.Vloxy.Demo
             m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
             m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
             m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
+            m_Player_Altitude = m_Player.FindAction("Altitude", throwIfNotFound: true);
             m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
             m_Player_Fire = m_Player.FindAction("Fire", throwIfNotFound: true);
             m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
@@ -1022,6 +1098,7 @@ namespace CodeBlaze.Vloxy.Demo
         private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
         private readonly InputAction m_Player_Move;
         private readonly InputAction m_Player_Look;
+        private readonly InputAction m_Player_Altitude;
         private readonly InputAction m_Player_Sprint;
         private readonly InputAction m_Player_Fire;
         private readonly InputAction m_Player_Jump;
@@ -1032,6 +1109,7 @@ namespace CodeBlaze.Vloxy.Demo
             public PlayerActions(@VloxyInput wrapper) { m_Wrapper = wrapper; }
             public InputAction @Move => m_Wrapper.m_Player_Move;
             public InputAction @Look => m_Wrapper.m_Player_Look;
+            public InputAction @Altitude => m_Wrapper.m_Player_Altitude;
             public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
             public InputAction @Fire => m_Wrapper.m_Player_Fire;
             public InputAction @Jump => m_Wrapper.m_Player_Jump;
@@ -1051,6 +1129,9 @@ namespace CodeBlaze.Vloxy.Demo
                 @Look.started += instance.OnLook;
                 @Look.performed += instance.OnLook;
                 @Look.canceled += instance.OnLook;
+                @Altitude.started += instance.OnAltitude;
+                @Altitude.performed += instance.OnAltitude;
+                @Altitude.canceled += instance.OnAltitude;
                 @Sprint.started += instance.OnSprint;
                 @Sprint.performed += instance.OnSprint;
                 @Sprint.canceled += instance.OnSprint;
@@ -1073,6 +1154,9 @@ namespace CodeBlaze.Vloxy.Demo
                 @Look.started -= instance.OnLook;
                 @Look.performed -= instance.OnLook;
                 @Look.canceled -= instance.OnLook;
+                @Altitude.started -= instance.OnAltitude;
+                @Altitude.performed -= instance.OnAltitude;
+                @Altitude.canceled -= instance.OnAltitude;
                 @Sprint.started -= instance.OnSprint;
                 @Sprint.performed -= instance.OnSprint;
                 @Sprint.canceled -= instance.OnSprint;
@@ -1323,6 +1407,7 @@ namespace CodeBlaze.Vloxy.Demo
         {
             void OnMove(InputAction.CallbackContext context);
             void OnLook(InputAction.CallbackContext context);
+            void OnAltitude(InputAction.CallbackContext context);
             void OnSprint(InputAction.CallbackContext context);
             void OnFire(InputAction.CallbackContext context);
             void OnJump(InputAction.CallbackContext context);
