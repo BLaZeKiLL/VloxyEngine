@@ -33,7 +33,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             var vertex_count = mesh_buffer.VertexBuffer.Length;
 
             mesh.SetVertexBufferParams(vertex_count, VertexParams);
-            mesh.GetVertexData<Vertex>().CopyFrom(mesh_buffer.VertexBuffer);
+            mesh.GetVertexData<Vertex>().CopyFrom(mesh_buffer.VertexBuffer.AsArray());
 
             // Index Buffer
             var index_0_count = mesh_buffer.IndexBuffer0.Length;
@@ -43,9 +43,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
             var index_buffer = mesh.GetIndexData<int>();
             
-            NativeArray<int>.Copy(mesh_buffer.IndexBuffer0, 0, index_buffer, 0, index_0_count);
+            NativeArray<int>.Copy(mesh_buffer.IndexBuffer0.AsArray(), 0, index_buffer, 0, index_0_count);
             if (index_1_count > 1)
-                NativeArray<int>.Copy(mesh_buffer.IndexBuffer1, 0, index_buffer, index_0_count, index_1_count);
+                NativeArray<int>.Copy(mesh_buffer.IndexBuffer1.AsArray(), 0, index_buffer, index_0_count, index_1_count);
 
             // Sub Mesh
             mesh.subMeshCount = 2;

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Utils.Extensions {
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     public static class BurstMathExtensions {
 
         [BurstCompile]
