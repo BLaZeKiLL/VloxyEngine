@@ -52,9 +52,11 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 
             var input = new VloxyCharacterController.Input {
                 Move = Vector3.ClampMagnitude(new Vector3(move.x, 0, move.y), 1f),
-                Look = _CameraController.transform.rotation
+                Look = _CameraController.transform.rotation,
+                JumpDown = _Input.Player.Jump.WasPressedThisFrame(),
+                SprintDown = Math.Abs(_Input.Player.Sprint.ReadValue<float>() - 1f) < float.Epsilon
             };
-            
+
             _CharacterController.SetInput(ref input);
         }
 

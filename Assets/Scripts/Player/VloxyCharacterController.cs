@@ -4,10 +4,18 @@ using KinematicCharacterController;
 
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace CodeBlaze.Vloxy.Demo.Player {
 
     public class VloxyCharacterController : MonoBehaviour, ICharacterController {
+
+        public enum State {
+
+            FPS,
+            FLY
+
+        }
         
         public struct Input {
 
@@ -21,17 +29,30 @@ namespace CodeBlaze.Vloxy.Demo.Player {
             /// </summary>
             public Quaternion Look { get; set; }
 
+            public bool JumpDown { get; set; }
+            
+            public bool SprintDown { get; set; }
+
         }
 
+        [FormerlySerializedAs("MaxStableMoveSpeed")]
         [Header("Stable Movement")]
-        [SerializeField] private float MaxStableMoveSpeed = 10f;
+        [SerializeField] private float MaxStableWalkSpeed = 10f;
+        [SerializeField] private float MaxStableSprintSpeed = 25f;
         [SerializeField] private float StableMovementSharpness = 15;
         [SerializeField] private float OrientationSharpness = 10;
 
         [Header("Air Movement")]
-        [SerializeField] private float MaxAirMoveSpeed = 10f;
+        [SerializeField] private float MaxAirWalkSpeed = 10f;
+        [SerializeField] private float MaxAirSprintSpeed = 25f;
         [SerializeField] private float AirAccelerationSpeed = 5f;
         [SerializeField] private float Drag = 0.1f;
+        
+        [Header("Jumping")]
+        [SerializeField] private bool AllowJumpingWhenSliding = false;
+        [SerializeField] private float JumpSpeed = 10f;
+        [SerializeField] private float JumpPreGroundingGraceTime = 0f;
+        [SerializeField] private float JumpPostGroundingGraceTime = 0f;
 
         [Header("Misc")]
         [SerializeField] private Vector3 Gravity = new(0, -30f, 0);
@@ -40,6 +61,14 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 
         private Vector3 _MoveInput;
         private Vector3 _LookInput;
+        
+        private bool _jumpRequested = false;
+        private bool _jumpConsumed = false;
+        private bool _jumpedThisFrame = false;
+        private float _timeSinceJumpRequested = Mathf.Infinity;
+        private float _timeSinceLastAbleToJump = 0f;
+
+        private bool _shouldSprint = false;
 
         private void Awake() {
             _Motor = GetComponent<KinematicCharacterMotor>();
@@ -61,6 +90,14 @@ namespace CodeBlaze.Vloxy.Demo.Player {
             // Move and look inputs
             _MoveInput = cameraPlanarRotation * input.Move;
             _LookInput = cameraPlanarDirection;
+
+            _shouldSprint = input.SprintDown;
+            
+            if (input.JumpDown)
+            {
+                _timeSinceJumpRequested = 0f;
+                _jumpRequested = true;
+            }
         }
 
         public void UpdateRotation(ref Quaternion currentRotation, float deltaTime) {
@@ -79,7 +116,8 @@ namespace CodeBlaze.Vloxy.Demo.Player {
                 // Calculate target velocity
                 var inputRight = Vector3.Cross(_MoveInput, _Motor.CharacterUp);
                 var reorientedInput = Vector3.Cross(_Motor.GroundingStatus.GroundNormal, inputRight).normalized * _MoveInput.magnitude;
-                var targetMovementVelocity = reorientedInput * MaxStableMoveSpeed;
+                
+                var targetMovementVelocity = reorientedInput * (_shouldSprint ? MaxStableSprintSpeed : MaxStableWalkSpeed);
 
                 // Smooth movement Velocity
                 currentVelocity = Vector3.Lerp(currentVelocity, targetMovementVelocity, 1 - Mathf.Exp(-StableMovementSharpness * deltaTime));
@@ -89,7 +127,7 @@ namespace CodeBlaze.Vloxy.Demo.Player {
                 // Add move input
                 if (_MoveInput.sqrMagnitude > 0f)
                 {
-                    var targetMovementVelocity = _MoveInput * MaxAirMoveSpeed;
+                    var targetMovementVelocity = _MoveInput * (_shouldSprint ? MaxAirSprintSpeed : MaxAirWalkSpeed);
 
                     // Prevent climbing on un-stable slopes with air movement
                     if (_Motor.GroundingStatus.FoundAnyGround)
@@ -99,7 +137,7 @@ namespace CodeBlaze.Vloxy.Demo.Player {
                     }
 
                     var velocityDiff = Vector3.ProjectOnPlane(targetMovementVelocity - currentVelocity, Gravity);
-                    currentVelocity += velocityDiff * AirAccelerationSpeed * deltaTime;
+                    currentVelocity += velocityDiff * (AirAccelerationSpeed * deltaTime);
                 }
 
                 // Gravity
@@ -108,15 +146,75 @@ namespace CodeBlaze.Vloxy.Demo.Player {
                 // Drag
                 currentVelocity *= (1f / (1f + (Drag * deltaTime)));
             }
+            
+            // Handle jumping
+            _jumpedThisFrame = false;
+            _timeSinceJumpRequested += deltaTime;
+            if (_jumpRequested)
+            {
+                // See if we actually are allowed to jump
+                if (!_jumpConsumed && ((AllowJumpingWhenSliding ? _Motor.GroundingStatus.FoundAnyGround : _Motor.GroundingStatus.IsStableOnGround) || _timeSinceLastAbleToJump <= JumpPostGroundingGraceTime))
+                {
+                    // Calculate jump direction before ungrounding
+                    var jumpDirection = _Motor.CharacterUp;
+                    if (_Motor.GroundingStatus is { FoundAnyGround: true, IsStableOnGround: false })
+                    {
+                        jumpDirection = _Motor.GroundingStatus.GroundNormal;
+                    }
+
+                    // Makes the character skip ground probing/snapping on its next update. 
+                    // If this line weren't here, the character would remain snapped to the ground when trying to jump. Try commenting this line out and see.
+                    _Motor.ForceUnground(0.1f);
+
+                    // Add to the return velocity and reset jump state
+                    currentVelocity += (jumpDirection * JumpSpeed) - Vector3.Project(currentVelocity, _Motor.CharacterUp);
+                    _jumpRequested = false;
+                    _jumpConsumed = true;
+                    _jumpedThisFrame = true;
+                }
+            }
         }
 
         public void BeforeCharacterUpdate(float deltaTime) {
         }
 
         public void PostGroundingUpdate(float deltaTime) {
+            // Handle landing and leaving ground
+            if (_Motor.GroundingStatus.IsStableOnGround && !_Motor.LastGroundingStatus.IsStableOnGround)
+            {
+                //OnLanded();
+            }
+            else if (!_Motor.GroundingStatus.IsStableOnGround && _Motor.LastGroundingStatus.IsStableOnGround)
+            {
+                //OnLeaveStableGround();
+            }
         }
 
         public void AfterCharacterUpdate(float deltaTime) {
+            // Handle jump-related values
+            {
+                // Handle jumping pre-ground grace period
+                if (_jumpRequested && _timeSinceJumpRequested > JumpPreGroundingGraceTime)
+                {
+                    _jumpRequested = false;
+                }
+
+                // Handle jumping while sliding
+                if (AllowJumpingWhenSliding ? _Motor.GroundingStatus.FoundAnyGround : _Motor.GroundingStatus.IsStableOnGround)
+                {
+                    // If we're on a ground surface, reset jumping values
+                    if (!_jumpedThisFrame)
+                    {
+                        _jumpConsumed = false;
+                    }
+                    _timeSinceLastAbleToJump = 0f;
+                }
+                else
+                {
+                    // Keep track of time since we were last able to jump (for grace period)
+                    _timeSinceLastAbleToJump += deltaTime;
+                }
+            }
         }
 
         public bool IsColliderValidForCollisions(Collider coll) {
