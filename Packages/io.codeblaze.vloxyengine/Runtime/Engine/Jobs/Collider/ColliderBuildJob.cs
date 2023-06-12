@@ -13,7 +13,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Collider {
     [BurstCompile]
     internal struct ColliderBuildJob : IJobParallelFor {
 
-        [ReadOnly] public NativeArray<int> MeshIDs;
+        [ReadOnly] public NativeList<int> MeshIDs;
 
         public void Execute(int index) {
             Physics.BakeMesh(MeshIDs[index], false);
