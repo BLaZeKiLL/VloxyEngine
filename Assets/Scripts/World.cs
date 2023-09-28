@@ -14,7 +14,7 @@ namespace CodeBlaze.Vloxy.Demo {
         }
 
         public Vector3 GetSpawnPoint() {
-            return new Vector3(0, NoiseProfile.GetNoise(int3.zero).Height + 64, 0);
+            return new Vector3(0, NoiseProfile.GetNoise(int3.zero).Height + 16, 0);
         }
 
     }

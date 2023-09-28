@@ -36,12 +36,14 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 
         }
 
-        [FormerlySerializedAs("MaxStableMoveSpeed")] [Header("Stable Movement")] [SerializeField]
+        [SerializeField] private World _World;
+        
+        [Header("Stable Movement")] [SerializeField]
         private float MaxStableWalkSpeed = 10f;
 
         [SerializeField] private float MaxStableSprintSpeed = 25f;
         [SerializeField] private float StableMovementSharpness = 15;
-        [SerializeField] private float OrientationSharpness = 10;
+        // [SerializeField] private float OrientationSharpness = 10;
 
         [Header("Air Movement")] [SerializeField]
         private float MaxAirWalkSpeed = 10f;
@@ -57,10 +59,10 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 
         [Header("Misc")] [SerializeField] private Vector3 Gravity = new(0, -30f, 0);
 
+        [SerializeField] private State _State;
+        
         private KinematicCharacterMotor _Motor;
-
-        private State _State;
-
+        
         private Vector3 _MoveInput;
         private Vector3 _LookInput;
 
@@ -79,7 +81,10 @@ namespace CodeBlaze.Vloxy.Demo.Player {
         private void Start() {
             _Motor.CharacterController = this;
 
-            TransitionState(State.FPS);
+            TransitionState(_State);
+            
+            Debug.Log(_World.GetSpawnPoint());
+            _Motor.SetPosition(_World.GetSpawnPoint());
         }
 
         public void ToggleState() {

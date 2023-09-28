@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace CodeBlaze.Vloxy.Demo.Debug {
+namespace CodeBlaze.Vloxy.Demo.RuntimeTools {
 
     public class DebugController : MonoBehaviour {
 
@@ -13,17 +13,17 @@ namespace CodeBlaze.Vloxy.Demo.Debug {
         private void OnEnable() {
             _Input ??= new VloxyInput();
             
-            _Input.Debug.Enable();
+            _Input.RuntimeTools.Enable();
             
-            _Input.Debug.Stats.performed += StatsOnPerformed;
-            _Input.Debug.Console.performed += ConsoleOnPerformed;
+            _Input.RuntimeTools.Stats.performed += StatsOnPerformed;
+            _Input.RuntimeTools.Console.performed += ConsoleOnPerformed;
         }
 
         private void OnDisable() {
-            _Input.Debug.Stats.performed -= StatsOnPerformed;
-            _Input.Debug.Console.performed -= ConsoleOnPerformed;
+            _Input.RuntimeTools.Stats.performed -= StatsOnPerformed;
+            _Input.RuntimeTools.Console.performed -= ConsoleOnPerformed;
             
-            _Input.Debug.Disable();
+            _Input.RuntimeTools.Disable();
         }
 
         private void StatsOnPerformed(InputAction.CallbackContext obj) {

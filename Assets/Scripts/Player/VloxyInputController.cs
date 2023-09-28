@@ -2,12 +2,11 @@ using System;
 
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace CodeBlaze.Vloxy.Demo.Player {
 
     public class VloxyInputController : MonoBehaviour {
-
-        [SerializeField] private World _World;
         
         private VloxyInput _Input;
         
@@ -25,20 +24,18 @@ namespace CodeBlaze.Vloxy.Demo.Player {
             _Input.Player.Enable();
             
             _Input.Player.Toggle.performed += ToggleOnPerformed;
+            _Input.Player.Quit.performed += QuitOnPerformed;
             
             Cursor.lockState = CursorLockMode.Locked;
         }
 
         private void OnDisable() {
             _Input.Player.Toggle.performed -= ToggleOnPerformed;
+            _Input.Player.Quit.performed -= QuitOnPerformed;
 
             _Input.Player.Disable();
 
             Cursor.lockState = CursorLockMode.None;
-        }
-        
-        private void Start() {
-            _CharacterController.transform.SetPositionAndRotation(_World.GetSpawnPoint(), Quaternion.identity);
         }
 
         private void Update() {
@@ -51,6 +48,12 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 
         private void ToggleOnPerformed(InputAction.CallbackContext obj) {
             _CharacterController.ToggleState();
+        }
+
+        private void QuitOnPerformed(InputAction.CallbackContext obj) {
+            #if !UNITY_EDITOR
+            SceneManager.LoadScene(0);
+            #endif
         }
         
         private void CharacterInput() {

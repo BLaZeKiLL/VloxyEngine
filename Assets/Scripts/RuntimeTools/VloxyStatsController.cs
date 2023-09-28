@@ -9,7 +9,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace CodeBlaze.Vloxy.Demo.Debug {
+namespace CodeBlaze.Vloxy.Demo.RuntimeTools {
 
     public class VloxyStatsController : MonoBehaviour {
 
