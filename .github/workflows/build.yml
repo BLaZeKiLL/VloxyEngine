@@ -18,8 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         buildMethod:
-          - CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease
-          - CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease
+          - CodeBlaze.Editor.Build.Builder.BuildAndroidRelease
         targetPlatform:
           - Android
     steps:
@@ -62,8 +61,7 @@ jobs:
       fail-fast: false
       matrix:
         buildMethod:
-          - CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease
-          - CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease
+          - CodeBlaze.Editor.Build.Builder.BuildWindowsRelease
         targetPlatform:
           - StandaloneWindows64
     steps:

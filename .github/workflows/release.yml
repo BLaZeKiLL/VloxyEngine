@@ -47,8 +47,7 @@ jobs:
       fail-fast: false
       matrix:
         buildMethod:
-          - CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease
-          - CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease
+          - CodeBlaze.Editor.Build.Builder.BuildAndroidRelease
         targetPlatform:
           - Android
     steps:
@@ -91,8 +90,7 @@ jobs:
       fail-fast: false
       matrix:
         buildMethod:
-          - CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease
-          - CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease
+          - CodeBlaze.Editor.Build.Builder.BuildWindowsRelease
         targetPlatform:
           - StandaloneWindows64
     steps:
@@ -143,10 +141,8 @@ jobs:
 
       - name: Zip artifacts
         run: |
-          zip -r android-mono-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease/
-          zip -r android-il2cpp-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease/
-          zip -r windows-mono-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease/
-          zip -r windows-il2cpp-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease/
+          zip -r android-mono-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildAndroidRelease/
+          zip -r windows-mono-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsRelease/
 
       - name: Move package
         run: mv artifacts/Package/vloxyengine.unitypackage vloxyengine-${{ github.ref_name }}.unitypackage
@@ -173,7 +169,5 @@ jobs:
           prerelease: false
           files: |
             vloxyengine-${{ github.ref_name }}.unitypackage
-            android-mono-${{ github.ref_name }}.zip
-            android-il2cpp-${{ github.ref_name }}.zip
-            windows-mono-${{ github.ref_name }}.zip
-            windows-il2cpp-${{ github.ref_name }}.zip
+            android-${{ github.ref_name }}.zip
+            windows-${{ github.ref_name }}.zip

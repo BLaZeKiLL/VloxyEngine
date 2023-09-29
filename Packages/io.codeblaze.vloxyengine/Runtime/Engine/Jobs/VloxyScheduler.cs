@@ -185,9 +185,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         private bool CanGenerateMeshForChunk(int3 position) {
             var result = true;
             
-            for (int x = -1; x <= 1; x++) {
-                for (int z = -1; z <= 1; z++) {
-                    for (int y = -1; y <= 1; y++) {
+            for (var x = -1; x <= 1; x++) {
+                for (var z = -1; z <= 1; z++) {
+                    for (var y = -1; y <= 1; y++) {
                         var pos = position + _Settings.Chunk.ChunkSize.MemberMultiply(x, y, z);
                         result &= _ChunkStore.ContainsChunk(pos);
                     }
@@ -199,7 +199,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 
         private bool CanBakeColliderForChunk(int3 position) => _ChunkPool.IsActive(position);
 
-        #region DebugAPI
+        #region RuntimeStatsAPI
 
         public float DataAvgTiming => _ChunkDataScheduler.AvgTime;
         public float MeshAvgTiming => _MeshBuildScheduler.AvgTime;
