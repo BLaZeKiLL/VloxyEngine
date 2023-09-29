@@ -11,15 +11,15 @@ namespace CodeBlaze.Vloxy.Engine.Data {
     public struct ChunkData {
 
         private int3 ChunkSize;
-        private UnsafeIntervalTree Data;
+        private UnsafeIntervalList Data;
 
         public ChunkData(int3 chunkSize) {
             ChunkSize = chunkSize;
-            Data = new UnsafeIntervalTree(128, Allocator.Persistent);
+            Data = new UnsafeIntervalList(128, Allocator.Persistent);
         }
 
         public void AddBlocks(int block, int count) {
-            Data.AddNode(block, count);
+            Data.AddInterval(block, count);
         }
 
         public void SetBlock(int block, int x, int y, int z) {

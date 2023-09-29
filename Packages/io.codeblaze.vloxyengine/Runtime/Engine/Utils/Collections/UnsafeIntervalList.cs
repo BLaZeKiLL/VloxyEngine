@@ -8,7 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
     [BurstCompile]
-    public struct UnsafeIntervalTree {
+    public struct UnsafeIntervalList {
 
         private struct Node {
             public int ID;
@@ -27,16 +27,41 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
         public int CompressedLength => Internal.Length;
 
-        public UnsafeIntervalTree(int capacity, Allocator allocator) {
+        public UnsafeIntervalList(int capacity, Allocator allocator) {
             Internal = new UnsafeList<Node>(capacity, allocator);
             Length = 0;
+        }
+
+        public UnsafeIntervalList(INativeList<int> list, int capacity, Allocator allocator) {
+            Internal = new UnsafeList<Node>(capacity, allocator);
+            Length = 0;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (list == null || list.Length == 0) throw new NullReferenceException("List is null or empty");
+#endif
+            
+            int current = list[0];
+            int count = 0;
+
+            for (int i = 0; i < list.Length; i++) {
+                var id = list[i];
+
+                if (current == id)
+                {
+                    count++;
+                } 
+                else
+                {
+                    
+                }
+            }
         }
 
         public void Dispose() {
             Internal.Dispose();
         }
 
-        public void AddNode(int id, int count) {
+        public void AddInterval(int id, int count) {
             Length += count;
             Internal.Add(new Node(id, Length));
         }
