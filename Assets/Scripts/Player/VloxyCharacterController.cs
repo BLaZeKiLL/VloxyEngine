@@ -83,7 +83,6 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 
             TransitionState(_State);
             
-            Debug.Log(_World.GetSpawnPoint());
             _Motor.SetPosition(_World.GetSpawnPoint());
         }
 
