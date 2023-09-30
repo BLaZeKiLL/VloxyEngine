@@ -7,40 +7,42 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
+    /// <summary>
+    /// Didn't see much difference in SOA or AOS performance wise, performance depends on the way elements
+    /// would be accessed in ou case AOS might be better, should profile and see
+    /// </summary>
     [BurstCompile]
     public struct UnsafeIntervalList {
 
         // Array of structs impl
-        // private struct Node {
-        //     public int ID;
-        //     public int Count;
-        //
-        //     public Node(int id, int count) {
-        //         ID = id;
-        //         Count = count;
-        //     }
-        //
-        // }
-        //
-        // private UnsafeList<Node> Internal;
+        private struct Node {
+            public int ID;
+            public int Count;
+        
+            public Node(int id, int count) {
+                ID = id;
+                Count = count;
+            }
+        
+        }
+        
+        private UnsafeList<Node> Internal;
 
         // Struct of arrays impl
-        private UnsafeList<int> _Ids;
-        private UnsafeList<int> _Runs;
+        // private UnsafeList<int> _Ids;
+        // private UnsafeList<int> _Counts;
 
         public int Length;
 
-        public int CompressedLength => _Ids.Length;
+        public int CompressedLength => Internal.Length;
 
         public UnsafeIntervalList(int capacity, Allocator allocator) {
-            _Ids = new UnsafeList<int>(capacity, allocator);
-            _Runs = new UnsafeList<int>(capacity, allocator);
+            Internal = new UnsafeList<Node>(capacity, allocator);
             Length = 0;
         }
 
         public UnsafeIntervalList(INativeList<int> list, int capacity, Allocator allocator) {
-            _Ids = new UnsafeList<int>(capacity, allocator);
-            _Runs = new UnsafeList<int>(capacity, allocator);
+            Internal = new UnsafeList<Node>(capacity, allocator);
             Length = 0;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -66,22 +68,19 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
         }
 
         public void Dispose() {
-            _Ids.Dispose();
-            _Runs.Dispose();
+            Internal.Dispose();
         }
 
         public void AddInterval(int id, int count) {
             Length += count;
-            _Ids.Add(id);
-            _Runs.Add(Length);
+            Internal.Add(new Node(id, Length));
         }
 
         public int Get(int index) {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (index >= Length) throw new IndexOutOfRangeException($"{index} is out of range for the given data of length {Length}");
 #endif
-
-            return _Ids[BinarySearch(index)];
+            return Internal[BinarySearch(index)].ID;
         }
 
         public void Set(int index, int id) {
@@ -89,12 +88,12 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
         }
 
         private int BinarySearch(int index) {
-            var min = 0;
-            var max = CompressedLength;
+            int min = 0;
+            int max = Internal.Length;
 
             while (min <= max) {
-                var mid = (max + min) / 2;
-                var count = _Runs[mid];
+                int mid = (max + min) / 2;
+                int count = Internal[mid].Count;
 
                 if (index == count) return mid + 1;
                 
@@ -107,9 +106,9 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
         public override string ToString() {
             var sb = new StringBuilder($"Length: {Length}, Compressed: {CompressedLength}\n");
-
-            for (var i = 0; i < CompressedLength; i++) {
-                sb.AppendLine($"[Data: {_Ids[i]}, Count: {_Runs[i]}");
+            
+            foreach (var node in Internal) {
+                sb.AppendLine($"[Data: {node.ID}, Count: {node.Count}]");
             }
 
             return sb.ToString();

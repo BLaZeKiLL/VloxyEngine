@@ -2,8 +2,9 @@
     "name": "CodeBlaze.Vloxy.Engine.Tests.Editor",
     "rootNamespace": "CodeBlaze.Vloxy.Engine.Tests.Editor",
     "references": [
-        "UnityEngine.TestRunner",
+        "Unity.Collections",
         "UnityEditor.TestRunner",
+        "UnityEngine.TestRunner",
         "CodeBlaze.Vloxy.Engine"
     ],
     "includePlatforms": [
