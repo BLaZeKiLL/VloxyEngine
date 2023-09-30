@@ -10,6 +10,10 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
     [BurstCompile]
     public struct UnsafeIntervalList {
 
+#if VLOXY_DATA_NEW // Struct of arrays impl
+        private UnsafeList<int> _Ids;
+        private UnsafeList<int> _Counts;
+#else // Array of structs impl
         private struct Node {
             public int ID;
             public int Count;
@@ -20,9 +24,10 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
             }
 
         }
-
-        private UnsafeList<Node> Internal;
-
+        
+        private UnsafeList<Node> Internal;   
+#endif
+        
         public int Length;
 
         public int CompressedLength => Internal.Length;
@@ -40,21 +45,22 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
             if (list == null || list.Length == 0) throw new NullReferenceException("List is null or empty");
 #endif
             
-            int current = list[0];
-            int count = 0;
+            var current = list[0];
+            var count = 0;
 
-            for (int i = 0; i < list.Length; i++) {
+            for (var i = 0; i < list.Length; i++) {
                 var id = list[i];
 
-                if (current == id)
-                {
+                if (current == id) {
                     count++;
-                } 
-                else
-                {
-                    
+                } else {
+                    AddInterval(current, count);
+                    current = id;
+                    count = 1;
                 }
             }
+            
+            AddInterval(current, count);
         }
 
         public void Dispose() {

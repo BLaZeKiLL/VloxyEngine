@@ -37,7 +37,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Collider {
             _Meshes = _ChunkPool.GetActiveMeshes(jobs);
 
             foreach (var (_, behaviour) in _Meshes) {
-                _Jobs.Add(behaviour.Mesh.GetInstanceID());
+                if (behaviour.Mesh.vertexCount > 0) { // Avoid colliders for empty meshes
+                    _Jobs.Add(behaviour.Mesh.GetInstanceID());
+                }
             }
 
             var job = new ColliderBuildJob {
