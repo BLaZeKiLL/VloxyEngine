@@ -10,35 +10,37 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
     [BurstCompile]
     public struct UnsafeIntervalList {
 
-#if VLOXY_DATA_NEW // Struct of arrays impl
+        // Array of structs impl
+        // private struct Node {
+        //     public int ID;
+        //     public int Count;
+        //
+        //     public Node(int id, int count) {
+        //         ID = id;
+        //         Count = count;
+        //     }
+        //
+        // }
+        //
+        // private UnsafeList<Node> Internal;
+
+        // Struct of arrays impl
         private UnsafeList<int> _Ids;
-        private UnsafeList<int> _Counts;
-#else // Array of structs impl
-        private struct Node {
-            public int ID;
-            public int Count;
+        private UnsafeList<int> _Runs;
 
-            public Node(int id, int count) {
-                ID = id;
-                Count = count;
-            }
-
-        }
-        
-        private UnsafeList<Node> Internal;   
-#endif
-        
         public int Length;
 
-        public int CompressedLength => Internal.Length;
+        public int CompressedLength => _Ids.Length;
 
         public UnsafeIntervalList(int capacity, Allocator allocator) {
-            Internal = new UnsafeList<Node>(capacity, allocator);
+            _Ids = new UnsafeList<int>(capacity, allocator);
+            _Runs = new UnsafeList<int>(capacity, allocator);
             Length = 0;
         }
 
         public UnsafeIntervalList(INativeList<int> list, int capacity, Allocator allocator) {
-            Internal = new UnsafeList<Node>(capacity, allocator);
+            _Ids = new UnsafeList<int>(capacity, allocator);
+            _Runs = new UnsafeList<int>(capacity, allocator);
             Length = 0;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -64,12 +66,14 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
         }
 
         public void Dispose() {
-            Internal.Dispose();
+            _Ids.Dispose();
+            _Runs.Dispose();
         }
 
         public void AddInterval(int id, int count) {
             Length += count;
-            Internal.Add(new Node(id, Length));
+            _Ids.Add(id);
+            _Runs.Add(Length);
         }
 
         public int Get(int index) {
@@ -77,7 +81,7 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
             if (index >= Length) throw new IndexOutOfRangeException($"{index} is out of range for the given data of length {Length}");
 #endif
 
-            return Internal[BinarySearch(index)].ID;
+            return _Ids[BinarySearch(index)];
         }
 
         public void Set(int index, int id) {
@@ -85,12 +89,12 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
         }
 
         private int BinarySearch(int index) {
-            int min = 0;
-            int max = Internal.Length;
+            var min = 0;
+            var max = CompressedLength;
 
             while (min <= max) {
-                int mid = (max + min) / 2;
-                int count = Internal[mid].Count;
+                var mid = (max + min) / 2;
+                var count = _Runs[mid];
 
                 if (index == count) return mid + 1;
                 
@@ -103,9 +107,9 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
         public override string ToString() {
             var sb = new StringBuilder($"Length: {Length}, Compressed: {CompressedLength}\n");
-            
-            foreach (var node in Internal) {
-                sb.AppendLine($"[Data: {node.ID}, Count: {node.Count}]");
+
+            for (var i = 0; i < CompressedLength; i++) {
+                sb.AppendLine($"[Data: {_Ids[i]}, Count: {_Runs[i]}");
             }
 
             return sb.ToString();
