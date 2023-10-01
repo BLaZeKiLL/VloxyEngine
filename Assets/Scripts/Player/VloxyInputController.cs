@@ -1,5 +1,5 @@
 using System;
-
+using CodeBlaze.Vloxy.Demo.Managers;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -8,32 +8,32 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 
     public class VloxyInputController : MonoBehaviour {
         
-        private VloxyInput _Input;
+        private VloxyInput.PlayerActions _PlayerMap;
         
         private VloxyCharacterController _CharacterController;
         private VloxyCameraController _CameraController;
-
+        
         private void Awake() {
             _CharacterController = GetComponentInChildren<VloxyCharacterController>();
             _CameraController = GetComponentInChildren<VloxyCameraController>();
         }
 
         private void OnEnable() {
-            _Input ??= new VloxyInput();
-
-            _Input.Player.Enable();
+            _PlayerMap = GameManager.Current.InputMaps.Player;
             
-            _Input.Player.Toggle.performed += ToggleOnPerformed;
-            _Input.Player.Quit.performed += QuitOnPerformed;
+            _PlayerMap.Enable();
+            
+            _PlayerMap.Toggle.performed += ToggleOnPerformed;
+            _PlayerMap.Quit.performed += QuitOnPerformed;
             
             Cursor.lockState = CursorLockMode.Locked;
         }
 
         private void OnDisable() {
-            _Input.Player.Toggle.performed -= ToggleOnPerformed;
-            _Input.Player.Quit.performed -= QuitOnPerformed;
+            _PlayerMap.Toggle.performed -= ToggleOnPerformed;
+            _PlayerMap.Quit.performed -= QuitOnPerformed;
 
-            _Input.Player.Disable();
+            _PlayerMap.Disable();
 
             Cursor.lockState = CursorLockMode.None;
         }
@@ -51,33 +51,33 @@ namespace CodeBlaze.Vloxy.Demo.Player {
         }
 
         private void QuitOnPerformed(InputAction.CallbackContext obj) {
-            #if !UNITY_EDITOR
+#if !UNITY_EDITOR
             SceneManager.LoadScene(0);
-            #endif
+#endif
         }
         
         private void CharacterInput() {
-            if (!_Input.Player.enabled) return;
+            if (!_PlayerMap.enabled) return;
             
-            var move = _Input.Player.Move.ReadValue<Vector2>();
+            var move = _PlayerMap.Move.ReadValue<Vector2>();
 
             var input = new VloxyCharacterController.Input {
                 Move = Vector3.ClampMagnitude(new Vector3(move.x, 0, move.y), 1f),
                 Look = _CameraController.transform.rotation,
-                JumpDown = _Input.Player.Jump.WasPressedThisFrame(),
-                SprintDown = Math.Abs(_Input.Player.Sprint.ReadValue<float>() - 1f) < float.Epsilon,
-                Altitude = _Input.Player.Altitude.ReadValue<float>()
+                JumpDown = _PlayerMap.Jump.WasPressedThisFrame(),
+                SprintDown = Math.Abs(_PlayerMap.Sprint.ReadValue<float>() - 1f) < float.Epsilon,
+                Altitude = _PlayerMap.Altitude.ReadValue<float>()
             };
 
             _CharacterController.SetInput(ref input);
         }
 
         private void CameraInput() {
-            if (!_Input.Player.enabled) return;
+            if (!_PlayerMap.enabled) return;
 
             var input = new VloxyCameraController.Input {
                 Move = _CharacterController.transform.position,
-                Look = _Input.Player.Look.ReadValue<Vector2>()
+                Look = _PlayerMap.Look.ReadValue<Vector2>()
             };
 
             _CameraController.UpdateWithInput(Time.deltaTime, ref input);

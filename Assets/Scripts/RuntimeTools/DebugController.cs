@@ -1,3 +1,4 @@
+using CodeBlaze.Vloxy.Demo.Managers;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,22 +9,22 @@ namespace CodeBlaze.Vloxy.Demo.RuntimeTools {
         [SerializeField] private RectTransform Vloxy;
         [SerializeField] private RectTransform Console;
 
-        private VloxyInput _Input;
+        private VloxyInput.RuntimeToolsActions _RuntimeToolsMap;
 
         private void OnEnable() {
-            _Input ??= new VloxyInput();
+            _RuntimeToolsMap = GameManager.Current.InputMaps.RuntimeTools;
             
-            _Input.RuntimeTools.Enable();
+            _RuntimeToolsMap.Enable();
             
-            _Input.RuntimeTools.Stats.performed += StatsOnPerformed;
-            _Input.RuntimeTools.Console.performed += ConsoleOnPerformed;
+            _RuntimeToolsMap.Stats.performed += StatsOnPerformed;
+            _RuntimeToolsMap.Console.performed += ConsoleOnPerformed;
         }
 
         private void OnDisable() {
-            _Input.RuntimeTools.Stats.performed -= StatsOnPerformed;
-            _Input.RuntimeTools.Console.performed -= ConsoleOnPerformed;
+            _RuntimeToolsMap.Stats.performed -= StatsOnPerformed;
+            _RuntimeToolsMap.Console.performed -= ConsoleOnPerformed;
             
-            _Input.RuntimeTools.Disable();
+            _RuntimeToolsMap.Disable();
         }
 
         private void StatsOnPerformed(InputAction.CallbackContext obj) {

@@ -8,10 +8,6 @@ using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
-#if VLOXY_LOGGING
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
-#endif
-
 using Priority_Queue;
 
 using Unity.Mathematics;

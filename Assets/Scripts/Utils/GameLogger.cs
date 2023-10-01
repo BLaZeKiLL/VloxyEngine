@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-namespace CodeBlaze.Vloxy.Engine.Utils.Logger {
+namespace CodeBlaze.Vloxy.Demo.Utils {
+    
+    public class GameLogger {
 
-    public static class VloxyLogger {
-
-        private static string _LogTag = $"<color=#{ColorUtility.ToHtmlStringRGB(GetColor("VLOXY"))}>[VLOXY]</color> ";
+        private static string _LogTag = $"<color=#{ColorUtility.ToHtmlStringRGB(GetColor("GAME"))}>[GAME]</color> ";
         
         /// <summary>
         /// Creates a tag with unique color for given type
@@ -58,12 +58,12 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Logger {
         /// <param name="hue">Original hue value</param>
         /// <returns>Normalized hue value</returns>
         private static float NormalizeHue(float hue) => Mathf.Lerp(0.7f, 1.6f, hue) % 1;
-        
+
         private static Color GetColor(string name) {
             var hue = ((float) name.GetHashCode() % 10000 / 10000 + 1) / 2;
             return Color.HSVToRGB(NormalizeHue(hue), 1f, 1f);
         }
-
+        
     }
-
+    
 }
