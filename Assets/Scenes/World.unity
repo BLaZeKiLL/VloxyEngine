@@ -703,7 +703,7 @@ MonoBehaviour:
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
+  m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
@@ -4746,7 +4746,7 @@ MonoBehaviour:
   m_InputType: 0
   m_AsteriskChar: 42
   m_KeyboardType: 0
-  m_LineType: 0
+  m_LineType: 1
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
   m_CharacterValidation: 0
@@ -4782,7 +4782,7 @@ MonoBehaviour:
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
   m_Text: 
   m_CaretBlinkRate: 0.85
-  m_CaretWidth: 1
+  m_CaretWidth: 4
   m_ReadOnly: 0
   m_RichText: 1
   m_GlobalFontAsset: {fileID: 0}
@@ -4790,7 +4790,7 @@ MonoBehaviour:
   m_ResetOnDeActivation: 1
   m_RestoreOriginalTextOnEscape: 1
   m_isRichTextEditingAllowed: 0
-  m_LineLimit: 0
+  m_LineLimit: 1
   m_InputValidator: {fileID: 0}
 --- !u!114 &877164705
 MonoBehaviour:
@@ -5720,6 +5720,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1445915950}
+  - component: {fileID: 1445915951}
   m_Layer: 5
   m_Name: Console
   m_TagString: Untagged
@@ -5748,6 +5749,20 @@ RectTransform:
   m_AnchoredPosition: {x: 8.205078, y: 7.5}
   m_SizeDelta: {x: 779.63, y: 277.68}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1445915951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1445915949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b2be92dfe7540069bd4ec9771090be7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CommandLine: {fileID: 877164704}
+  Output: {fileID: 1081522595}
 --- !u!1 &1477473334
 GameObject:
   m_ObjectHideFlags: 0
@@ -6016,7 +6031,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -6456,8 +6471,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 28
+  m_fontSizeBase: 28
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 0
