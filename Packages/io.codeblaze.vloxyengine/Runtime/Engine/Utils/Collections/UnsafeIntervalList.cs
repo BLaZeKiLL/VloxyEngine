@@ -9,9 +9,9 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
     /// <summary>
     /// Didn't see much difference in SOA or AOS performance wise, performance depends on the way elements
-    /// would be accessed in ou case AOS might be better, should profile and see
+    /// would be accessed in our case AOS might be better, should profile and see
     /// </summary>
-    // [BurstCompile]
+    [BurstCompile]
     public struct UnsafeIntervalList {
 
         // Array of structs impl
@@ -113,24 +113,26 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
             var (left_item, left_node_index) = LeftOf(index, node_index);
             var (right_item, right_node_index) = RightOf(index, node_index);
             
+            // Nodes are returned by value, so we need to update them back in the array
+            
             if (id == left_item && id == right_item) { // [X,A,X] -> [X,X,X]
-                var left_node = Internal[left_node_index]; // This is returned by valued
+                var left_node = Internal[left_node_index]; 
 
                 left_node.Count = Internal[right_node_index].Count;
 
-                Internal[left_node_index] = left_node; // Need to update it
+                Internal[left_node_index] = left_node;
                 
-                Internal.RemoveRange(node_index, 2); // Can remove node and right
-            } else if (id == left_item) { // [X,A,Y] -> [X,X,Y]
-                var left_node = Internal[left_node_index];
+                Internal.RemoveRange(node_index, 2);
+            } else if (id == left_item) { // [X,A,A,Y] -> [X,X,A,Y]
+                var left_node = Internal[left_node_index]; // This is returned by value
                 var node = Internal[node_index];
 
                 left_node.Count++;
 
                 Internal[left_node_index] = left_node;
                 
-                if (left_node.Count == node.Count) Internal.RemoveRange(node_index, 1);
-            } else if (id == right_item) { // [X,A,Y] -> [X,Y,Y]
+                if (left_node.Count == node.Count) Internal.RemoveRange(node_index, 1); // [X,A,Y] -> [X,X,Y]
+            } else if (id == right_item) { // [X,A,A,Y] -> [X,A,Y,Y]
                 var left_node = Internal[left_node_index];
                 var node = Internal[node_index];
 
@@ -138,9 +140,12 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
                 Internal[node_index] = node;
                 
-                if (left_node.Count == node.Count) Internal.RemoveRange(node_index, 1);
+                if (left_node.Count == node.Count) Internal.RemoveRange(node_index, 1); // [X,A,Y] -> [X,Y,Y]
             } else { // No Coalesce
                 if (block == left_item && block == right_item) { // [X,X,X] -> [X,A,X]
+                    // Unity docs says that InsertRange creates duplicates of node at node_index but in the
+                    // debugger I have seen junk values sometimes, so to be safe we set the values of
+                    // each newly created node to the correct value.
                     Internal.InsertRange(node_index, 2);
 
                     var left_node = Internal[node_index];

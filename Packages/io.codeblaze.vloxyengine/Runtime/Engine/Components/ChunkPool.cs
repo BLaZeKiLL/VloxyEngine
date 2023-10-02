@@ -88,8 +88,11 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             // Reclaim
             if (_Queue.Count >= _ChunkPoolSize) {
                 var reclaim = _Queue.Dequeue();
+                var reclaim_behaviour = _MeshMap[reclaim];
+
+                reclaim_behaviour.Collider.sharedMesh = null;
                 
-                _Pool.Release(_MeshMap[reclaim]);
+                _Pool.Release(reclaim_behaviour);
                 _MeshMap.Remove(reclaim);
                 _ColliderSet.Remove(reclaim);
             }
