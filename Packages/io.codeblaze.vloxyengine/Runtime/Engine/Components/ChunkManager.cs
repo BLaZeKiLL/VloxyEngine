@@ -16,7 +16,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
     public class ChunkManager {
 
-        private Dictionary<int3, Chunk> _Chunks;
+        private Dictionary<int3, ChunkData> _Chunks;
         private SimplePriorityQueue<int3> _Queue;
 
         private int3 _Focus;
@@ -27,7 +27,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             _ChunkSize = settings.Chunk.ChunkSize;
             _ChunkStoreSize = (settings.Chunk.LoadDistance + 2).CubedSize();
 
-            _Chunks = new Dictionary<int3, Chunk>(_ChunkStoreSize);
+            _Chunks = new Dictionary<int3, ChunkData>(_ChunkStoreSize);
             _Queue = new SimplePriorityQueue<int3>();
         }
 
@@ -44,7 +44,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             
             VloxyLogger.Info<ChunkManager>($"Setting block {block_pos} in chunk {chunk_pos}");
 
-            _Chunks[chunk_pos].Data.SetBlock(block_pos, VloxyUtils.GetBlockId(block));
+            _Chunks[chunk_pos].SetBlock(block_pos, VloxyUtils.GetBlockId(block));
             
             return true;
         }
@@ -57,8 +57,8 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         internal void RemoveChunk(int3 position) => _Chunks.Remove(position);
         
         internal void Dispose() {
-            foreach (var pair in _Chunks) {
-                pair.Value.Data.Dispose();
+            foreach (var (_, chunk) in _Chunks) {
+                chunk.Dispose();
             }
         }
         
@@ -70,7 +70,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             }
         }
 
-        internal void AddChunks(NativeParallelHashMap<int3, Chunk> chunks) {
+        internal void AddChunks(NativeParallelHashMap<int3, ChunkData> chunks) {
             foreach (var pair in chunks) {
                 var position = pair.Key;
                 var chunk = pair.Value;
@@ -99,7 +99,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
         
         internal ChunkAccessor GetAccessor(List<int3> positions) {
-            var slice = new NativeParallelHashMap<int3, Chunk>(
+            var slice = new NativeParallelHashMap<int3, ChunkData>(
                 positions.Count * 27, 
                 Allocator.Persistent // TODO : Allocator cleanup, fit in the 4 frame limit
             );

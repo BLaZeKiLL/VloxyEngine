@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Components;
+using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs.Core;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -21,7 +22,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
         
         // can be native arrays
         private NativeList<int3> _Jobs;
-        private NativeParallelHashMap<int3, Data.Chunk> _Results;
+        private NativeParallelHashMap<int3, ChunkData> _Results;
 
         public ChunkDataScheduler(
             VloxySettings settings,
@@ -33,7 +34,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
             _NoiseProfile = noiseProfile;
 
             _Jobs = new NativeList<int3>(Allocator.Persistent);
-            _Results = new NativeParallelHashMap<int3, Data.Chunk>(
+            _Results = new NativeParallelHashMap<int3, ChunkData>(
                 settings.Chunk.LoadDistance.CubedSize(), 
                 Allocator.Persistent
             );

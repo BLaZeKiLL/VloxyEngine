@@ -10,10 +10,13 @@ namespace CodeBlaze.Vloxy.Engine.Data {
     [BurstCompile]
     public struct ChunkData {
 
+        public int3 Position { get; }
+        
         private int3 ChunkSize;
         private UnsafeIntervalList Data;
 
-        public ChunkData(int3 chunkSize) {
+        public ChunkData(int3 position, int3 chunkSize) {
+            Position = position;
             ChunkSize = chunkSize;
             Data = new UnsafeIntervalList(128, Allocator.Persistent);
         }
