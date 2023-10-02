@@ -41,10 +41,12 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 VloxyLogger.Warn<ChunkManager>($"Chunk : {chunk_pos} not loaded");
                 return false;
             }
-            
-            VloxyLogger.Info<ChunkManager>($"Setting block {block_pos} in chunk {chunk_pos}");
 
-            _Chunks[chunk_pos].SetBlock(block_pos, VloxyUtils.GetBlockId(block));
+            var chunk = _Chunks[chunk_pos];
+            
+            chunk.SetBlock(block_pos, VloxyUtils.GetBlockId(block));
+
+            _Chunks[chunk_pos] = chunk;
             
             return true;
         }
@@ -86,15 +88,15 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 _Chunks.Add(position, chunk);
                 _Queue.Enqueue(position, 1.0f / (position - _Focus).SqrMagnitude());
                 
-                // for (var x = 6; x <= 10; x++) {
-                //     for (var z = 6; z <= 10; z++) {
-                //         for (var y = 6; y <= 10; y++) {
-                //             var pos = new Vector3Int(position.x + x, position.y + y, position.z + z);
-                //
-                //             SetBlock(Block.STONE, pos);
-                //         }
-                //     }
-                // }
+                for (var x = 6; x <= 10; x++) {
+                    for (var z = 6; z <= 10; z++) {
+                        for (var y = 6; y <= 10; y++) {
+                            var pos = new Vector3Int(position.x + x, position.y + y, position.z + z);
+                
+                            SetBlock(Block.STONE, pos);
+                        }
+                    }
+                }
             }
         }
         

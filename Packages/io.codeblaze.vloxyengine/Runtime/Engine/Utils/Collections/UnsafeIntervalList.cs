@@ -123,14 +123,22 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
                 Internal.RemoveRange(node_index, 2); // Can remove node and right
             } else if (id == left_item) { // [X,A,Y] -> [X,X,Y]
                 var left_node = Internal[left_node_index];
+                var node = Internal[node_index];
 
                 left_node.Count++;
 
                 Internal[left_node_index] = left_node;
                 
-                Internal.RemoveRange(node_index, 1);
+                if (left_node.Count == node.Count) Internal.RemoveRange(node_index, 1);
             } else if (id == right_item) { // [X,A,Y] -> [X,Y,Y]
-                Internal.RemoveRange(node_index, 1);
+                var left_node = Internal[left_node_index];
+                var node = Internal[node_index];
+
+                node.Count--;
+
+                Internal[node_index] = node;
+                
+                if (left_node.Count == node.Count) Internal.RemoveRange(node_index, 1);
             } else { // No Coalesce
                 if (block == left_item && block == right_item) { // [X,X,X] -> [X,A,X]
                     Internal.InsertRange(node_index, 2);

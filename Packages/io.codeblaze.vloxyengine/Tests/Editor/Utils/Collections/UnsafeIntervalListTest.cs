@@ -228,6 +228,25 @@ namespace CodeBlaze.Vloxy.Engine.Tests.Editor.Utils.Collections {
             var list = new NativeList<int>(16, Allocator.Temp);
             
             list.AddReplicate(1, 5);
+            list.AddReplicate(2, 2);
+            list.AddReplicate(3, 5);
+
+            var compressed = new UnsafeIntervalList(list, 16, Allocator.Temp);
+            
+            compressed.Set(5, 1);
+            
+            Assert.AreEqual(1, compressed.Get(5));
+            Assert.AreEqual(3, compressed.CompressedLength);
+            
+            list.Dispose();
+            compressed.Dispose();
+        }
+        
+        [Test]
+        public void ShouldSet_LeftSingleCoalesce() {
+            var list = new NativeList<int>(16, Allocator.Temp);
+            
+            list.AddReplicate(1, 5);
             list.AddReplicate(2, 1);
             list.AddReplicate(3, 5);
 
@@ -244,6 +263,25 @@ namespace CodeBlaze.Vloxy.Engine.Tests.Editor.Utils.Collections {
 
         [Test]
         public void ShouldSet_RightCoalesce() {
+            var list = new NativeList<int>(16, Allocator.Temp);
+            
+            list.AddReplicate(1, 5);
+            list.AddReplicate(2, 2);
+            list.AddReplicate(3, 5);
+
+            var compressed = new UnsafeIntervalList(list, 16, Allocator.Temp);
+            
+            compressed.Set(6, 3);
+            
+            Assert.AreEqual(3, compressed.Get(6));
+            Assert.AreEqual(3, compressed.CompressedLength);
+            
+            list.Dispose();
+            compressed.Dispose();
+        }
+        
+        [Test]
+        public void ShouldSet_RightSingleCoalesce() {
             var list = new NativeList<int>(16, Allocator.Temp);
             
             list.AddReplicate(1, 5);
