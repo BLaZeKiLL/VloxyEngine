@@ -4487,6 +4487,7 @@ GameObject:
   m_Component:
   - component: {fileID: 652638165}
   - component: {fileID: 652638164}
+  - component: {fileID: 652638166}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4523,6 +4524,19 @@ Transform:
   - {fileID: 1045365577}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &652638166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652638163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 584064cbf7df4c77aa23389702a012ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MaxInteractionDistance: 250
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -4840,6 +4854,7 @@ GameObject:
   m_Component:
   - component: {fileID: 892864101}
   - component: {fileID: 892864100}
+  - component: {fileID: 892864102}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -4876,6 +4891,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &892864102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 892864099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f327e6ab3ee942de82894a62a93cfeee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isPersistant: 0
 --- !u!1 &903551183
 GameObject:
   m_ObjectHideFlags: 0
@@ -4930,7 +4958,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d810b425bdc4810b122d77017593705, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  World: {fileID: 892864100}
   Coords: {fileID: 1214471351}
   ChunkCoords: {fileID: 468773430}
   Data: {fileID: 420825906}
@@ -5275,7 +5302,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43a1e4cd01464d6781cfe3fa4477f2c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _World: {fileID: 892864100}
   MaxStableWalkSpeed: 10
   MaxStableSprintSpeed: 25
   StableMovementSharpness: 15

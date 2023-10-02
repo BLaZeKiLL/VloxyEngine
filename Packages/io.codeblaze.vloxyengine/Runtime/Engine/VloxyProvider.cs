@@ -13,9 +13,9 @@ namespace CodeBlaze.Vloxy.Engine {
 
     public class VloxyProvider : Provider<VloxyProvider> {
 
-        public VloxySettings Settings { get; set; }
+        internal VloxySettings Settings { get; set; }
 
-        public virtual NoiseProfile NoiseProfile() => new (new NoiseProfile.Settings {
+        internal virtual NoiseProfile NoiseProfile() => new (new NoiseProfile.Settings {
             Height = Settings.Noise.Height,
             WaterLevel = Settings.Noise.WaterLevel,
             Seed = Settings.Noise.Seed,
@@ -25,41 +25,31 @@ namespace CodeBlaze.Vloxy.Engine {
             Octaves = Settings.Noise.Octaves,
         });
 
-        public virtual ChunkManager ChunkManager() => new(Settings);
+        internal virtual ChunkManager ChunkManager() => new(Settings);
 
-        public virtual ChunkPool ChunkPoolV2(Transform transform) => new (transform, Settings);
+        internal virtual ChunkPool ChunkPool(Transform transform) => new (transform, Settings);
 
-        public virtual VloxyScheduler VloxySchedulerV2(
+        internal virtual VloxyScheduler VloxyScheduler(
             MeshBuildScheduler meshBuildScheduler,
             ChunkDataScheduler chunkDataScheduler,
             ColliderBuildScheduler colliderBuildScheduler,
-            ChunkStore chunkStore,
+            ChunkManager ChunkManager,
             ChunkPool chunkPool
-        ) => new(Settings, meshBuildScheduler, chunkDataScheduler, colliderBuildScheduler, chunkStore, chunkPool);
+        ) => new(Settings, meshBuildScheduler, chunkDataScheduler, colliderBuildScheduler, ChunkManager, chunkPool);
 
-        public virtual ChunkDataScheduler ChunkDataSchedulerV2(
-            ChunkStore chunkStore,
+        internal virtual ChunkDataScheduler ChunkDataScheduler(
+            ChunkManager ChunkManager,
             NoiseProfile noiseProfile
-        ) => new(
-            Settings,
-            chunkStore,
-            noiseProfile
-        );
+        ) => new(Settings, ChunkManager, noiseProfile);
 
-        public virtual MeshBuildScheduler MeshBuildSchedulerV2(
-            ChunkStore chunkStore,
+        internal virtual MeshBuildScheduler MeshBuildScheduler(
+            ChunkManager ChunkManager,
             ChunkPool chunkPool
-        ) => new(
-            Settings,
-            chunkStore,
-            chunkPool
-        );
+        ) => new(Settings, ChunkManager, chunkPool);
 
-        public virtual ColliderBuildScheduler ColliderBuildScheduler(
+        internal virtual ColliderBuildScheduler ColliderBuildScheduler(
             ChunkPool chunkPool
-        ) => new(
-            chunkPool
-        );
+        ) => new(chunkPool);
 
     }
 

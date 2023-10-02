@@ -28,7 +28,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         private int3 _Focus;
         private int _ChunkPoolSize;
         
-        public ChunkPool(Transform transform, VloxySettings settings) {
+        internal ChunkPool(Transform transform, VloxySettings settings) {
             _ChunkPoolSize = (settings.Chunk.DrawDistance + 2).CubedSize();
 
             _MeshMap = new Dictionary<int3, ChunkBehaviour>(_ChunkPoolSize);
@@ -42,6 +42,8 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                             parent = transform
                         }
                     };
+
+                    go.tag = "Chunk";
 
                     var collider = new GameObject("Collider", typeof(MeshCollider)) {
                         transform = {
@@ -67,8 +69,8 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 #endif
         }
 
-        public bool IsActive(int3 pos) => _MeshMap.ContainsKey(pos);
-        public bool IsCollidable(int3 pos) => _ColliderSet.Contains(pos);
+        internal bool IsActive(int3 pos) => _MeshMap.ContainsKey(pos);
+        internal bool IsCollidable(int3 pos) => _ColliderSet.Contains(pos);
 
         internal void FocusUpdate(int3 focus) {
             _Focus = focus;

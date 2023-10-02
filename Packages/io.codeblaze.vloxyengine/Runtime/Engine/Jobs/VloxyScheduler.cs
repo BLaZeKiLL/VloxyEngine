@@ -20,7 +20,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         private readonly ChunkDataScheduler _ChunkDataScheduler;
         private readonly ColliderBuildScheduler _ColliderBuildScheduler;
 
-        private readonly ChunkStore _ChunkStore;
+        private readonly ChunkManager _ChunkManager;
         private readonly ChunkPool _ChunkPool;
 
         private readonly SimplePriorityQueue<int3> _ViewQueue;
@@ -38,14 +38,14 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             MeshBuildScheduler meshBuildScheduler,
             ChunkDataScheduler chunkDataScheduler,
             ColliderBuildScheduler colliderBuildScheduler,
-            ChunkStore chunkStore,
+            ChunkManager ChunkManager,
             ChunkPool chunkPool
         ) {
             _MeshBuildScheduler = meshBuildScheduler;
             _ChunkDataScheduler = chunkDataScheduler;
             _ColliderBuildScheduler = colliderBuildScheduler;
 
-            _ChunkStore = chunkStore;
+            _ChunkManager = ChunkManager;
             _ChunkPool = chunkPool;
 
             _ViewQueue = new SimplePriorityQueue<int3>();
@@ -102,7 +102,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                 }
             }
             
-            _ChunkStore.FocusUpdate(focus);
+            _ChunkManager.FocusUpdate(focus);
             _ChunkPool.FocusUpdate(focus);
         }
 
@@ -167,7 +167,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             _ColliderBuildScheduler.Dispose();
         }
 
-        private bool ShouldScheduleForGenerating(int3 position) => !(_ChunkStore.ContainsChunk(position) || _DataSet.Contains(position));
+        private bool ShouldScheduleForGenerating(int3 position) => !(_ChunkManager.ContainsChunk(position) || _DataSet.Contains(position));
         private bool ShouldScheduleForMeshing(int3 position) => !(_ChunkPool.IsActive(position) || _ViewSet.Contains(position));
 
         private bool ShouldScheduleForBaking(int3 position) =>
@@ -185,7 +185,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                 for (var z = -1; z <= 1; z++) {
                     for (var y = -1; y <= 1; y++) {
                         var pos = position + _Settings.Chunk.ChunkSize.MemberMultiply(x, y, z);
-                        result &= _ChunkStore.ContainsChunk(pos);
+                        result &= _ChunkManager.ContainsChunk(pos);
                     }
                 }
             }

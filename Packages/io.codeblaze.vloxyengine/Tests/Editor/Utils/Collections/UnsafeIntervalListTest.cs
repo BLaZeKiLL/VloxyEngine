@@ -279,6 +279,44 @@ namespace CodeBlaze.Vloxy.Engine.Tests.Editor.Utils.Collections {
             list.Dispose();
             compressed.Dispose();
         }
+
+        [Test]
+        public void ShouldSet_InLastInterval() {
+            var list = new NativeList<int>(16, Allocator.Temp);
+            
+            list.AddReplicate(1, 5);
+            list.AddReplicate(2, 1);
+            list.AddReplicate(1, 5);
+
+            var compressed = new UnsafeIntervalList(list, 16, Allocator.Temp);
+
+            compressed.Set(9, 5);
+            
+            Assert.AreEqual(5, compressed.Get(9));
+            Assert.AreEqual(5, compressed.CompressedLength);
+            
+            list.Dispose();
+            compressed.Dispose();
+        }
+
+        [Test]
+        public void ShouldSet_InFirstInterval() {
+            var list = new NativeList<int>(16, Allocator.Temp);
+            
+            list.AddReplicate(1, 5);
+            list.AddReplicate(2, 1);
+            list.AddReplicate(1, 5);
+
+            var compressed = new UnsafeIntervalList(list, 16, Allocator.Temp);
+
+            compressed.Set(1, 5);
+            
+            Assert.AreEqual(5, compressed.Get(1));
+            Assert.AreEqual(5, compressed.CompressedLength);
+            
+            list.Dispose();
+            compressed.Dispose();
+        } 
     }
 
 }

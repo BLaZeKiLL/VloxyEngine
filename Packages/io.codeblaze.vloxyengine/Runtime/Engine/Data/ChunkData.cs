@@ -22,8 +22,12 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             Data.AddInterval(block, count);
         }
 
-        public void SetBlock(int block, int x, int y, int z) {
-            Data.Set(block, ChunkSize.Flatten(x,y,z));
+        public void SetBlock(int x, int y, int z, int block) {
+            Data.Set(ChunkSize.Flatten(x,y,z), block);
+        }
+        
+        public void SetBlock(int3 pos, int block) {
+            Data.Set(ChunkSize.Flatten(pos), block);
         }
 
         public int GetBlock(int x, int y, int z) {

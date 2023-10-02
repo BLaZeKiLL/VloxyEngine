@@ -9,13 +9,24 @@ namespace CodeBlaze.Vloxy.Demo.Player {
     public class VloxyInputController : MonoBehaviour {
         
         private VloxyInput.PlayerActions _PlayerMap;
-        
+
+        private VloxyCharacterInteractions _CharacterInteractions;
         private VloxyCharacterController _CharacterController;
         private VloxyCameraController _CameraController;
         
         private void Awake() {
+            _CharacterInteractions = GetComponent<VloxyCharacterInteractions>();
+            
             _CharacterController = GetComponentInChildren<VloxyCharacterController>();
             _CameraController = GetComponentInChildren<VloxyCameraController>();
+        }
+        
+        private void Update() {
+            CharacterInput();
+        }
+
+        private void LateUpdate() {
+            CameraInput();
         }
 
         private void OnEnable() {
@@ -25,6 +36,7 @@ namespace CodeBlaze.Vloxy.Demo.Player {
             
             _PlayerMap.Toggle.performed += ToggleOnPerformed;
             _PlayerMap.Quit.performed += QuitOnPerformed;
+            _PlayerMap.Fire.performed += FireOnPerformed;
             
             Cursor.lockState = CursorLockMode.Locked;
         }
@@ -32,18 +44,11 @@ namespace CodeBlaze.Vloxy.Demo.Player {
         private void OnDisable() {
             _PlayerMap.Toggle.performed -= ToggleOnPerformed;
             _PlayerMap.Quit.performed -= QuitOnPerformed;
+            _PlayerMap.Fire.performed -= FireOnPerformed;
 
             _PlayerMap.Disable();
 
             Cursor.lockState = CursorLockMode.None;
-        }
-
-        private void Update() {
-            CharacterInput();
-        }
-
-        private void LateUpdate() {
-            CameraInput();
         }
 
         private void ToggleOnPerformed(InputAction.CallbackContext obj) {
@@ -54,6 +59,10 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 #if !UNITY_EDITOR
             SceneManager.LoadScene(0);
 #endif
+        }
+        
+        private void FireOnPerformed(InputAction.CallbackContext obj) {
+            _CharacterInteractions.Fire();
         }
         
         private void CharacterInput() {

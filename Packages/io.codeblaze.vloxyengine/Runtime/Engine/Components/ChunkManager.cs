@@ -1,111 +1,127 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 
+using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
+using CodeBlaze.Vloxy.Engine.Utils;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using CodeBlaze.Vloxy.Engine.Utils.Logger;
+using Priority_Queue;
 
+using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Components {
 
     public class ChunkManager {
 
-        internal ChunkStore Store { get; }
-        
-        private ChunkSettings _ChunkSettings;
-        
-        private ISet<int3> _Claim;
-        private ISet<int3> _Reclaim;
+        private Dictionary<int3, Chunk> _Chunks;
+        private SimplePriorityQueue<int3> _Queue;
 
-        public ChunkManager(VloxySettings settings) {
-            _ChunkSettings = settings.Chunk;
+        private int3 _Focus;
+        private int3 _ChunkSize;
+        private int _ChunkStoreSize;
 
-            Store = new ChunkStore(settings);
-            
-            var viewRegionSize = _ChunkSettings.DrawDistance.CubedSize();
-            
-            _Claim = new HashSet<int3>(viewRegionSize);
-            _Reclaim = new HashSet<int3>(viewRegionSize);
+        internal ChunkManager(VloxySettings settings) {
+            _ChunkSize = settings.Chunk.ChunkSize;
+            _ChunkStoreSize = (settings.Chunk.LoadDistance + 2).CubedSize();
+
+            _Chunks = new Dictionary<int3, Chunk>(_ChunkStoreSize);
+            _Queue = new SimplePriorityQueue<int3>();
         }
 
-        internal (List<int3>, List<int3>) ChunkRegionUpdate(int3 newFocusChunkCoord, int3 focusChunkCoord) {
-            var initial = focusChunkCoord == new int3(1, 1, 1) * int.MinValue;
-            var diff = newFocusChunkCoord - focusChunkCoord;
-            
-            if (initial.AndReduce()) return (null, null);
-            
-            _Reclaim.Clear();
-            _Claim.Clear();
-            
-            Update(_Claim, newFocusChunkCoord, diff, _ChunkSettings.LoadDistance);
-            Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.LoadDistance);
+        #region API
 
-#if VLOXY_LOGGING
-            VloxyLogger.Info<ChunkManager>($"Data Claim : {_Claim.Count()}, Data Reclaim : {_Reclaim.Count}");
-#endif
-            return (_Claim.ToList(), _Reclaim.ToList());
-        }
+        public bool SetBlock(Block block, Vector3Int position) {
+            var chunk_pos = VloxyUtils.GetChunkCoords(position);
+            var block_pos = VloxyUtils.GetBlockIndex(position);
 
-        internal (List<int3>, List<int3>) ViewRegionUpdate(int3 newFocusChunkCoord, int3 focusChunkCoord) {
-            var initial = focusChunkCoord == new int3(1, 1, 1) * int.MinValue;
-            var diff = newFocusChunkCoord - focusChunkCoord;
-            
-            _Reclaim.Clear();
-            _Claim.Clear();
-            
-            if (!initial.AndReduce()) {
-                Update(_Claim, newFocusChunkCoord, diff, _ChunkSettings.DrawDistance);
-                Update(_Reclaim, focusChunkCoord, -diff, _ChunkSettings.DrawDistance);
-            } else {
-                InitialViewRegion(newFocusChunkCoord);
+            if (!_Chunks.ContainsKey(chunk_pos)) {
+                VloxyLogger.Warn<ChunkManager>($"Chunk : {chunk_pos} not loaded");
+                return false;
             }
             
-#if VLOXY_LOGGING
-            VloxyLogger.Info<ChunkManager>($"View Claim : {_Claim.Count()}, View Reclaim : {_Reclaim.Count}");
-#endif
+            VloxyLogger.Info<ChunkManager>($"Setting block {block_pos} in chunk {chunk_pos}");
 
-            return (_Claim.ToList(), _Reclaim.ToList());
+            _Chunks[chunk_pos].Data.SetBlock(block_pos, VloxyUtils.GetBlockId(block));
+            
+            return true;
         }
+        
+        public int ChunkCount() => _Chunks.Count;
+        public bool ContainsChunk(int3 position) => _Chunks.ContainsKey(position);
 
+        #endregion
+        
+        internal void RemoveChunk(int3 position) => _Chunks.Remove(position);
+        
         internal void Dispose() {
-            Store.Dispose();
+            foreach (var pair in _Chunks) {
+                pair.Value.Data.Dispose();
+            }
         }
+        
+        internal void FocusUpdate(int3 focus) {
+            _Focus = focus;
 
-        private void InitialViewRegion(int3 focus) {
-            for (int x = -_ChunkSettings.DrawDistance; x <= _ChunkSettings.DrawDistance; x++) {
-                for (int z = -_ChunkSettings.DrawDistance; z <= _ChunkSettings.DrawDistance; z++) {
-                    for (int y = -_ChunkSettings.DrawDistance; y <= _ChunkSettings.DrawDistance; y++) {
-                        _Claim.Add(focus + new int3(x, y, z) * _ChunkSettings.ChunkSize);
-                    }
-                }
+            foreach (var position in _Queue) {
+                _Queue.UpdatePriority(position, 1.0f / (position - focus).SqrMagnitude());
             }
         }
 
-        private void Update(ISet<int3> set, int3 focus, int3 diff, int distance) {
-            var size = _ChunkSettings.ChunkSize;
-            
-            for (int i = -distance; i <= distance; i++) {
-                for (int j = -distance; j <= distance; j++) {
-                    if (diff.x != 0) {
-                        var position = new int3(focus + new int3(diff.x * distance, i * size.y, j * size.z));
-                        
-                        set.Add(position);
-                    }
+        internal void AddChunks(NativeParallelHashMap<int3, Chunk> chunks) {
+            foreach (var pair in chunks) {
+                var position = pair.Key;
+                var chunk = pair.Value;
 
-                    if (diff.y != 0) {
-                        var position = new int3(focus + new int3(i * size.x, diff.y * distance, j * size.z));
-                        
-                        set.Add(position);
-                    }
+                if (_Chunks.ContainsKey(chunk.Position)) {
+                    throw new InvalidOperationException($"Chunk {position} already exists");
+                }
+                
+                if (_Queue.Count >= _ChunkStoreSize) {
+                    _Chunks.Remove(_Queue.Dequeue());
+                }
+                
+                _Chunks.Add(position, chunk);
+                _Queue.Enqueue(position, 1.0f / (position - _Focus).SqrMagnitude());
+                
+                // for (var x = 6; x <= 10; x++) {
+                //     for (var z = 6; z <= 10; z++) {
+                //         for (var y = 6; y <= 10; y++) {
+                //             var pos = new Vector3Int(position.x + x, position.y + y, position.z + z);
+                //
+                //             SetBlock(Block.STONE, pos);
+                //         }
+                //     }
+                // }
+            }
+        }
+        
+        internal ChunkAccessor GetAccessor(List<int3> positions) {
+            var slice = new NativeParallelHashMap<int3, Chunk>(
+                positions.Count * 27, 
+                Allocator.Persistent // TODO : Allocator cleanup, fit in the 4 frame limit
+            );
 
-                    if (diff.z != 0) {
-                        var position = new int3(focus + new int3(i * size.x, j * size.y, diff.z * distance));
-                        
-                        set.Add(position);
+            foreach (var position in positions) {
+                for (var x = -1; x <= 1; x++) {
+                    for (var z = -1; z <= 1; z++) {
+                        for (var y = -1; y <= 1; y++) {
+                            var pos = position + _ChunkSize.MemberMultiply(x,y,z);
+
+                            if (!_Chunks.ContainsKey(pos)) {
+                                // Anytime this exception is thrown, mesh building completely stops
+                                throw new InvalidOperationException($"Chunk {pos} has not been generated");
+                            }
+                                
+                            if (!slice.ContainsKey(pos)) slice.Add(pos, _Chunks[pos]);
+                        }
                     }
                 }
             }
+
+            return new ChunkAccessor(slice, _ChunkSize);
         }
 
     }

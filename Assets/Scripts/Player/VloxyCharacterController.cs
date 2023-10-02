@@ -35,8 +35,6 @@ namespace CodeBlaze.Vloxy.Demo.Player {
             public bool SprintDown { get; set; }
 
         }
-
-        [SerializeField] private World _World;
         
         [Header("Stable Movement")] [SerializeField]
         private float MaxStableWalkSpeed = 10f;
@@ -83,7 +81,7 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 
             TransitionState(_State);
             
-            _Motor.SetPosition(_World.GetSpawnPoint());
+            _Motor.SetPosition(WorldAPI.Current.World.GetSpawnPoint());
         }
 
         public void ToggleState() {

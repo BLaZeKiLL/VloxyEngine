@@ -14,7 +14,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
 
     public class ChunkDataScheduler : JobScheduler {
         private int3 _ChunkSize;
-        private ChunkStore _ChunkStore;
+        private ChunkManager _ChunkStore;
         private NoiseProfile _NoiseProfile;
 
         private JobHandle _Handle;
@@ -25,7 +25,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
 
         public ChunkDataScheduler(
             VloxySettings settings,
-            ChunkStore chunkStore,
+            ChunkManager chunkStore,
             NoiseProfile noiseProfile
         ) {
             _ChunkSize = settings.Chunk.ChunkSize;

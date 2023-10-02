@@ -13,8 +13,6 @@ namespace CodeBlaze.Vloxy.Demo.RuntimeTools {
 
     public class VloxyStatsController : MonoBehaviour {
 
-        [SerializeField] private VloxyWorld World;
-
         [SerializeField] private Text Coords;
         [SerializeField] private Text ChunkCoords;
         [SerializeField] private Text Data;
@@ -28,11 +26,13 @@ namespace CodeBlaze.Vloxy.Demo.RuntimeTools {
         }
 
         private void Update() {
-            UpdateCoords(Vector3Int.RoundToInt(World.Focus.position));
-            UpdateChunkCoords(World.FocusChunkCoord / 32);
-            UpdateData(World.Scheduler.DataQueueCount, World.Scheduler.DataAvgTiming);
-            UpdateMesh(World.Scheduler.MeshQueueCount, World.Scheduler.MeshAvgTiming);
-            UpdateBake(World.Scheduler.BakeQueueCount, World.Scheduler.BakeAvgTiming);
+            var world = WorldAPI.Current.World;
+            
+            UpdateCoords(Vector3Int.RoundToInt(world.Focus.position));
+            UpdateChunkCoords(world.FocusChunkCoord / 32);
+            UpdateData(world.Scheduler.DataQueueCount, world.Scheduler.DataAvgTiming);
+            UpdateMesh(world.Scheduler.MeshQueueCount, world.Scheduler.MeshAvgTiming);
+            UpdateBake(world.Scheduler.BakeQueueCount, world.Scheduler.BakeAvgTiming);
         }
 
         private void UpdateCoords(Vector3Int coords) {

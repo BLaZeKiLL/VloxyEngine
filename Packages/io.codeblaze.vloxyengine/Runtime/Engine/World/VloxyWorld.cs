@@ -24,6 +24,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
         public Transform Focus => _Focus;
         public VloxySettings Settings => _Settings;
         public int3 FocusChunkCoord { get; private set; }
+        
+        
         public VloxyScheduler Scheduler { get; private set; }
         public NoiseProfile NoiseProfile { get; private set; }
         public ChunkManager ChunkManager { get; private set; }
@@ -134,15 +136,15 @@ namespace CodeBlaze.Vloxy.Engine.World {
             NoiseProfile = VloxyProvider.Current.NoiseProfile();
             ChunkManager = VloxyProvider.Current.ChunkManager();
 
-            _ChunkPool = VloxyProvider.Current.ChunkPoolV2(transform);
+            _ChunkPool = VloxyProvider.Current.ChunkPool(transform);
 
-            _MeshBuildScheduler = VloxyProvider.Current.MeshBuildSchedulerV2(
-                ChunkManager.Store, 
+            _MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(
+                ChunkManager, 
                 _ChunkPool
             );
             
-            _ChunkDataScheduler = VloxyProvider.Current.ChunkDataSchedulerV2(
-                ChunkManager.Store,
+            _ChunkDataScheduler = VloxyProvider.Current.ChunkDataScheduler(
+                ChunkManager,
                 NoiseProfile
             );
 
@@ -150,11 +152,11 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 _ChunkPool
             );
 
-            Scheduler = VloxyProvider.Current.VloxySchedulerV2(
+            Scheduler = VloxyProvider.Current.VloxyScheduler(
                 _MeshBuildScheduler, 
                 _ChunkDataScheduler,
                 _ColliderBuildScheduler,
-                ChunkManager.Store,
+                ChunkManager,
                 _ChunkPool
             );
 
