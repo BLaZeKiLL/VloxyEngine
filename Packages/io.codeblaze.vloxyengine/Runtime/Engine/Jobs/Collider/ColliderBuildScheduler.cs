@@ -53,10 +53,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Collider {
             _Handle.Complete();
             
             foreach (var (position, behaviour) in _Meshes) {
+                _ChunkPool.ColliderBaked(position);
+                
                 if (behaviour.Mesh.vertexCount <= 0) continue;
                 
                 behaviour.Collider.sharedMesh = behaviour.Mesh;
-                _ChunkPool.ColliderBaked(position);
             }
             
             _Jobs.Clear();

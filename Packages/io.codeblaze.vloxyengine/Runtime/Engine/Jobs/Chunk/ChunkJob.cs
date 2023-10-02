@@ -9,14 +9,14 @@ using Unity.Mathematics;
 namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
 
     [BurstCompile]
-    public struct ChunkDataJob : IJobParallelFor {
+    public struct ChunkJob : IJobParallelFor {
 
         [ReadOnly] public int3 ChunkSize;
         [ReadOnly] public NoiseProfile NoiseProfile;
 
         [ReadOnly] public NativeList<int3> Jobs;
         
-        [WriteOnly] public NativeParallelHashMap<int3, ChunkData>.ParallelWriter Results;
+        [WriteOnly] public NativeParallelHashMap<int3, Data.Chunk>.ParallelWriter Results;
 
         public void Execute(int index) {
             var position = Jobs[index];
@@ -26,8 +26,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
             Results.TryAdd(position, chunk);
         }
         
-        private ChunkData GenerateChunkData(int3 position) {
-            var data = new ChunkData(position, ChunkSize);
+        private Data.Chunk GenerateChunkData(int3 position) {
+            var data = new Data.Chunk(position, ChunkSize);
             
             var noise = NoiseProfile.GetNoise(position);
             int current_block = GetBlock(ref noise);

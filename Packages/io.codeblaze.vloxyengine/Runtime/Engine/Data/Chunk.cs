@@ -8,14 +8,14 @@ using Unity.Mathematics;
 namespace CodeBlaze.Vloxy.Engine.Data {
 
     [BurstCompile]
-    public struct ChunkData {
+    public struct Chunk {
 
         public int3 Position { get; }
         
         private int3 ChunkSize;
         private UnsafeIntervalList Data;
 
-        public ChunkData(int3 position, int3 chunkSize) {
+        public Chunk(int3 position, int3 chunkSize) {
             Position = position;
             ChunkSize = chunkSize;
             Data = new UnsafeIntervalList(128, Allocator.Persistent);

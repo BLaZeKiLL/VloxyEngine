@@ -7,10 +7,10 @@ namespace CodeBlaze.Vloxy.Engine.Data {
     [BurstCompile]
     public struct ChunkAccessor {
         
-        private NativeParallelHashMap<int3, ChunkData> Chunks;
+        private NativeParallelHashMap<int3, Chunk> Chunks;
         private int3 ChunkSize;
 
-        public ChunkAccessor(NativeParallelHashMap<int3, ChunkData> chunks, int3 chunkSize) {
+        public ChunkAccessor(NativeParallelHashMap<int3, Chunk> chunks, int3 chunkSize) {
             Chunks = chunks;
             ChunkSize = chunkSize;
         }
@@ -34,42 +34,42 @@ namespace CodeBlaze.Vloxy.Engine.Data {
             return TryGetChunk(chunk_pos + key, out var chunk) ? chunk.GetBlock(block_pos) : 0;
         }
 
-        public bool TryGetChunk(int3 pos, out ChunkData chunk) => Chunks.TryGetValue(pos, out chunk);
+        public bool TryGetChunk(int3 pos, out Chunk chunk) => Chunks.TryGetValue(pos, out chunk);
 
         public bool ContainsChunk(int3 coord) => Chunks.ContainsKey(coord);
         
-        public bool TryGetNeighborPX(int3 pos, out ChunkData chunk) {
+        public bool TryGetNeighborPX(int3 pos, out Chunk chunk) {
             var px = pos + new int3(1,0,0) * ChunkSize;
 
             return Chunks.TryGetValue(px, out chunk);
         }
 
-        public bool TryGetNeighborPY(int3 pos, out ChunkData chunk) {
+        public bool TryGetNeighborPY(int3 pos, out Chunk chunk) {
             var py = pos + new int3(0,1,0) * ChunkSize;
 
             return Chunks.TryGetValue(py, out chunk);
         }
 
-        public bool TryGetNeighborPZ(int3 pos, out ChunkData chunk) {
+        public bool TryGetNeighborPZ(int3 pos, out Chunk chunk) {
             var pz = pos + new int3(0, 0, 1) * ChunkSize;
 
             return Chunks.TryGetValue(pz, out chunk);
         }
 
-        public bool TryGetNeighborNX(int3 pos, out ChunkData chunk) {
+        public bool TryGetNeighborNX(int3 pos, out Chunk chunk) {
             var nx = pos + new int3(-1,0,0) * ChunkSize;
 
             return Chunks.TryGetValue(nx, out chunk);
         }
 
-        public bool TryGetNeighborNY(int3 pos, out ChunkData chunk) {
+        public bool TryGetNeighborNY(int3 pos, out Chunk chunk) {
             var ny = pos + new int3(0,-1,0) * ChunkSize;
 
             return Chunks.TryGetValue(ny, out chunk);
         }
 
         
-        public bool TryGetNeighborNZ(int3 pos, out ChunkData chunk) {
+        public bool TryGetNeighborNZ(int3 pos, out Chunk chunk) {
             var nz = pos + new int3(0, 0, -1) * ChunkSize;
 
             return Chunks.TryGetValue(nz, out chunk);

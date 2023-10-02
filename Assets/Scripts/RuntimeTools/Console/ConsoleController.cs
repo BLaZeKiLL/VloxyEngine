@@ -18,15 +18,17 @@ namespace CodeBlaze.Vloxy.Demo.RuntimeTools.Console {
             GameManager.Current.InputMaps.Player.Disable();
             
             CommandLine.ActivateInputField();
-            CommandLine.onSubmit.AddListener(OnCommand);
             CommandLine.Select();
+            
+            CommandLine.onSubmit.AddListener(OnCommand);
         }
 
         private void OnDisable() {
             GameManager.Current.InputMaps.Player.Enable();
             
-            CommandLine.ReleaseSelection();
             CommandLine.onSubmit.RemoveAllListeners();
+            
+            CommandLine.ReleaseSelection();
             CommandLine.DeactivateInputField();
         }
         

@@ -13,7 +13,7 @@ using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
 
-    public class ChunkDataScheduler : JobScheduler {
+    public class ChunkScheduler : JobScheduler {
         private int3 _ChunkSize;
         private ChunkManager _ChunkStore;
         private NoiseProfile _NoiseProfile;
@@ -22,9 +22,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
         
         // can be native arrays
         private NativeList<int3> _Jobs;
-        private NativeParallelHashMap<int3, ChunkData> _Results;
+        private NativeParallelHashMap<int3, Data.Chunk> _Results;
 
-        public ChunkDataScheduler(
+        public ChunkScheduler(
             VloxySettings settings,
             ChunkManager chunkStore,
             NoiseProfile noiseProfile
@@ -34,7 +34,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
             _NoiseProfile = noiseProfile;
 
             _Jobs = new NativeList<int3>(Allocator.Persistent);
-            _Results = new NativeParallelHashMap<int3, ChunkData>(
+            _Results = new NativeParallelHashMap<int3, Data.Chunk>(
                 settings.Chunk.LoadDistance.CubedSize(), 
                 Allocator.Persistent
             );
@@ -52,7 +52,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
                 _Jobs.Add(j);
             }
             
-            var job = new ChunkDataJob {
+            var job = new ChunkJob {
                 Jobs = _Jobs,
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,

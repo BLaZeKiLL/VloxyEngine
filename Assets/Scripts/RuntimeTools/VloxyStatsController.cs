@@ -60,7 +60,7 @@ namespace CodeBlaze.Vloxy.Demo.RuntimeTools {
         private void UpdateData(int queue_count, float avg) {
             sb.Clear();
 
-            sb.Append("Data Queue : ").Append(queue_count.ToStringNonAlloc())
+            sb.Append("Chunk Queue : ").Append(queue_count.ToStringNonAlloc())
               .Append(", Average : ").Append(avg.ToString("F3")).Append("ms");
 
             Data.text = sb.ToString();

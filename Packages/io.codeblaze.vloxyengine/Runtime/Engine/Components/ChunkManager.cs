@@ -16,7 +16,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
     public class ChunkManager {
 
-        private Dictionary<int3, ChunkData> _Chunks;
+        private Dictionary<int3, Chunk> _Chunks;
         private SimplePriorityQueue<int3> _Queue;
 
         private int3 _Focus;
@@ -27,7 +27,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             _ChunkSize = settings.Chunk.ChunkSize;
             _ChunkStoreSize = (settings.Chunk.LoadDistance + 2).CubedSize();
 
-            _Chunks = new Dictionary<int3, ChunkData>(_ChunkStoreSize);
+            _Chunks = new Dictionary<int3, Chunk>(_ChunkStoreSize);
             _Queue = new SimplePriorityQueue<int3>();
         }
 
@@ -70,7 +70,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             }
         }
 
-        internal void AddChunks(NativeParallelHashMap<int3, ChunkData> chunks) {
+        internal void AddChunks(NativeParallelHashMap<int3, Chunk> chunks) {
             foreach (var pair in chunks) {
                 var position = pair.Key;
                 var chunk = pair.Value;
@@ -99,7 +99,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
         
         internal ChunkAccessor GetAccessor(List<int3> positions) {
-            var slice = new NativeParallelHashMap<int3, ChunkData>(
+            var slice = new NativeParallelHashMap<int3, Chunk>(
                 positions.Count * 27, 
                 Allocator.Persistent // TODO : Allocator cleanup, fit in the 4 frame limit
             );

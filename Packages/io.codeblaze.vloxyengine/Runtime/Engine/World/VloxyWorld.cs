@@ -34,7 +34,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         
         private ChunkPool _ChunkPool;
         private MeshBuildScheduler _MeshBuildScheduler;
-        private ChunkDataScheduler _ChunkDataScheduler;
+        private ChunkScheduler _ChunkScheduler;
         private ColliderBuildScheduler _ColliderBuildScheduler;
 
         private bool _IsFocused;
@@ -143,7 +143,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
                 _ChunkPool
             );
             
-            _ChunkDataScheduler = VloxyProvider.Current.ChunkDataScheduler(
+            _ChunkScheduler = VloxyProvider.Current.ChunkDataScheduler(
                 ChunkManager,
                 NoiseProfile
             );
@@ -154,7 +154,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             Scheduler = VloxyProvider.Current.VloxyScheduler(
                 _MeshBuildScheduler, 
-                _ChunkDataScheduler,
+                _ChunkScheduler,
                 _ColliderBuildScheduler,
                 ChunkManager,
                 _ChunkPool

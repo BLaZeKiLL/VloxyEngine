@@ -11,13 +11,14 @@ using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using Priority_Queue;
 
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Jobs {
     
     public class VloxyScheduler {
         
         private readonly MeshBuildScheduler _MeshBuildScheduler;
-        private readonly ChunkDataScheduler _ChunkDataScheduler;
+        private readonly ChunkScheduler _ChunkScheduler;
         private readonly ColliderBuildScheduler _ColliderBuildScheduler;
 
         private readonly ChunkManager _ChunkManager;
@@ -36,13 +37,13 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         internal VloxyScheduler(
             VloxySettings settings, 
             MeshBuildScheduler meshBuildScheduler,
-            ChunkDataScheduler chunkDataScheduler,
+            ChunkScheduler ChunkScheduler,
             ColliderBuildScheduler colliderBuildScheduler,
             ChunkManager ChunkManager,
             ChunkPool chunkPool
         ) {
             _MeshBuildScheduler = meshBuildScheduler;
-            _ChunkDataScheduler = chunkDataScheduler;
+            _ChunkScheduler = ChunkScheduler;
             _ColliderBuildScheduler = colliderBuildScheduler;
 
             _ChunkManager = ChunkManager;
@@ -64,9 +65,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             var draw = _Settings.Chunk.DrawDistance;
             var update = _Settings.Chunk.UpdateDistance;
 
-            for (int x = -load; x <= load; x++) {
-                for (int z = -load; z <= load; z++) {
-                    for (int y = -load; y <= load; y++) {
+            for (var x = -load; x <= load; x++) {
+                for (var z = -load; z <= load; z++) {
+                    for (var y = -load; y <= load; y++) {
                         var pos = focus + _Settings.Chunk.ChunkSize.MemberMultiply(x, y, z);
 
                         if (
@@ -107,20 +108,20 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         }
 
         internal void SchedulerUpdate() {
-            if (_DataQueue.Count > 0 && _ChunkDataScheduler.IsReady) {
+            if (_DataQueue.Count > 0 && _ChunkScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.StreamingBatchSize, _DataQueue.Count);
                 
-                for (int i = 0; i < count; i++) {
+                for (var i = 0; i < count; i++) {
                     _DataSet.Add(_DataQueue.Dequeue());
                 }
                 
-                _ChunkDataScheduler.Start(_DataSet.ToList());
+                _ChunkScheduler.Start(_DataSet.ToList());
             }  
             
             if (_ViewQueue.Count > 0 && _MeshBuildScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.MeshingBatchSize, _ViewQueue.Count);
                 
-                for (int i = 0; i < count; i++) {
+                for (var i = 0; i < count; i++) {
                     var chunk = _ViewQueue.Dequeue();
                     
                     // The chunk may be removed from memory by the time we schedule,
@@ -134,7 +135,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             if (_ColliderQueue.Count > 0 && _ColliderBuildScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.ColliderBatchSize, _ColliderQueue.Count);
 
-                for (int i = 0; i < count; i++) {
+                for (var i = 0; i < count; i++) {
                     var position = _ColliderQueue.Dequeue();
 
                     if (CanBakeColliderForChunk(position)) _ColliderSet.Add(position);
@@ -145,8 +146,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         }
 
         internal void SchedulerLateUpdate() {
-            if (_ChunkDataScheduler.IsComplete && !_ChunkDataScheduler.IsReady) {
-                _ChunkDataScheduler.Complete();
+            if (_ChunkScheduler.IsComplete && !_ChunkScheduler.IsReady) {
+                _ChunkScheduler.Complete();
                 _DataSet.Clear();
             }
             
@@ -162,7 +163,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         }
 
         internal void Dispose() {
-            _ChunkDataScheduler.Dispose();
+            _ChunkScheduler.Dispose();
             _MeshBuildScheduler.Dispose();
             _ColliderBuildScheduler.Dispose();
         }
@@ -197,7 +198,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 
         #region RuntimeStatsAPI
 
-        public float DataAvgTiming => _ChunkDataScheduler.AvgTime;
+        public float DataAvgTiming => _ChunkScheduler.AvgTime;
         public float MeshAvgTiming => _MeshBuildScheduler.AvgTime;
         public float BakeAvgTiming => _ColliderBuildScheduler.AvgTime;
 

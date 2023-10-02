@@ -31,13 +31,13 @@ namespace CodeBlaze.Vloxy.Engine {
 
         internal virtual VloxyScheduler VloxyScheduler(
             MeshBuildScheduler meshBuildScheduler,
-            ChunkDataScheduler chunkDataScheduler,
+            ChunkScheduler ChunkScheduler,
             ColliderBuildScheduler colliderBuildScheduler,
             ChunkManager ChunkManager,
             ChunkPool chunkPool
-        ) => new(Settings, meshBuildScheduler, chunkDataScheduler, colliderBuildScheduler, ChunkManager, chunkPool);
+        ) => new(Settings, meshBuildScheduler, ChunkScheduler, colliderBuildScheduler, ChunkManager, chunkPool);
 
-        internal virtual ChunkDataScheduler ChunkDataScheduler(
+        internal virtual ChunkScheduler ChunkDataScheduler(
             ChunkManager ChunkManager,
             NoiseProfile noiseProfile
         ) => new(Settings, ChunkManager, noiseProfile);
