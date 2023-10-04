@@ -10,18 +10,16 @@ on:
   workflow_dispatch:
     
 jobs:
-  linux:
-    name: Build For Android
+  build:
+    name: Build For ${{ matrix.build.target }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        buildMethod:
-          - CodeBlaze.Editor.Build.Builder.BuildAndroidMonoRelease
-          - CodeBlaze.Editor.Build.Builder.BuildAndroidIL2CPPRelease
-        targetPlatform:
-          - Android
+        build:
+          - { target: Android, method: CodeBlaze.Editor.Build.Builder.BuildAndroidRelease }
+          - { target: StandaloneWindows64, method: CodeBlaze.Editor.Build.Builder.BuildWindowsRelease }
     steps:
       - uses: actions/checkout@v3
         with:
@@ -37,62 +35,21 @@ jobs:
             Library-${{ matrix.targetPlatform }}-
             Library-
 
-      - uses: game-ci/unity-builder@v2
+      - if: matrix.targetPlatform == 'Android'
+        uses: jlumbroso/free-disk-space@v1.2.0
+
+      - uses: game-ci/unity-builder@v3
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-          buildMethod: ${{ matrix.buildMethod }}
+          targetPlatform: ${{ matrix.build.target }}
+          buildMethod: ${{ matrix.build.method }}
 
       - uses: actions/upload-artifact@v3
         with:
-          name: Build-${{ matrix.buildMethod }}
-          path: |
-            Build
-            !**/*DoNotShip*/**
-            !**/*ButDontShipItWithYourGame*/**
-  
-  windows:
-    name: Build For Windows
-    timeout-minutes: 60
-    runs-on: windows-2019
-    strategy:
-      fail-fast: false
-      matrix:
-        buildMethod:
-          - CodeBlaze.Editor.Build.Builder.BuildWindowsMonoRelease
-          - CodeBlaze.Editor.Build.Builder.BuildWindowsIL2CPPRelease
-        targetPlatform:
-          - StandaloneWindows64
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          lfs: true
-          
-      - uses: actions/cache@v3
-        with:
-          path: Library
-          key:
-            Library-${{ matrix.targetPlatform }}-${{ hashFiles('.') }}
-          restore-keys: |
-            Library-${{ matrix.targetPlatform }}-
-            Library-
-            
-      - uses: game-ci/unity-builder@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-          buildMethod: ${{ matrix.buildMethod }}
-          
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Build-${{ matrix.buildMethod }}
+          name: Build-${{ matrix.build.target }}
           path: |
             Build
             !**/*DoNotShip*/**

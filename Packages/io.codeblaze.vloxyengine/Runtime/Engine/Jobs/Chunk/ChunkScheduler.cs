@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 
 using CodeBlaze.Vloxy.Engine.Components;
+using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Jobs.Core;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -12,9 +13,9 @@ using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
 
-    public class ChunkDataScheduler : JobScheduler {
+    public class ChunkScheduler : JobScheduler {
         private int3 _ChunkSize;
-        private ChunkStore _ChunkStore;
+        private ChunkManager _ChunkStore;
         private NoiseProfile _NoiseProfile;
 
         private JobHandle _Handle;
@@ -23,9 +24,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
         private NativeList<int3> _Jobs;
         private NativeParallelHashMap<int3, Data.Chunk> _Results;
 
-        public ChunkDataScheduler(
+        public ChunkScheduler(
             VloxySettings settings,
-            ChunkStore chunkStore,
+            ChunkManager chunkStore,
             NoiseProfile noiseProfile
         ) {
             _ChunkSize = settings.Chunk.ChunkSize;
@@ -51,7 +52,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
                 _Jobs.Add(j);
             }
             
-            var job = new ChunkDataJob {
+            var job = new ChunkJob {
                 Jobs = _Jobs,
                 ChunkSize = _ChunkSize,
                 NoiseProfile = _NoiseProfile,

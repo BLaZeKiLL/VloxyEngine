@@ -56,5 +56,13 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Extensions {
         public static int3 MemberMultiply(this int3 a, int x, int y, int z) => new(a.x * x, a.y * y, a.z * z);
 
     }
+
+    public static class VectorExtension {
+
+        public static int3 Int3(this Vector3Int vec) => new(vec.x, vec.y, vec.z);
+        
+        public static int3 Int3(this Vector3 vec) => Vector3Int.FloorToInt(vec).Int3();
+
+    }
     
 }
