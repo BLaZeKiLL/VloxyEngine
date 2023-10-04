@@ -13,7 +13,7 @@ namespace CodeBlaze.Vloxy.Engine {
 
     public class VloxyProvider : Provider<VloxyProvider> {
 
-        internal VloxySettings Settings { get; set; }
+        public VloxySettings Settings { get; set; }
 
         internal virtual NoiseProfile NoiseProfile() => new (new NoiseProfile.Settings {
             Height = Settings.Noise.Height,

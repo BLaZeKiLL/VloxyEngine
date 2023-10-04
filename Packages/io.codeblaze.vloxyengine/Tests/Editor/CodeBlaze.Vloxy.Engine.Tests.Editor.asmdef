@@ -3,6 +3,7 @@
     "rootNamespace": "CodeBlaze.Vloxy.Engine.Tests.Editor",
     "references": [
         "Unity.Collections",
+        "Unity.Mathematics",
         "UnityEditor.TestRunner",
         "UnityEngine.TestRunner",
         "CodeBlaze.Vloxy.Engine"

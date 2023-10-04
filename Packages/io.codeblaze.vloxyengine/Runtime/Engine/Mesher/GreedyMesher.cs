@@ -76,15 +76,15 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 IndexBuffer1 = new NativeList<int>(Allocator.Temp)
             };
 
-            int vertex_count = 0;
+            var vertex_count = 0;
 
-            for (int direction = 0; direction < 3; direction++) {
-                int axis1 = (direction + 1) % 3;
-                int axis2 = (direction + 2) % 3;
+            for (var direction = 0; direction < 3; direction++) {
+                var axis1 = (direction + 1) % 3;
+                var axis2 = (direction + 2) % 3;
 
-                int mainAxisLimit = size[direction];
-                int axis1Limit = size[axis1];
-                int axis2Limit = size[axis2];
+                var mainAxisLimit = size[direction];
+                var axis1Limit = size[axis1];
+                var axis2Limit = size[axis2];
 
                 var deltaAxis1 = int3.zero;
                 var deltaAxis2 = int3.zero;
@@ -121,8 +121,8 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                     ++chunkItr[direction];
                     n = 0;
 
-                    for (int j = 0; j < axis2Limit; j++) {
-                        for (int i = 0; i < axis1Limit;) {
+                    for (var j = 0; j < axis2Limit; j++) {
+                        for (var i = 0; i < axis1Limit;) {
                             if (normalMask[n].Normal != 0) { // Create Quad
                                 var currentMask = normalMask[n];
                                 chunkItr[axis1] = i;
@@ -140,11 +140,11 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                                 // greedy meshing will attempt to expand this quad out to CHUNK_SIZE x 5, but will stop if it reaches a hole in the mask
 
                                 int height;
-                                bool done = false;
+                                var done = false;
 
                                 for (height = 1; j + height < axis2Limit; height++) {
                                     // Check each block next to this quad
-                                    for (int k = 0; k < width; ++k) {
+                                    for (var k = 0; k < width; ++k) {
                                         if (CompareMask(normalMask[n + k + height * axis1Limit], currentMask)) continue;
 
                                         done = true;
@@ -176,8 +176,8 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                                 deltaAxis2 = int3.zero;
 
                                 // Clear this part of the mask, so we don't add duplicate faces
-                                for (int l = 0; l < height; ++l)
-                                    for (int k = 0; k < width; ++k)
+                                for (var l = 0; l < height; ++l)
+                                    for (var k = 0; k < width; ++k)
                                         normalMask[n + k + l * axis1Limit] = default;
 
                                 // update loop vars

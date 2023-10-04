@@ -117,6 +117,8 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
 
         internal ChunkAccessor GetAccessor(List<int3> positions) {
+            _AccessorMap.Clear();
+            
             foreach (var position in positions) {
                 for (var x = -1; x <= 1; x++) {
                     for (var z = -1; z <= 1; z++) {

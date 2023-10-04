@@ -6,7 +6,7 @@ using UnityEngine;
 namespace CodeBlaze.Vloxy.Engine.Tests.Editor.Utils.Collections {
 
     public class UnsafeIntervalListTest {
-
+        
         [Test]
         public void ShouldCompressTo1() {
             var list = new NativeList<int>(16, Allocator.Temp);
