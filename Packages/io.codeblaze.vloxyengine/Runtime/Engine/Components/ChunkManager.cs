@@ -17,7 +17,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
     public class ChunkManager {
 
         private Dictionary<int3, Chunk> _Chunks;
-        private SimplePriorityQueue<int3, int> _Queue;
+        private SimpleFastPriorityQueue<int3, int> _Queue;
 
         private int3 _Focus;
         private int3 _ChunkSize;
@@ -28,7 +28,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             _ChunkStoreSize = (settings.Chunk.LoadDistance + 2).CubedSize();
 
             _Chunks = new Dictionary<int3, Chunk>(_ChunkStoreSize);
-            _Queue = new SimplePriorityQueue<int3, int>();
+            _Queue = new SimpleFastPriorityQueue<int3, int>();
         }
 
         #region API

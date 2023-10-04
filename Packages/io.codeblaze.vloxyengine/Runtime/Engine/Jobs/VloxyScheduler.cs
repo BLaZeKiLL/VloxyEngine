@@ -24,9 +24,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         private readonly ChunkManager _ChunkManager;
         private readonly ChunkPool _ChunkPool;
 
-        private readonly SimplePriorityQueue<int3> _ViewQueue;
-        private readonly SimplePriorityQueue<int3> _DataQueue;
-        private readonly SimplePriorityQueue<int3> _ColliderQueue;
+        private readonly SimpleFastPriorityQueue<int3, int> _ViewQueue;
+        private readonly SimpleFastPriorityQueue<int3, int> _DataQueue;
+        private readonly SimpleFastPriorityQueue<int3, int> _ColliderQueue;
 
         private readonly HashSet<int3> _ViewSet;
         private readonly HashSet<int3> _DataSet;
@@ -49,9 +49,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             _ChunkManager = chunkManager;
             _ChunkPool = chunkPool;
 
-            _ViewQueue = new SimplePriorityQueue<int3>();
-            _DataQueue = new SimplePriorityQueue<int3>();
-            _ColliderQueue = new SimplePriorityQueue<int3>();
+            _ViewQueue = new SimpleFastPriorityQueue<int3, int>();
+            _DataQueue = new SimpleFastPriorityQueue<int3, int>();
+            _ColliderQueue = new SimpleFastPriorityQueue<int3, int>();
 
             _ViewSet = new HashSet<int3>();
             _DataSet = new HashSet<int3>();

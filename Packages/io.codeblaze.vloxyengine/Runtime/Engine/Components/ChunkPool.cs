@@ -18,12 +18,15 @@ using UnityEngine.Pool;
 
 namespace CodeBlaze.Vloxy.Engine.Components {
 
+    /// <summary>
+    /// Chunks are created on demand
+    /// </summary>
     public class ChunkPool {
 
-        private IObjectPool<ChunkBehaviour> _Pool;
+        private ObjectPool<ChunkBehaviour> _Pool;
         private Dictionary<int3, ChunkBehaviour> _MeshMap;
         private HashSet<int3> _ColliderSet;
-        private SimplePriorityQueue<int3, int> _Queue;
+        private SimpleFastPriorityQueue<int3, int> _Queue;
 
         private int3 _Focus;
         private int _ChunkPoolSize;
@@ -33,17 +36,16 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
             _MeshMap = new Dictionary<int3, ChunkBehaviour>(_ChunkPoolSize);
             _ColliderSet = new HashSet<int3>((settings.Chunk.UpdateDistance + 2).CubedSize());
-            _Queue = new SimplePriorityQueue<int3, int>();
+            _Queue = new SimpleFastPriorityQueue<int3, int>();
 
             _Pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
                 () => {
                     var go = new GameObject("Chunk", typeof(ChunkBehaviour)) {
                         transform = {
                             parent = transform
-                        }
+                        },
+                        tag = "Chunk"
                     };
-
-                    go.tag = "Chunk";
 
                     var collider = new GameObject("Collider", typeof(MeshCollider)) {
                         transform = {
@@ -65,7 +67,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             );
             
 #if VLOXY_LOGGING
-            VloxyLogger.Info<ChunkPool>("Initialized Size : " + _ChunkPoolSize);
+            VloxyLogger.Info<ChunkPool>("Max Size : " + _ChunkPoolSize);
 #endif
         }
 
