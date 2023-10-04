@@ -16,7 +16,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
     public class MeshBuildScheduler : JobScheduler {
 
-        private readonly ChunkStore _ChunkStore;
+        private readonly ChunkManager _ChunkManager;
         private readonly ChunkPool _ChunkPool;
 
         private int3 _ChunkSize;
@@ -30,10 +30,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
         public MeshBuildScheduler(
             VloxySettings settings,
-            ChunkStore chunkStore,
+            ChunkManager chunkManager,
             ChunkPool chunkPool
         ) {
-            _ChunkStore = chunkStore;
+            _ChunkManager = chunkManager;
             _ChunkPool = chunkPool;
 
             _ChunkSize = settings.Chunk.ChunkSize;
@@ -61,7 +61,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             
             IsReady = false;
 
-            _ChunkAccessor = _ChunkStore.GetAccessor(jobs);
+            _ChunkAccessor = _ChunkManager.GetAccessor(jobs);
             
             foreach (var j in jobs) {
                 _Jobs.Add(j);
@@ -88,8 +88,12 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
             for (var index = 0; index < _Jobs.Length; index++) {
                 var position = _Jobs[index];
-                
-                meshes[_Results[position]] = _ChunkPool.Claim(position).Mesh;
+
+                if (_ChunkManager.ReMeshedChunk(position)) {
+                    meshes[_Results[position]] = _ChunkPool.Get(position).Mesh;
+                } else {
+                    meshes[_Results[position]] = _ChunkPool.Claim(position).Mesh;
+                }
             }
 
             UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(
@@ -102,7 +106,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
                 meshes[index].RecalculateBounds();
             }
             
-            _ChunkAccessor.Dispose();
             _Results.Clear();
             _Jobs.Clear();
             

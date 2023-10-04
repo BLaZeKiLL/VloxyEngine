@@ -18,4 +18,4 @@ MonoBehaviour:
   Scale: 256
   Persistance: 0.5
   Lacunarity: 2
-  Octaves: 4
+  Octaves: 6

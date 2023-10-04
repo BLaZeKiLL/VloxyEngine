@@ -27,38 +27,38 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
             var mesh = MeshDataArray[index];
             var position = Jobs[index];
 
-            var mesh_buffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize);
+            var meshBuffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize);
             
             // Vertex Buffer
-            var vertex_count = mesh_buffer.VertexBuffer.Length;
+            var vertexCount = meshBuffer.VertexBuffer.Length;
 
-            mesh.SetVertexBufferParams(vertex_count, VertexParams);
-            mesh.GetVertexData<Vertex>().CopyFrom(mesh_buffer.VertexBuffer.AsArray());
+            mesh.SetVertexBufferParams(vertexCount, VertexParams);
+            mesh.GetVertexData<Vertex>().CopyFrom(meshBuffer.VertexBuffer.AsArray());
 
             // Index Buffer
-            var index_0_count = mesh_buffer.IndexBuffer0.Length;
-            var index_1_count = mesh_buffer.IndexBuffer1.Length;
+            var index0Count = meshBuffer.IndexBuffer0.Length;
+            var index1Count = meshBuffer.IndexBuffer1.Length;
             
-            mesh.SetIndexBufferParams(index_0_count + index_1_count, IndexFormat.UInt32);
+            mesh.SetIndexBufferParams(index0Count + index1Count, IndexFormat.UInt32);
 
-            var index_buffer = mesh.GetIndexData<int>();
+            var indexBuffer = mesh.GetIndexData<int>();
             
-            NativeArray<int>.Copy(mesh_buffer.IndexBuffer0.AsArray(), 0, index_buffer, 0, index_0_count);
-            if (index_1_count > 1)
-                NativeArray<int>.Copy(mesh_buffer.IndexBuffer1.AsArray(), 0, index_buffer, index_0_count, index_1_count);
+            NativeArray<int>.Copy(meshBuffer.IndexBuffer0.AsArray(), 0, indexBuffer, 0, index0Count);
+            if (index1Count > 1)
+                NativeArray<int>.Copy(meshBuffer.IndexBuffer1.AsArray(), 0, indexBuffer, index0Count, index1Count);
 
             // Sub Mesh
             mesh.subMeshCount = 2;
             
-            var descriptor0 = new SubMeshDescriptor(0, index_0_count);
-            var descriptor1 = new SubMeshDescriptor(index_0_count, index_1_count);
+            var descriptor0 = new SubMeshDescriptor(0, index0Count);
+            var descriptor1 = new SubMeshDescriptor(index0Count, index1Count);
             
             mesh.SetSubMesh(0, descriptor0, MeshUpdateFlags.DontRecalculateBounds);
             mesh.SetSubMesh(1, descriptor1, MeshUpdateFlags.DontRecalculateBounds);
-
+            
             Results.TryAdd(position, index);
 
-            mesh_buffer.Dispose();
+            meshBuffer.Dispose();
         }
 
     }

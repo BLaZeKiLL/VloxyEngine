@@ -4,6 +4,8 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Logger {
 
     public static class VloxyLogger {
 
+        private static string _LogTag = $"<color=#{ColorUtility.ToHtmlStringRGB(GetColor("VLOXY"))}>[VLOXY]</color> ";
+        
         /// <summary>
         /// Creates a tag with unique color for given type
         /// </summary>
@@ -17,9 +19,7 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Logger {
         /// <param name="name">tag value</param>
         /// <returns>tag color formatted string</returns>
         public static string GetTag(string name) {
-            var hue = ((float) name.GetHashCode() % 10000 / 10000 + 1) / 2;
-            var color = Color.HSVToRGB(NormalizeHue(hue), 1f, 1f);
-            return $"<color=#{ColorUtility.ToHtmlStringRGB(color)}>{name}</color>";
+            return $"{_LogTag}<color=#{ColorUtility.ToHtmlStringRGB(GetColor(name))}>{name}</color>";
         }
         
         /// <summary>
@@ -58,6 +58,11 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Logger {
         /// <param name="hue">Original hue value</param>
         /// <returns>Normalized hue value</returns>
         private static float NormalizeHue(float hue) => Mathf.Lerp(0.7f, 1.6f, hue) % 1;
+        
+        private static Color GetColor(string name) {
+            var hue = ((float) name.GetHashCode() % 10000 / 10000 + 1) / 2;
+            return Color.HSVToRGB(NormalizeHue(hue), 1f, 1f);
+        }
 
     }
 

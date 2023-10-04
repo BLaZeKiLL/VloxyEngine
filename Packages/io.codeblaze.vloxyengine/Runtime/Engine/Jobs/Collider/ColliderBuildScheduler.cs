@@ -12,6 +12,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Collider {
 
     public class ColliderBuildScheduler : JobScheduler {
 
+        private ChunkManager _ChunkManager;
         private ChunkPool _ChunkPool;
         
         private NativeList<int> _Jobs;
@@ -19,7 +20,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Collider {
 
         private JobHandle _Handle;
 
-        public ColliderBuildScheduler(ChunkPool chunkPool) {
+        public ColliderBuildScheduler(ChunkManager chunkManager, ChunkPool chunkPool) {
+            _ChunkManager = chunkManager;
             _ChunkPool = chunkPool;
             
             _Jobs = new NativeList<int>(Allocator.Persistent);
@@ -37,7 +39,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Collider {
             _Meshes = _ChunkPool.GetActiveMeshes(jobs);
 
             foreach (var (_, behaviour) in _Meshes) {
-                _Jobs.Add(behaviour.Mesh.GetInstanceID());
+                if (behaviour.Mesh.vertexCount > 0) { // Avoid colliders for empty meshes
+                    _Jobs.Add(behaviour.Mesh.GetInstanceID());
+                }
             }
 
             var job = new ColliderBuildJob {
@@ -51,8 +55,12 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Collider {
             _Handle.Complete();
             
             foreach (var (position, behaviour) in _Meshes) {
-                behaviour.Collider.sharedMesh = behaviour.Mesh;
                 _ChunkPool.ColliderBaked(position);
+                _ChunkManager.ReCollideChunk(position);
+                
+                if (behaviour.Mesh.vertexCount <= 0) continue;
+                
+                behaviour.Collider.sharedMesh = behaviour.Mesh;
             }
             
             _Jobs.Clear();
