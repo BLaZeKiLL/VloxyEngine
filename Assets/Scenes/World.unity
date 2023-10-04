@@ -4539,7 +4539,7 @@ MonoBehaviour:
   InteractionMask:
     serializedVersion: 2
     m_Bits: 1
-  MaxInteractionDistance: 100
+  MaxInteractionDistance: 10
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0

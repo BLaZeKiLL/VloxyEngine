@@ -36,7 +36,8 @@ namespace CodeBlaze.Vloxy.Demo.Player {
             
             _PlayerMap.Toggle.performed += ToggleOnPerformed;
             _PlayerMap.Quit.performed += QuitOnPerformed;
-            _PlayerMap.Fire.performed += FireOnPerformed;
+            _PlayerMap.BreakBlock.performed += BreakBlockOnPerformed;
+            _PlayerMap.PlaceBlock.performed += PlaceBlockOnPerformed;
             
             Cursor.lockState = CursorLockMode.Locked;
         }
@@ -44,7 +45,8 @@ namespace CodeBlaze.Vloxy.Demo.Player {
         private void OnDisable() {
             _PlayerMap.Toggle.performed -= ToggleOnPerformed;
             _PlayerMap.Quit.performed -= QuitOnPerformed;
-            _PlayerMap.Fire.performed -= FireOnPerformed;
+            _PlayerMap.BreakBlock.performed -= BreakBlockOnPerformed;
+            _PlayerMap.PlaceBlock.performed -= PlaceBlockOnPerformed;
 
             _PlayerMap.Disable();
 
@@ -61,8 +63,12 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 #endif
         }
         
-        private void FireOnPerformed(InputAction.CallbackContext obj) {
-            _CharacterInteractions.Fire();
+        private void BreakBlockOnPerformed(InputAction.CallbackContext obj) {
+            _CharacterInteractions.BreakBlock();
+        }
+        
+        private void PlaceBlockOnPerformed(InputAction.CallbackContext obj) {
+            _CharacterInteractions.PlaceBlock();
         }
         
         private void CharacterInput() {

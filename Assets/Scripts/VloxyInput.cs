@@ -66,9 +66,18 @@ namespace CodeBlaze.Vloxy.Demo
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Fire"",
+                    ""name"": ""BreakBlock"",
                     ""type"": ""Button"",
                     ""id"": ""643f393f-0353-4069-80fb-f2dad9656be9"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PlaceBlock"",
+                    ""type"": ""Button"",
+                    ""id"": ""865a9dc8-fc81-4d4e-bcd6-0cbbd044e34e"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -242,7 +251,7 @@ namespace CodeBlaze.Vloxy.Demo
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
-                    ""action"": ""Fire"",
+                    ""action"": ""BreakBlock"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -253,7 +262,7 @@ namespace CodeBlaze.Vloxy.Demo
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""Fire"",
+                    ""action"": ""BreakBlock"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -408,6 +417,28 @@ namespace CodeBlaze.Vloxy.Demo
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Quit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""62843812-88cf-41b5-833e-850d0dbb8eee"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""PlaceBlock"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""beea1d0c-b31c-4e6f-8175-4434a0375025"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""PlaceBlock"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1069,7 +1100,8 @@ namespace CodeBlaze.Vloxy.Demo
             m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
             m_Player_Altitude = m_Player.FindAction("Altitude", throwIfNotFound: true);
             m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
-            m_Player_Fire = m_Player.FindAction("Fire", throwIfNotFound: true);
+            m_Player_BreakBlock = m_Player.FindAction("BreakBlock", throwIfNotFound: true);
+            m_Player_PlaceBlock = m_Player.FindAction("PlaceBlock", throwIfNotFound: true);
             m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
             m_Player_Toggle = m_Player.FindAction("Toggle", throwIfNotFound: true);
             m_Player_Quit = m_Player.FindAction("Quit", throwIfNotFound: true);
@@ -1154,7 +1186,8 @@ namespace CodeBlaze.Vloxy.Demo
         private readonly InputAction m_Player_Look;
         private readonly InputAction m_Player_Altitude;
         private readonly InputAction m_Player_Sprint;
-        private readonly InputAction m_Player_Fire;
+        private readonly InputAction m_Player_BreakBlock;
+        private readonly InputAction m_Player_PlaceBlock;
         private readonly InputAction m_Player_Jump;
         private readonly InputAction m_Player_Toggle;
         private readonly InputAction m_Player_Quit;
@@ -1166,7 +1199,8 @@ namespace CodeBlaze.Vloxy.Demo
             public InputAction @Look => m_Wrapper.m_Player_Look;
             public InputAction @Altitude => m_Wrapper.m_Player_Altitude;
             public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
-            public InputAction @Fire => m_Wrapper.m_Player_Fire;
+            public InputAction @BreakBlock => m_Wrapper.m_Player_BreakBlock;
+            public InputAction @PlaceBlock => m_Wrapper.m_Player_PlaceBlock;
             public InputAction @Jump => m_Wrapper.m_Player_Jump;
             public InputAction @Toggle => m_Wrapper.m_Player_Toggle;
             public InputAction @Quit => m_Wrapper.m_Player_Quit;
@@ -1191,9 +1225,12 @@ namespace CodeBlaze.Vloxy.Demo
                 @Sprint.started += instance.OnSprint;
                 @Sprint.performed += instance.OnSprint;
                 @Sprint.canceled += instance.OnSprint;
-                @Fire.started += instance.OnFire;
-                @Fire.performed += instance.OnFire;
-                @Fire.canceled += instance.OnFire;
+                @BreakBlock.started += instance.OnBreakBlock;
+                @BreakBlock.performed += instance.OnBreakBlock;
+                @BreakBlock.canceled += instance.OnBreakBlock;
+                @PlaceBlock.started += instance.OnPlaceBlock;
+                @PlaceBlock.performed += instance.OnPlaceBlock;
+                @PlaceBlock.canceled += instance.OnPlaceBlock;
                 @Jump.started += instance.OnJump;
                 @Jump.performed += instance.OnJump;
                 @Jump.canceled += instance.OnJump;
@@ -1219,9 +1256,12 @@ namespace CodeBlaze.Vloxy.Demo
                 @Sprint.started -= instance.OnSprint;
                 @Sprint.performed -= instance.OnSprint;
                 @Sprint.canceled -= instance.OnSprint;
-                @Fire.started -= instance.OnFire;
-                @Fire.performed -= instance.OnFire;
-                @Fire.canceled -= instance.OnFire;
+                @BreakBlock.started -= instance.OnBreakBlock;
+                @BreakBlock.performed -= instance.OnBreakBlock;
+                @BreakBlock.canceled -= instance.OnBreakBlock;
+                @PlaceBlock.started -= instance.OnPlaceBlock;
+                @PlaceBlock.performed -= instance.OnPlaceBlock;
+                @PlaceBlock.canceled -= instance.OnPlaceBlock;
                 @Jump.started -= instance.OnJump;
                 @Jump.performed -= instance.OnJump;
                 @Jump.canceled -= instance.OnJump;
@@ -1471,7 +1511,8 @@ namespace CodeBlaze.Vloxy.Demo
             void OnLook(InputAction.CallbackContext context);
             void OnAltitude(InputAction.CallbackContext context);
             void OnSprint(InputAction.CallbackContext context);
-            void OnFire(InputAction.CallbackContext context);
+            void OnBreakBlock(InputAction.CallbackContext context);
+            void OnPlaceBlock(InputAction.CallbackContext context);
             void OnJump(InputAction.CallbackContext context);
             void OnToggle(InputAction.CallbackContext context);
             void OnQuit(InputAction.CallbackContext context);
