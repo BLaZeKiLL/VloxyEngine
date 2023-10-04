@@ -6,16 +6,22 @@ on:
       - "v*"
 
 jobs:
-  package:
-    name: Unity Package
-    runs-on: ubuntu-latest
+  build:
+    name: Build For ${{ matrix.build.target }}
     timeout-minutes: 60
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+          - { target: Android, method: CodeBlaze.Editor.Build.Builder.BuildAndroidRelease }
+          - { target: StandaloneWindows64, method: CodeBlaze.Editor.Build.Builder.BuildWindowsRelease }
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           lfs: true
-      
+
       - uses: actions/cache@v3
         with:
           path: Library
@@ -25,7 +31,46 @@ jobs:
             Library-${{ matrix.targetPlatform }}-
             Library-
 
-      - uses: game-ci/unity-builder@v2
+      - if: matrix.targetPlatform == 'Android'
+        uses: jlumbroso/free-disk-space@v1.2.0
+
+      - uses: game-ci/unity-builder@v3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.build.target }}
+          buildMethod: ${{ matrix.build.method }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Build-${{ matrix.build.target }}
+          path: |
+            Build
+            !**/*DoNotShip*/**
+            !**/*ButDontShipItWithYourGame*/**
+
+  package:
+    name: Unity Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key:
+            Library-${{ matrix.targetPlatform }}-${{ hashFiles('.') }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
+
+      - uses: game-ci/unity-builder@v3
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -39,96 +84,10 @@ jobs:
           name: Package
           path: vloxyengine.unitypackage
 
-  linux:
-    name: Release Build For Android
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        buildMethod:
-          - CodeBlaze.Editor.Build.Builder.BuildAndroidRelease
-        targetPlatform:
-          - Android
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          lfs: true
-
-      - uses: actions/cache@v3
-        with:
-          path: Library
-          key:
-            Library-${{ matrix.targetPlatform }}-${{ hashFiles('.') }}
-          restore-keys: |
-            Library-${{ matrix.targetPlatform }}-
-            Library-
-
-      - uses: game-ci/unity-builder@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-          buildMethod: ${{ matrix.buildMethod }}
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Build-${{ matrix.buildMethod }}
-          path: |
-            Build
-            !**/*DoNotShip*/**
-            !**/*ButDontShipItWithYourGame*/**
-  
-  windows:
-    name: Release Build For Windows
-    runs-on: windows-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        buildMethod:
-          - CodeBlaze.Editor.Build.Builder.BuildWindowsRelease
-        targetPlatform:
-          - StandaloneWindows64
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          lfs: true
-          
-      - uses: actions/cache@v3
-        with:
-          path: Library
-          key:
-            Library-${{ matrix.targetPlatform }}-${{ hashFiles('.') }}
-          restore-keys: |
-            Library-${{ matrix.targetPlatform }}-
-            Library-
-            
-      - uses: game-ci/unity-builder@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-          buildMethod: ${{ matrix.buildMethod }}
-          
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Build-${{ matrix.buildMethod }}
-          path: |
-            Build
-            !**/*DoNotShip*/**
-            !**/*ButDontShipItWithYourGame*/**
-
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: [package, linux, windows]
+    needs: [build]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -141,8 +100,8 @@ jobs:
 
       - name: Zip artifacts
         run: |
-          zip -r android-mono-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildAndroidRelease/
-          zip -r windows-mono-${{ github.ref_name }}.zip artifacts/Build-CodeBlaze.Editor.Build.Builder.BuildWindowsRelease/
+          zip -r android-${{ github.ref_name }}.zip artifacts/Build-Android/
+          zip -r windows64-${{ github.ref_name }}.zip artifacts/Build-StandaloneWindows64/
 
       - name: Move package
         run: mv artifacts/Package/vloxyengine.unitypackage vloxyengine-${{ github.ref_name }}.unitypackage
@@ -170,4 +129,4 @@ jobs:
           files: |
             vloxyengine-${{ github.ref_name }}.unitypackage
             android-${{ github.ref_name }}.zip
-            windows-${{ github.ref_name }}.zip
+            windows64-${{ github.ref_name }}.zip
