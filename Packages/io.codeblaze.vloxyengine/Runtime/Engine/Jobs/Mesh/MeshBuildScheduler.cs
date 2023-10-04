@@ -30,10 +30,10 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
         public MeshBuildScheduler(
             VloxySettings settings,
-            ChunkManager ChunkManager,
+            ChunkManager chunkManager,
             ChunkPool chunkPool
         ) {
-            _ChunkManager = ChunkManager;
+            _ChunkManager = chunkManager;
             _ChunkPool = chunkPool;
 
             _ChunkSize = settings.Chunk.ChunkSize;
@@ -106,7 +106,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
                 meshes[index].RecalculateBounds();
             }
             
-            _ChunkAccessor.Dispose();
             _Results.Clear();
             _Jobs.Clear();
             

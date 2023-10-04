@@ -18,6 +18,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
         private Dictionary<int3, Chunk> _Chunks;
         private SimpleFastPriorityQueue<int3, int> _Queue;
+        private NativeParallelHashMap<int3, Chunk> _AccessorMap;
 
         private HashSet<int3> _ReMeshChunks;
         private HashSet<int3> _ReCollideChunks;
@@ -35,6 +36,11 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             
             _Chunks = new Dictionary<int3, Chunk>(_ChunkStoreSize);
             _Queue = new SimpleFastPriorityQueue<int3, int>();
+            
+            _AccessorMap = new NativeParallelHashMap<int3, Chunk>(
+                settings.Scheduler.MeshingBatchSize * 27, 
+                Allocator.Persistent
+            );
         }
 
         #region API
@@ -76,6 +82,8 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         internal void RemoveChunk(int3 position) => _Chunks.Remove(position);
         
         internal void Dispose() {
+            _AccessorMap.Dispose();
+            
             foreach (var (_, chunk) in _Chunks) {
                 chunk.Dispose();
             }
@@ -109,11 +117,6 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         }
 
         internal ChunkAccessor GetAccessor(List<int3> positions) {
-            var slice = new NativeParallelHashMap<int3, Chunk>(
-                positions.Count * 27, 
-                Allocator.Persistent // TODO : Allocator cleanup, fit in the 4 frame limit or pool it
-            );
-
             foreach (var position in positions) {
                 for (var x = -1; x <= 1; x++) {
                     for (var z = -1; z <= 1; z++) {
@@ -125,13 +128,13 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                                 throw new InvalidOperationException($"Chunk {pos} has not been generated");
                             }
                                 
-                            if (!slice.ContainsKey(pos)) slice.Add(pos, _Chunks[pos]);
+                            if (!_AccessorMap.ContainsKey(pos)) _AccessorMap.Add(pos, _Chunks[pos]);
                         }
                     }
                 }
             }
 
-            return new ChunkAccessor(slice, _ChunkSize);
+            return new ChunkAccessor(_AccessorMap.AsReadOnly(), _ChunkSize);
         }
 
         internal bool ReMeshedChunk(int3 position) {
