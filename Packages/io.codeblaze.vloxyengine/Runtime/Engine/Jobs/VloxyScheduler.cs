@@ -17,8 +17,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
     
     public class VloxyScheduler {
         
-        private readonly MeshBuildScheduler _MeshBuildScheduler;
         private readonly ChunkScheduler _ChunkScheduler;
+        private readonly MeshBuildScheduler _MeshBuildScheduler;
         private readonly ColliderBuildScheduler _ColliderBuildScheduler;
 
         private readonly ChunkManager _ChunkManager;
@@ -174,9 +174,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             _ColliderBuildScheduler.Dispose();
         }
 
-        private bool ShouldScheduleForGenerating(int3 position) => !(_ChunkManager.ContainsChunk(position) || _DataSet.Contains(position));
-        private bool ShouldScheduleForMeshing(int3 position) => !(_ChunkPool.IsActive(position) || _ViewSet.Contains(position));
-        private bool ShouldScheduleForBaking(int3 position) => !(_ChunkPool.IsCollidable(position) || _ColliderSet.Contains(position));
+        private bool ShouldScheduleForGenerating(int3 position) => !_ChunkManager.ContainsChunk(position) && !_DataSet.Contains(position);
+        private bool ShouldScheduleForMeshing(int3 position) => (!_ChunkPool.IsActive(position) || _ChunkManager.ShouldReMesh(position)) && !_ViewSet.Contains(position);
+        private bool ShouldScheduleForBaking(int3 position) => (!_ChunkPool.IsCollidable(position) || _ChunkManager.ShouldReCollide(position)) && !_ColliderSet.Contains(position);
 
         /// <summary>
         /// Checks if the specified chunks and it's neighbours are generated

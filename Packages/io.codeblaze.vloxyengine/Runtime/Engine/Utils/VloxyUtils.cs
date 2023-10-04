@@ -23,7 +23,17 @@ namespace CodeBlaze.Vloxy.Engine.Utils {
             return new int3(x,y,z);
         }
         
-        
+        public static int3 GetChunkCoords(int3 Position) {
+            var x = Position.x - Position.x % ChunkSize.x;
+            var y = Position.y - Position.y % ChunkSize.y;
+            var z = Position.z - Position.z % ChunkSize.z;
+            
+            x = Position.x < 0 ? x - ChunkSize.x : x;
+            y = Position.y < 0 ? y - ChunkSize.y : y;
+            z = Position.z < 0 ? z - ChunkSize.z : z;
+            
+            return new int3(x,y,z);
+        }
 
         public static int3 GetBlockIndex(Vector3 Position) => GetBlockIndex(Vector3Int.FloorToInt(Position));
 
@@ -34,6 +44,17 @@ namespace CodeBlaze.Vloxy.Engine.Utils {
         }
 
         public static int GetBlockId(Block block) => (int) block;
+
+        public static readonly int3[] Directions = {
+            new(1, 0, 0),
+            new(-1, 0, 0),
+            
+            new(0, 1, 0),
+            new(0, -1, 0),
+            
+            new(0, 0, 1),
+            new(0, 0, -1),
+        };
 
     }
 

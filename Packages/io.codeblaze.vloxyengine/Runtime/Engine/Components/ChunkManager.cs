@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils;
@@ -19,6 +19,9 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         private Dictionary<int3, Chunk> _Chunks;
         private SimpleFastPriorityQueue<int3, int> _Queue;
 
+        private HashSet<int3> _ReMeshChunks;
+        private HashSet<int3> _ReCollideChunks;
+
         private int3 _Focus;
         private int3 _ChunkSize;
         private int _ChunkStoreSize;
@@ -27,13 +30,16 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             _ChunkSize = settings.Chunk.ChunkSize;
             _ChunkStoreSize = (settings.Chunk.LoadDistance + 2).CubedSize();
 
+            _ReMeshChunks = new HashSet<int3>();
+            _ReCollideChunks = new HashSet<int3>();
+            
             _Chunks = new Dictionary<int3, Chunk>(_ChunkStoreSize);
             _Queue = new SimpleFastPriorityQueue<int3, int>();
         }
 
         #region API
 
-        public bool SetBlock(Block block, Vector3Int position) {
+        public bool SetBlock(Block block, Vector3Int position, bool remesh = true) {
             var chunk_pos = VloxyUtils.GetChunkCoords(position);
             var block_pos = VloxyUtils.GetBlockIndex(position);
 
@@ -47,15 +53,19 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             chunk.SetBlock(block_pos, VloxyUtils.GetBlockId(block));
 
             _Chunks[chunk_pos] = chunk;
+
+            if (remesh) ReMeshChunks(position.Int3());
             
             return true;
         }
-        
+
         public int ChunkCount() => _Chunks.Count;
         public bool ContainsChunk(int3 position) => _Chunks.ContainsKey(position);
 
         #endregion
         
+        internal bool ShouldReMesh(int3 position) => _ReMeshChunks.Contains(position);
+        internal bool ShouldReCollide(int3 position) => _ReCollideChunks.Contains(position);
         internal void RemoveChunk(int3 position) => _Chunks.Remove(position);
         
         internal void Dispose() {
@@ -83,23 +93,17 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 
                 if (_Queue.Count >= _ChunkStoreSize) {
                     _Chunks.Remove(_Queue.Dequeue());
+                    
+                    // if dirty save chunk
                 }
                 
                 _Chunks.Add(position, chunk);
                 _Queue.Enqueue(position, -(position - _Focus).SqrMagnitude());
                 
-                for (var x = 6; x <= 10; x++) {
-                    for (var z = 6; z <= 10; z++) {
-                        for (var y = 6; y <= 10; y++) {
-                            var pos = new Vector3Int(position.x + x, position.y + y, position.z + z);
-                
-                            SetBlock(Block.STONE, pos);
-                        }
-                    }
-                }
+                TestStoneChunkCenter(position);
             }
         }
-        
+
         internal ChunkAccessor GetAccessor(List<int3> positions) {
             var slice = new NativeParallelHashMap<int3, Chunk>(
                 positions.Count * 27, 
@@ -126,6 +130,40 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             return new ChunkAccessor(slice, _ChunkSize);
         }
 
+        internal bool ReMeshedChunk(int3 position) {
+            if (!_ReMeshChunks.Contains(position)) return false;
+            
+            _ReMeshChunks.Remove(position);
+            _ReCollideChunks.Add(position);
+
+            return true;
+        }
+
+        internal bool ReCollideChunk(int3 position) {
+            if (!_ReCollideChunks.Contains(position)) return false;
+            
+            _ReCollideChunks.Remove(position);
+
+            return true;
+        }
+        
+        private void ReMeshChunks(int3 block_position) {
+            foreach (var dir in VloxyUtils.Directions) {
+                _ReMeshChunks.Add(VloxyUtils.GetChunkCoords(block_position + dir));
+            }
+        }
+        
+        private void TestStoneChunkCenter(int3 position) {
+            for (var x = 6; x <= 10; x++) {
+                for (var z = 6; z <= 10; z++) {
+                    for (var y = 6; y <= 10; y++) {
+                        var pos = new Vector3Int(position.x + x, position.y + y, position.z + z);
+
+                        SetBlock(Block.STONE, pos, false);
+                    }
+                }
+            }
+        }
     }
 
 }

@@ -88,8 +88,12 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
 
             for (var index = 0; index < _Jobs.Length; index++) {
                 var position = _Jobs[index];
-                
-                meshes[_Results[position]] = _ChunkPool.Claim(position).Mesh;
+
+                if (_ChunkManager.ReMeshedChunk(position)) {
+                    meshes[_Results[position]] = _ChunkPool.Get(position).Mesh;
+                } else {
+                    meshes[_Results[position]] = _ChunkPool.Claim(position).Mesh;
+                }
             }
 
             UnityEngine.Mesh.ApplyAndDisposeWritableMeshData(

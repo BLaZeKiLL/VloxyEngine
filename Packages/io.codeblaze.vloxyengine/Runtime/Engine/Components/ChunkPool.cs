@@ -127,6 +127,14 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             _ColliderSet.Add(position);
         }
 
+        internal ChunkBehaviour Get(int3 position) {
+            if (!_MeshMap.ContainsKey(position)) {
+                throw new InvalidOperationException($"Chunk ({position}) isn't active");
+            }
+
+            return _MeshMap[position];
+        }
+
     }
 
 }

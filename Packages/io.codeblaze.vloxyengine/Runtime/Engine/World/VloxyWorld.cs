@@ -149,6 +149,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
             );
 
             _ColliderBuildScheduler = VloxyProvider.Current.ColliderBuildScheduler(
+                ChunkManager,
                 _ChunkPool
             );
 

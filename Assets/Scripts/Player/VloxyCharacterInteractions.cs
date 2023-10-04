@@ -45,7 +45,7 @@ namespace CodeBlaze.Vloxy.Demo.Player {
                     GameLogger.Info<VloxyCharacterInteractions>($"Place Block : {block_pos}");
                     Debug.DrawRay(ray.origin, ray.direction * hit.distance, Color.green, 5);
 
-                    WorldAPI.Current.World.ChunkManager.SetBlock(Block.AIR, block_pos);
+                    WorldAPI.Current.World.ChunkManager.SetBlock(Block.STONE, block_pos);
                 }
             }
         }

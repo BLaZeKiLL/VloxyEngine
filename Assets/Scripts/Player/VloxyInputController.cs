@@ -61,6 +61,11 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 #if !UNITY_EDITOR
             SceneManager.LoadScene(0);
 #endif
+            
+#if UNITY_EDITOR
+            Application.Quit();
+            UnityEditor.EditorApplication.isPlaying = false; 
+#endif
         }
         
         private void BreakBlockOnPerformed(InputAction.CallbackContext obj) {
