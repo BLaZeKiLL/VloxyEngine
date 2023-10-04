@@ -29,7 +29,7 @@ namespace CodeBlaze.Vloxy.Demo.RuntimeTools {
             var world = WorldAPI.Current.World;
             
             UpdateCoords(Vector3Int.RoundToInt(world.Focus.position));
-            UpdateChunkCoords(world.FocusChunkCoord / 32);
+            UpdateChunkCoords(world.FocusChunkCoord);
             UpdateData(world.Scheduler.DataQueueCount, world.Scheduler.DataAvgTiming);
             UpdateMesh(world.Scheduler.MeshQueueCount, world.Scheduler.MeshAvgTiming);
             UpdateBake(world.Scheduler.BakeQueueCount, world.Scheduler.BakeAvgTiming);

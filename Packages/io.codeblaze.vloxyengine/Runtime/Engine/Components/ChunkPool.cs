@@ -44,13 +44,13 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                         transform = {
                             parent = transform
                         },
-                        tag = "Chunk"
                     };
 
                     var collider = new GameObject("Collider", typeof(MeshCollider)) {
                         transform = {
                             parent = go.transform
-                        }
+                        },
+                        tag = "Chunk"
                     };
 
                     go.SetActive(false);

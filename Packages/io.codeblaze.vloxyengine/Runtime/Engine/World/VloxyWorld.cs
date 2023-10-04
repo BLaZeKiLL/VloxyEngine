@@ -125,9 +125,9 @@ namespace CodeBlaze.Vloxy.Engine.World {
             Settings.Chunk.UpdateDistance = math.max(Settings.Chunk.DrawDistance - 2, 2);
 
             // TODO : Should these be dynamic or manual ?
-            Settings.Scheduler.MeshingBatchSize = 16;
-            Settings.Scheduler.StreamingBatchSize = 24;
-            Settings.Scheduler.ColliderBatchSize = 16;
+            Settings.Scheduler.MeshingBatchSize = 8;
+            Settings.Scheduler.StreamingBatchSize = 12;
+            Settings.Scheduler.ColliderBatchSize = 8;
 
             WorldConfigure();
         }

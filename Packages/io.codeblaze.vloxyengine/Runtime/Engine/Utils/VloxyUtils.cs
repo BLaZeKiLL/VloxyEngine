@@ -22,6 +22,8 @@ namespace CodeBlaze.Vloxy.Engine.Utils {
             
             return new int3(x,y,z);
         }
+        
+        
 
         public static int3 GetBlockIndex(Vector3 Position) => GetBlockIndex(Vector3Int.FloorToInt(Position));
 
