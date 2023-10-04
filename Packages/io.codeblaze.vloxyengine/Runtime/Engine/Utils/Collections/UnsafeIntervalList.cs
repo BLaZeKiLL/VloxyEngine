@@ -99,7 +99,7 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
         /// <param name="index">index to set at</param>
         /// <param name="id">value to set at</param>
         /// <exception cref="IndexOutOfRangeException">Debug only</exception>
-        public void Set(int index, int id) {
+        public bool Set(int index, int id) {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (index >= Length) throw new IndexOutOfRangeException($"{index} is out of range for the given data of length {Length}");
 #endif
@@ -108,7 +108,7 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
 
             var block = Internal[node_index].ID;
             
-            if (block == id) return; // No Change
+            if (block == id) return false; // No Change
             
             var (left_item, left_node_index) = LeftOf(index, node_index);
             var (right_item, right_node_index) = RightOf(index, node_index);
@@ -192,6 +192,8 @@ namespace CodeBlaze.Vloxy.Engine.Utils.Collections {
                     Internal[node_index] = node;
                 }
             }
+
+            return true;
         }
 
         public int LeftOf(int index) {

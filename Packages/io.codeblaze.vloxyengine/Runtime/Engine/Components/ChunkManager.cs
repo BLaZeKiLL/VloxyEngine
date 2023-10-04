@@ -63,11 +63,11 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
             var chunk = _Chunks[chunk_pos];
             
-            chunk.SetBlock(block_pos, VloxyUtils.GetBlockId(block));
+            var result = chunk.SetBlock(block_pos, VloxyUtils.GetBlockId(block));
 
             _Chunks[chunk_pos] = chunk;
 
-            if (remesh) ReMeshChunks(position.Int3());
+            if (remesh && result) ReMeshChunks(position.Int3());
             
             return true;
         }

@@ -44,32 +44,30 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             int block,
             int3 normal
         ) {
-            switch (block) {
-                case (int) Block.GRASS when normal.y is 1: return 15;
-                case (int) Block.GRASS when normal.y is -1: return 52;
-                case (int) Block.GRASS: return 43;
-                case (int) Block.DIRT: return 52;
-                case (int) Block.STONE: return 39;
-                case (int) Block.WATER: return 54;
-                case (int) Block.SAND: return 57;
-            }
-
-            return 0;
+            return block switch {
+                (int) Block.GRASS when normal.y is 1 => 15,
+                (int) Block.GRASS when normal.y is -1 => 52,
+                (int) Block.GRASS => 43,
+                (int) Block.DIRT => 52,
+                (int) Block.STONE => 39,
+                (int) Block.SAND => 57,
+                _ => 0
+            };
         }
 
         [BurstCompile]
         private static byte GetMeshIndex(int block) {
-            switch (block) {
-                case (int) Block.AIR: return 2;
-                case (int) Block.WATER: return 1;
-                default: return 0;
-            }
+            return block switch {
+                (int) Block.AIR => 2,
+                (int) Block.WATER => 1,
+                _ => 0
+            };
         }
 
         [BurstCompile]
         internal static MeshBuffer GenerateMesh(
             ChunkAccessor accessor, int3 pos, int3 size
-            ) {
+        ) {
             var mesh = new MeshBuffer {
                 VertexBuffer = new NativeList<Vertex>(Allocator.Temp),
                 IndexBuffer0 = new NativeList<int>(Allocator.Temp),
@@ -109,7 +107,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                             var compareMeshIndex = GetMeshIndex(compareBlock);
 
                             if (currentMeshIndex == compareMeshIndex) {
-                                normalMask[n++] = default;
+                                normalMask[n++] = default; // Air with Air or Water with Water or Solid with Solid, no face in this case
                             } else if (currentMeshIndex < compareMeshIndex) {
                                 normalMask[n++] = new Mask(currentBlock, currentMeshIndex, 1, ComputeAOMask(accessor, pos, chunkItr + directionMask, axis1, axis2));
                             } else {
@@ -201,7 +199,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         private static void CreateQuad(
             MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
             int width, int height, int3 v1, int3 v2, int3 v3, int3 v4
-            ) {
+        ) {
             switch (mask.MeshIndex) {
                 case 0: CreateQuad0(mesh, vertex_count, mask, directionMask, width, height, v1, v2, v3, v4);
                     break;
@@ -214,7 +212,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         private static void CreateQuad0(
             MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
             int width, int height, float3 v1, float3 v2, float3 v3, float3 v4
-            ) {
+        ) {
             var normal = directionMask * mask.Normal;
 
             // Main UV
@@ -297,7 +295,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         private static void CreateQuad1(
             MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
             int width, int height, float3 v1, float3 v2, float3 v3, float3 v4
-            ) {
+        ) {
             var normal = directionMask * mask.Normal;
 
             // Main UV
