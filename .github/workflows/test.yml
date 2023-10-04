@@ -24,8 +24,8 @@ jobs:
           
       - uses: actions/cache@v2
         with:
-          path: ${{ matrix.projectPath }}/Library
-          key: Library-${{ matrix.projectPath }}
+          path: Library
+          key: Library-${{ matrix.testMode }}
           restore-keys: |
             Library-
             
