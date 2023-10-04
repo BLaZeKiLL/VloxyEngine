@@ -39,6 +39,13 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
         #region API
 
+        /// <summary>
+        /// Set a block at a position
+        /// </summary>
+        /// <param name="block">Block Type</param>
+        /// <param name="position">World Position</param>
+        /// <param name="remesh">Regenerate Mesh and Collider ?</param>
+        /// <returns>Operation Success</returns>
         public bool SetBlock(Block block, Vector3Int position, bool remesh = true) {
             var chunk_pos = VloxyUtils.GetChunkCoords(position);
             var block_pos = VloxyUtils.GetBlockIndex(position);
@@ -93,21 +100,18 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 
                 if (_Queue.Count >= _ChunkStoreSize) {
                     _Chunks.Remove(_Queue.Dequeue());
-                    
                     // if dirty save chunk
                 }
                 
                 _Chunks.Add(position, chunk);
                 _Queue.Enqueue(position, -(position - _Focus).SqrMagnitude());
-                
-                TestStoneChunkCenter(position);
             }
         }
 
         internal ChunkAccessor GetAccessor(List<int3> positions) {
             var slice = new NativeParallelHashMap<int3, Chunk>(
                 positions.Count * 27, 
-                Allocator.Persistent // TODO : Allocator cleanup, fit in the 4 frame limit
+                Allocator.Persistent // TODO : Allocator cleanup, fit in the 4 frame limit or pool it
             );
 
             foreach (var position in positions) {
@@ -150,18 +154,6 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         private void ReMeshChunks(int3 block_position) {
             foreach (var dir in VloxyUtils.Directions) {
                 _ReMeshChunks.Add(VloxyUtils.GetChunkCoords(block_position + dir));
-            }
-        }
-        
-        private void TestStoneChunkCenter(int3 position) {
-            for (var x = 6; x <= 10; x++) {
-                for (var z = 6; z <= 10; z++) {
-                    for (var y = 6; y <= 10; y++) {
-                        var pos = new Vector3Int(position.x + x, position.y + y, position.z + z);
-
-                        SetBlock(Block.STONE, pos, false);
-                    }
-                }
             }
         }
     }
