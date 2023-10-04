@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils;
@@ -69,11 +68,12 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
             if (remesh && result) ReMeshChunks(position.Int3());
             
-            return true;
+            return result;
         }
 
         public int ChunkCount() => _Chunks.Count;
-        public bool ContainsChunk(int3 position) => _Chunks.ContainsKey(position);
+        
+        public bool IsChunkLoaded(int3 position) => _Chunks.ContainsKey(position);
 
         #endregion
         

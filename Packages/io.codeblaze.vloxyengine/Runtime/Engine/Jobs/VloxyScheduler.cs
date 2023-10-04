@@ -174,7 +174,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             _ColliderBuildScheduler.Dispose();
         }
 
-        private bool ShouldScheduleForGenerating(int3 position) => !_ChunkManager.ContainsChunk(position) && !_DataSet.Contains(position);
+        private bool ShouldScheduleForGenerating(int3 position) => !_ChunkManager.IsChunkLoaded(position) && !_DataSet.Contains(position);
         private bool ShouldScheduleForMeshing(int3 position) => (!_ChunkPool.IsActive(position) || _ChunkManager.ShouldReMesh(position)) && !_ViewSet.Contains(position);
         private bool ShouldScheduleForBaking(int3 position) => (!_ChunkPool.IsCollidable(position) || _ChunkManager.ShouldReCollide(position)) && !_ColliderSet.Contains(position);
 
@@ -190,7 +190,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                 for (var z = -1; z <= 1; z++) {
                     for (var y = -1; y <= 1; y++) {
                         var pos = position + _Settings.Chunk.ChunkSize.MemberMultiply(x, y, z);
-                        result &= _ChunkManager.ContainsChunk(pos);
+                        result &= _ChunkManager.IsChunkLoaded(pos);
                     }
                 }
             }
