@@ -7,6 +7,7 @@ using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
+using CodeBlaze.Vloxy.Engine.Utils.Logger;
 
 using Unity.Mathematics;
 
@@ -23,6 +24,8 @@ namespace CodeBlaze.Vloxy.Engine.World {
         public Transform Focus => _Focus;
         public VloxySettings Settings => _Settings;
         public int3 FocusChunkCoord { get; private set; }
+        
+        
         public VloxyScheduler Scheduler { get; private set; }
         public NoiseProfile NoiseProfile { get; private set; }
         public ChunkManager ChunkManager { get; private set; }
@@ -31,7 +34,7 @@ namespace CodeBlaze.Vloxy.Engine.World {
         
         private ChunkPool _ChunkPool;
         private MeshBuildScheduler _MeshBuildScheduler;
-        private ChunkDataScheduler _ChunkDataScheduler;
+        private ChunkScheduler _ChunkScheduler;
         private ColliderBuildScheduler _ColliderBuildScheduler;
 
         private bool _IsFocused;
@@ -83,18 +86,18 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) {
                 FocusChunkCoord = NewFocusChunkCoord;
-                
+                Scheduler.FocusUpdate(FocusChunkCoord);
                 WorldFocusUpdate();
             }
             
             // We can change this, so that update happens only when required
-            Scheduler.FocusUpdate(FocusChunkCoord);
+            Scheduler.SchedulerUpdate(FocusChunkCoord);
 
             // Schedule every 'x' frames (throttling)
             if (_UpdateFrame % Settings.Scheduler.TickRate == 0) {
                 _UpdateFrame = 1;
 
-                Scheduler.SchedulerUpdate();
+                Scheduler.JobUpdate();
 
                 WorldSchedulerUpdate();
             } else {
@@ -119,12 +122,12 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
         private void ConfigureSettings() {
             Settings.Chunk.LoadDistance = Settings.Chunk.DrawDistance + 2;
-            Settings.Chunk.UpdateDistance = Settings.Chunk.DrawDistance; // can reduce this by 2 maybe
+            Settings.Chunk.UpdateDistance = math.max(Settings.Chunk.DrawDistance - 2, 2);
 
             // TODO : Should these be dynamic or manual ?
-            Settings.Scheduler.MeshingBatchSize = 16;
-            Settings.Scheduler.StreamingBatchSize = 24;
-            Settings.Scheduler.ColliderBatchSize = 32;
+            Settings.Scheduler.MeshingBatchSize = 8;
+            Settings.Scheduler.StreamingBatchSize = 12;
+            Settings.Scheduler.ColliderBatchSize = 8;
 
             WorldConfigure();
         }
@@ -133,27 +136,28 @@ namespace CodeBlaze.Vloxy.Engine.World {
             NoiseProfile = VloxyProvider.Current.NoiseProfile();
             ChunkManager = VloxyProvider.Current.ChunkManager();
 
-            _ChunkPool = VloxyProvider.Current.ChunkPoolV2(transform);
+            _ChunkPool = VloxyProvider.Current.ChunkPool(transform);
 
-            _MeshBuildScheduler = VloxyProvider.Current.MeshBuildSchedulerV2(
-                ChunkManager.Store, 
+            _MeshBuildScheduler = VloxyProvider.Current.MeshBuildScheduler(
+                ChunkManager, 
                 _ChunkPool
             );
             
-            _ChunkDataScheduler = VloxyProvider.Current.ChunkDataSchedulerV2(
-                ChunkManager.Store,
+            _ChunkScheduler = VloxyProvider.Current.ChunkDataScheduler(
+                ChunkManager,
                 NoiseProfile
             );
 
             _ColliderBuildScheduler = VloxyProvider.Current.ColliderBuildScheduler(
+                ChunkManager,
                 _ChunkPool
             );
 
-            Scheduler = VloxyProvider.Current.VloxySchedulerV2(
+            Scheduler = VloxyProvider.Current.VloxyScheduler(
                 _MeshBuildScheduler, 
-                _ChunkDataScheduler,
+                _ChunkScheduler,
                 _ColliderBuildScheduler,
-                ChunkManager.Store,
+                ChunkManager,
                 _ChunkPool
             );
 

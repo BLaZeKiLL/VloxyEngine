@@ -8,28 +8,25 @@ using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Settings;
 using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 
-#if VLOXY_LOGGING
-using CodeBlaze.Vloxy.Engine.Utils.Logger;
-#endif
-
 using Priority_Queue;
 
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace CodeBlaze.Vloxy.Engine.Jobs {
     
     public class VloxyScheduler {
         
+        private readonly ChunkScheduler _ChunkScheduler;
         private readonly MeshBuildScheduler _MeshBuildScheduler;
-        private readonly ChunkDataScheduler _ChunkDataScheduler;
         private readonly ColliderBuildScheduler _ColliderBuildScheduler;
 
-        private readonly ChunkStore _ChunkStore;
+        private readonly ChunkManager _ChunkManager;
         private readonly ChunkPool _ChunkPool;
 
-        private readonly SimplePriorityQueue<int3> _ViewQueue;
-        private readonly SimplePriorityQueue<int3> _DataQueue;
-        private readonly SimplePriorityQueue<int3> _ColliderQueue;
+        private readonly SimpleFastPriorityQueue<int3, int> _ViewQueue;
+        private readonly SimpleFastPriorityQueue<int3, int> _DataQueue;
+        private readonly SimpleFastPriorityQueue<int3, int> _ColliderQueue;
 
         private readonly HashSet<int3> _ViewSet;
         private readonly HashSet<int3> _DataSet;
@@ -40,21 +37,21 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         internal VloxyScheduler(
             VloxySettings settings, 
             MeshBuildScheduler meshBuildScheduler,
-            ChunkDataScheduler chunkDataScheduler,
+            ChunkScheduler chunkScheduler,
             ColliderBuildScheduler colliderBuildScheduler,
-            ChunkStore chunkStore,
+            ChunkManager chunkManager,
             ChunkPool chunkPool
         ) {
             _MeshBuildScheduler = meshBuildScheduler;
-            _ChunkDataScheduler = chunkDataScheduler;
+            _ChunkScheduler = chunkScheduler;
             _ColliderBuildScheduler = colliderBuildScheduler;
 
-            _ChunkStore = chunkStore;
+            _ChunkManager = chunkManager;
             _ChunkPool = chunkPool;
 
-            _ViewQueue = new SimplePriorityQueue<int3>();
-            _DataQueue = new SimplePriorityQueue<int3>();
-            _ColliderQueue = new SimplePriorityQueue<int3>();
+            _ViewQueue = new SimpleFastPriorityQueue<int3, int>();
+            _DataQueue = new SimpleFastPriorityQueue<int3, int>();
+            _ColliderQueue = new SimpleFastPriorityQueue<int3, int>();
 
             _ViewSet = new HashSet<int3>();
             _DataSet = new HashSet<int3>();
@@ -63,14 +60,23 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             _Settings = settings;
         }
 
+        // Priority Updates for Reclaim
+        // At max 2 Queues are updated in total (ViewReclaimQueue, DataReclaimQueue)
         internal void FocusUpdate(int3 focus) {
+            _ChunkManager.FocusUpdate(focus);
+            _ChunkPool.FocusUpdate(focus);
+        }
+
+        // TODO : This thing takes 4ms every frame need to make a reactive system and maybe try the fast queue
+        // At max 3 Queues are updated in total (ViewQueue, DataQueue, ColliderQueue)
+        internal void SchedulerUpdate(int3 focus) {
             var load = _Settings.Chunk.LoadDistance;
             var draw = _Settings.Chunk.DrawDistance;
             var update = _Settings.Chunk.UpdateDistance;
 
-            for (int x = -load; x <= load; x++) {
-                for (int z = -load; z <= load; z++) {
-                    for (int y = -load; y <= load; y++) {
+            for (var x = -load; x <= load; x++) {
+                for (var z = -load; z <= load; z++) {
+                    for (var y = -load; y <= load; y++) {
                         var pos = focus + _Settings.Chunk.ChunkSize.MemberMultiply(x, y, z);
 
                         if (
@@ -105,26 +111,23 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                     }
                 }
             }
-            
-            _ChunkStore.FocusUpdate(focus);
-            _ChunkPool.FocusUpdate(focus);
         }
 
-        internal void SchedulerUpdate() {
-            if (_DataQueue.Count > 0 && _ChunkDataScheduler.IsReady) {
+        internal void JobUpdate() {
+            if (_DataQueue.Count > 0 && _ChunkScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.StreamingBatchSize, _DataQueue.Count);
                 
-                for (int i = 0; i < count; i++) {
+                for (var i = 0; i < count; i++) {
                     _DataSet.Add(_DataQueue.Dequeue());
                 }
                 
-                _ChunkDataScheduler.Start(_DataSet.ToList());
+                _ChunkScheduler.Start(_DataSet.ToList());
             }  
             
             if (_ViewQueue.Count > 0 && _MeshBuildScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.MeshingBatchSize, _ViewQueue.Count);
                 
-                for (int i = 0; i < count; i++) {
+                for (var i = 0; i < count; i++) {
                     var chunk = _ViewQueue.Dequeue();
                     
                     // The chunk may be removed from memory by the time we schedule,
@@ -138,7 +141,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             if (_ColliderQueue.Count > 0 && _ColliderBuildScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.ColliderBatchSize, _ColliderQueue.Count);
 
-                for (int i = 0; i < count; i++) {
+                for (var i = 0; i < count; i++) {
                     var position = _ColliderQueue.Dequeue();
 
                     if (CanBakeColliderForChunk(position)) _ColliderSet.Add(position);
@@ -149,8 +152,8 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         }
 
         internal void SchedulerLateUpdate() {
-            if (_ChunkDataScheduler.IsComplete && !_ChunkDataScheduler.IsReady) {
-                _ChunkDataScheduler.Complete();
+            if (_ChunkScheduler.IsComplete && !_ChunkScheduler.IsReady) {
+                _ChunkScheduler.Complete();
                 _DataSet.Clear();
             }
             
@@ -166,16 +169,14 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         }
 
         internal void Dispose() {
-            _ChunkDataScheduler.Dispose();
+            _ChunkScheduler.Dispose();
             _MeshBuildScheduler.Dispose();
             _ColliderBuildScheduler.Dispose();
         }
 
-        private bool ShouldScheduleForGenerating(int3 position) => !(_ChunkStore.ContainsChunk(position) || _DataSet.Contains(position));
-        private bool ShouldScheduleForMeshing(int3 position) => !(_ChunkPool.IsActive(position) || _ViewSet.Contains(position));
-
-        private bool ShouldScheduleForBaking(int3 position) =>
-            !(_ChunkPool.IsCollidable(position) || _ColliderSet.Contains(position));
+        private bool ShouldScheduleForGenerating(int3 position) => !_ChunkManager.IsChunkLoaded(position) && !_DataSet.Contains(position);
+        private bool ShouldScheduleForMeshing(int3 position) => (!_ChunkPool.IsActive(position) || _ChunkManager.ShouldReMesh(position)) && !_ViewSet.Contains(position);
+        private bool ShouldScheduleForBaking(int3 position) => (!_ChunkPool.IsCollidable(position) || _ChunkManager.ShouldReCollide(position)) && !_ColliderSet.Contains(position);
 
         /// <summary>
         /// Checks if the specified chunks and it's neighbours are generated
@@ -185,11 +186,11 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         private bool CanGenerateMeshForChunk(int3 position) {
             var result = true;
             
-            for (int x = -1; x <= 1; x++) {
-                for (int z = -1; z <= 1; z++) {
-                    for (int y = -1; y <= 1; y++) {
+            for (var x = -1; x <= 1; x++) {
+                for (var z = -1; z <= 1; z++) {
+                    for (var y = -1; y <= 1; y++) {
                         var pos = position + _Settings.Chunk.ChunkSize.MemberMultiply(x, y, z);
-                        result &= _ChunkStore.ContainsChunk(pos);
+                        result &= _ChunkManager.IsChunkLoaded(pos);
                     }
                 }
             }
@@ -199,9 +200,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 
         private bool CanBakeColliderForChunk(int3 position) => _ChunkPool.IsActive(position);
 
-        #region DebugAPI
+        #region RuntimeStatsAPI
 
-        public float DataAvgTiming => _ChunkDataScheduler.AvgTime;
+        public float DataAvgTiming => _ChunkScheduler.AvgTime;
         public float MeshAvgTiming => _MeshBuildScheduler.AvgTime;
         public float BakeAvgTiming => _ColliderBuildScheduler.AvgTime;
 

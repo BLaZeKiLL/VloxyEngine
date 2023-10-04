@@ -9,7 +9,7 @@ using Unity.Mathematics;
 namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
 
     [BurstCompile]
-    public struct ChunkDataJob : IJobParallelFor {
+    public struct ChunkJob : IJobParallelFor {
 
         [ReadOnly] public int3 ChunkSize;
         [ReadOnly] public NoiseProfile NoiseProfile;
@@ -21,13 +21,13 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
         public void Execute(int index) {
             var position = Jobs[index];
 
-            var data = GenerateChunkData(position);
+            var chunk = GenerateChunkData(position);
 
-            Results.TryAdd(position, new Data.Chunk(position, data));
+            Results.TryAdd(position, chunk);
         }
         
-        private ChunkData GenerateChunkData(int3 position) {
-            var data = new ChunkData(ChunkSize);
+        private Data.Chunk GenerateChunkData(int3 position) {
+            var data = new Data.Chunk(position, ChunkSize);
             
             var noise = NoiseProfile.GetNoise(position);
             int current_block = GetBlock(ref noise);
@@ -35,9 +35,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Chunk {
             int count = 0;
         
             // Loop order should be same as flatten order for AddBlocks to work properly
-            for (int y = 0; y < ChunkSize.y; y++) {
-                for (int z = 0; z < ChunkSize.z; z++) {
-                    for (int x = 0; x < ChunkSize.x; x++) {
+            for (var y = 0; y < ChunkSize.y; y++) {
+                for (var z = 0; z < ChunkSize.z; z++) {
+                    for (var x = 0; x < ChunkSize.x; x++) {
                         noise = NoiseProfile.GetNoise(position + new int3(x, y, z));
                         
                         var block = GetBlock(ref noise);

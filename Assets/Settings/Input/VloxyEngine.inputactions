@@ -42,9 +42,18 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Fire",
+                    "name": "BreakBlock",
                     "type": "Button",
                     "id": "643f393f-0353-4069-80fb-f2dad9656be9",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PlaceBlock",
+                    "type": "Button",
+                    "id": "865a9dc8-fc81-4d4e-bcd6-0cbbd044e34e",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -63,6 +72,15 @@
                     "name": "Toggle",
                     "type": "Button",
                     "id": "b1c35d7b-3bab-479c-b152-fcd6b22ca17f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Quit",
+                    "type": "Button",
+                    "id": "d835121d-de09-4bb9-8984-d51ee8b4b0ad",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -209,7 +227,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "Fire",
+                    "action": "BreakBlock",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -220,7 +238,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Fire",
+                    "action": "BreakBlock",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -355,6 +373,50 @@
                     "action": "Altitude",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "fe6adac3-b360-4a82-8d08-619d666c8ae6",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Quit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fac57465-10dc-4643-9867-21aaff3a0a4c",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Quit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "62843812-88cf-41b5-833e-850d0dbb8eee",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "PlaceBlock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "beea1d0c-b31c-4e6f-8175-4434a0375025",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "PlaceBlock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -875,7 +937,7 @@
             ]
         },
         {
-            "name": "Debug",
+            "name": "RuntimeTools",
             "id": "a806aeef-f0cb-4544-93a3-e3e95dccc56a",
             "actions": [
                 {

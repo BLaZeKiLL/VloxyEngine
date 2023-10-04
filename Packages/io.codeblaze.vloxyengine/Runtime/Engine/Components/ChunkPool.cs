@@ -18,35 +18,39 @@ using UnityEngine.Pool;
 
 namespace CodeBlaze.Vloxy.Engine.Components {
 
+    /// <summary>
+    /// Chunks are created on demand
+    /// </summary>
     public class ChunkPool {
 
-        private IObjectPool<ChunkBehaviour> _Pool;
+        private ObjectPool<ChunkBehaviour> _Pool;
         private Dictionary<int3, ChunkBehaviour> _MeshMap;
         private HashSet<int3> _ColliderSet;
-        private SimplePriorityQueue<int3> _Queue;
+        private SimpleFastPriorityQueue<int3, int> _Queue;
 
         private int3 _Focus;
         private int _ChunkPoolSize;
         
-        public ChunkPool(Transform transform, VloxySettings settings) {
+        internal ChunkPool(Transform transform, VloxySettings settings) {
             _ChunkPoolSize = (settings.Chunk.DrawDistance + 2).CubedSize();
 
             _MeshMap = new Dictionary<int3, ChunkBehaviour>(_ChunkPoolSize);
             _ColliderSet = new HashSet<int3>((settings.Chunk.UpdateDistance + 2).CubedSize());
-            _Queue = new SimplePriorityQueue<int3>();
+            _Queue = new SimpleFastPriorityQueue<int3, int>();
 
             _Pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
                 () => {
                     var go = new GameObject("Chunk", typeof(ChunkBehaviour)) {
                         transform = {
                             parent = transform
-                        }
+                        },
                     };
 
                     var collider = new GameObject("Collider", typeof(MeshCollider)) {
                         transform = {
                             parent = go.transform
-                        }
+                        },
+                        tag = "Chunk"
                     };
 
                     go.SetActive(false);
@@ -63,18 +67,18 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             );
             
 #if VLOXY_LOGGING
-            VloxyLogger.Info<ChunkPool>("Initialized Size : " + _ChunkPoolSize);
+            VloxyLogger.Info<ChunkPool>("Max Size : " + _ChunkPoolSize);
 #endif
         }
 
-        public bool IsActive(int3 pos) => _MeshMap.ContainsKey(pos);
-        public bool IsCollidable(int3 pos) => _ColliderSet.Contains(pos);
+        internal bool IsActive(int3 pos) => _MeshMap.ContainsKey(pos);
+        internal bool IsCollidable(int3 pos) => _ColliderSet.Contains(pos);
 
         internal void FocusUpdate(int3 focus) {
             _Focus = focus;
 
             foreach (var position in _Queue) {
-                _Queue.UpdatePriority(position, 1.0f / (position - _Focus).SqrMagnitude());
+                _Queue.UpdatePriority(position, -(position - _Focus).SqrMagnitude());
             }
         }
         
@@ -86,8 +90,11 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             // Reclaim
             if (_Queue.Count >= _ChunkPoolSize) {
                 var reclaim = _Queue.Dequeue();
+                var reclaim_behaviour = _MeshMap[reclaim];
+
+                reclaim_behaviour.Collider.sharedMesh = null;
                 
-                _Pool.Release(_MeshMap[reclaim]);
+                _Pool.Release(reclaim_behaviour);
                 _MeshMap.Remove(reclaim);
                 _ColliderSet.Remove(reclaim);
             }
@@ -99,7 +106,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             behaviour.name = $"Chunk({position})";
                 
             _MeshMap.Add(position, behaviour);
-            _Queue.Enqueue(position, 1.0f / (position - _Focus).SqrMagnitude());
+            _Queue.Enqueue(position, -(position - _Focus).SqrMagnitude());
 
             return behaviour;
         }
@@ -118,6 +125,14 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
         internal void ColliderBaked(int3 position) {
             _ColliderSet.Add(position);
+        }
+
+        internal ChunkBehaviour Get(int3 position) {
+            if (!_MeshMap.ContainsKey(position)) {
+                throw new InvalidOperationException($"Chunk ({position}) isn't active");
+            }
+
+            return _MeshMap[position];
         }
 
     }

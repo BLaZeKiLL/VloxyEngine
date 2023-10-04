@@ -42,7 +42,7 @@
                     <ui:VisualElement name="ChunkPage" class="vloxy-display-none">
                         <ui:VisualElement style="flex-direction: row;">
                             <ui:Label text="Draw Distance" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 200px;" />
-                            <ui:SliderInt value="8" high-value="20" name="DrawDistance" style="flex-grow: 1;" />
+                            <ui:SliderInt value="6" high-value="20" name="DrawDistance" style="flex-grow: 1;" />
                         </ui:VisualElement>
                         <ui:VisualElement value="4" name="ChunkSize" style="flex-direction: row;">
                             <ui:Label text="Chunk Size" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 200px;" />
