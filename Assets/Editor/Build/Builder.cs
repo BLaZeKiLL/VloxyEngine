@@ -28,10 +28,6 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
-
-            if (report.summary.result == BuildResult.Succeeded) {
-                EditorUtility.RevealInFinder("Build/Windows/Mono-Debug");
-            }
         }
 
         [MenuItem("Build/Windows/Release")]
@@ -51,10 +47,6 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
-
-            if (report.summary.result == BuildResult.Succeeded) {
-                EditorUtility.RevealInFinder("Build/Windows/Mono-Release");
-            }
         }
         
         #endregion
@@ -77,10 +69,6 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
-
-            if (report.summary.result == BuildResult.Succeeded) {
-                EditorUtility.RevealInFinder("Build/Osx/Mono-Debug");
-            }
         }
 
         [MenuItem("Build/Mac/Release")]
@@ -100,10 +88,6 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
-
-            if (report.summary.result == BuildResult.Succeeded) {
-                EditorUtility.RevealInFinder("Build/Osx/Mono-Release");
-            }
         }
         
         #endregion
@@ -126,10 +110,6 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
-
-            if (report.summary.result == BuildResult.Succeeded) {
-                EditorUtility.RevealInFinder("Build/Android/Mono-Debug");
-            }
         }
 
         [MenuItem("Build/Android/Release")]
@@ -149,10 +129,6 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
-
-            if (report.summary.result == BuildResult.Succeeded) {
-                EditorUtility.RevealInFinder("Build/Android/Mono-Release");
-            }
         }
         
         #endregion
