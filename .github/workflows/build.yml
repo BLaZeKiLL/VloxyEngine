@@ -30,12 +30,12 @@ jobs:
         with:
           path: Library
           key:
-            Library-${{ matrix.targetPlatform }}-${{ hashFiles('.') }}
+            Library-${{ matrix.build.target }}-${{ hashFiles('.') }}
           restore-keys: |
-            Library-${{ matrix.targetPlatform }}-
+            Library-${{ matrix.build.target }}-
             Library-
 
-      - if: matrix.targetPlatform == 'Android'
+      - if: matrix.build.target == 'Android'
         uses: jlumbroso/free-disk-space@v1.2.0
 
       - uses: game-ci/unity-builder@v3
