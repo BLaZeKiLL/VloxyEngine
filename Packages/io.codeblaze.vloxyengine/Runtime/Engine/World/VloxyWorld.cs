@@ -86,18 +86,18 @@ namespace CodeBlaze.Vloxy.Engine.World {
 
             if (!(NewFocusChunkCoord == FocusChunkCoord).AndReduce()) {
                 FocusChunkCoord = NewFocusChunkCoord;
-                
+                Scheduler.FocusUpdate(FocusChunkCoord);
                 WorldFocusUpdate();
             }
             
             // We can change this, so that update happens only when required
-            Scheduler.FocusUpdate(FocusChunkCoord);
+            Scheduler.SchedulerUpdate(FocusChunkCoord);
 
             // Schedule every 'x' frames (throttling)
             if (_UpdateFrame % Settings.Scheduler.TickRate == 0) {
                 _UpdateFrame = 1;
 
-                Scheduler.SchedulerUpdate();
+                Scheduler.JobUpdate();
 
                 WorldSchedulerUpdate();
             } else {

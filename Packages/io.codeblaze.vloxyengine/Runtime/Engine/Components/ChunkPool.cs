@@ -23,7 +23,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
         private IObjectPool<ChunkBehaviour> _Pool;
         private Dictionary<int3, ChunkBehaviour> _MeshMap;
         private HashSet<int3> _ColliderSet;
-        private SimplePriorityQueue<int3> _Queue;
+        private SimplePriorityQueue<int3, int> _Queue;
 
         private int3 _Focus;
         private int _ChunkPoolSize;
@@ -33,7 +33,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
             _MeshMap = new Dictionary<int3, ChunkBehaviour>(_ChunkPoolSize);
             _ColliderSet = new HashSet<int3>((settings.Chunk.UpdateDistance + 2).CubedSize());
-            _Queue = new SimplePriorityQueue<int3>();
+            _Queue = new SimplePriorityQueue<int3, int>();
 
             _Pool = new ObjectPool<ChunkBehaviour>( // pool size = x^2 + 1
                 () => {
@@ -76,7 +76,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             _Focus = focus;
 
             foreach (var position in _Queue) {
-                _Queue.UpdatePriority(position, 1.0f / (position - _Focus).SqrMagnitude());
+                _Queue.UpdatePriority(position, -(position - _Focus).SqrMagnitude());
             }
         }
         
@@ -104,7 +104,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             behaviour.name = $"Chunk({position})";
                 
             _MeshMap.Add(position, behaviour);
-            _Queue.Enqueue(position, 1.0f / (position - _Focus).SqrMagnitude());
+            _Queue.Enqueue(position, -(position - _Focus).SqrMagnitude());
 
             return behaviour;
         }

@@ -17,7 +17,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
     public class ChunkManager {
 
         private Dictionary<int3, Chunk> _Chunks;
-        private SimplePriorityQueue<int3> _Queue;
+        private SimplePriorityQueue<int3, int> _Queue;
 
         private int3 _Focus;
         private int3 _ChunkSize;
@@ -28,7 +28,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             _ChunkStoreSize = (settings.Chunk.LoadDistance + 2).CubedSize();
 
             _Chunks = new Dictionary<int3, Chunk>(_ChunkStoreSize);
-            _Queue = new SimplePriorityQueue<int3>();
+            _Queue = new SimplePriorityQueue<int3, int>();
         }
 
         #region API
@@ -68,7 +68,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
             _Focus = focus;
 
             foreach (var position in _Queue) {
-                _Queue.UpdatePriority(position, 1.0f / (position - focus).SqrMagnitude());
+                _Queue.UpdatePriority(position, -(position - focus).SqrMagnitude());
             }
         }
 
@@ -86,7 +86,7 @@ namespace CodeBlaze.Vloxy.Engine.Components {
                 }
                 
                 _Chunks.Add(position, chunk);
-                _Queue.Enqueue(position, 1.0f / (position - _Focus).SqrMagnitude());
+                _Queue.Enqueue(position, -(position - _Focus).SqrMagnitude());
                 
                 for (var x = 6; x <= 10; x++) {
                     for (var z = 6; z <= 10; z++) {

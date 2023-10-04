@@ -37,16 +37,16 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
         internal VloxyScheduler(
             VloxySettings settings, 
             MeshBuildScheduler meshBuildScheduler,
-            ChunkScheduler ChunkScheduler,
+            ChunkScheduler chunkScheduler,
             ColliderBuildScheduler colliderBuildScheduler,
-            ChunkManager ChunkManager,
+            ChunkManager chunkManager,
             ChunkPool chunkPool
         ) {
             _MeshBuildScheduler = meshBuildScheduler;
-            _ChunkScheduler = ChunkScheduler;
+            _ChunkScheduler = chunkScheduler;
             _ColliderBuildScheduler = colliderBuildScheduler;
 
-            _ChunkManager = ChunkManager;
+            _ChunkManager = chunkManager;
             _ChunkPool = chunkPool;
 
             _ViewQueue = new SimplePriorityQueue<int3>();
@@ -60,7 +60,16 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
             _Settings = settings;
         }
 
+        // Priority Updates for Reclaim
+        // At max 2 Queues are updated in total (ViewReclaimQueue, DataReclaimQueue)
         internal void FocusUpdate(int3 focus) {
+            _ChunkManager.FocusUpdate(focus);
+            _ChunkPool.FocusUpdate(focus);
+        }
+
+        // TODO : This thing takes 4ms every frame need to make a reactive system and maybe try the fast queue
+        // At max 3 Queues are updated in total (ViewQueue, DataQueue, ColliderQueue)
+        internal void SchedulerUpdate(int3 focus) {
             var load = _Settings.Chunk.LoadDistance;
             var draw = _Settings.Chunk.DrawDistance;
             var update = _Settings.Chunk.UpdateDistance;
@@ -102,12 +111,9 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
                     }
                 }
             }
-            
-            _ChunkManager.FocusUpdate(focus);
-            _ChunkPool.FocusUpdate(focus);
         }
 
-        internal void SchedulerUpdate() {
+        internal void JobUpdate() {
             if (_DataQueue.Count > 0 && _ChunkScheduler.IsReady) {
                 var count = math.min(_Settings.Scheduler.StreamingBatchSize, _DataQueue.Count);
                 
@@ -170,9 +176,7 @@ namespace CodeBlaze.Vloxy.Engine.Jobs {
 
         private bool ShouldScheduleForGenerating(int3 position) => !(_ChunkManager.ContainsChunk(position) || _DataSet.Contains(position));
         private bool ShouldScheduleForMeshing(int3 position) => !(_ChunkPool.IsActive(position) || _ViewSet.Contains(position));
-
-        private bool ShouldScheduleForBaking(int3 position) =>
-            !(_ChunkPool.IsCollidable(position) || _ColliderSet.Contains(position));
+        private bool ShouldScheduleForBaking(int3 position) => !(_ChunkPool.IsCollidable(position) || _ColliderSet.Contains(position));
 
         /// <summary>
         /// Checks if the specified chunks and it's neighbours are generated
