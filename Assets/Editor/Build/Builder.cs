@@ -1,10 +1,13 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEditor.Build.Reporting;
 
 namespace CodeBlaze.Editor.Build {
 
     public static class Builder {
 
+        private static readonly string Eol = Environment.NewLine;
+        
         [MenuItem("Build/Package")]
         private static void Package() {
             AssetDatabase.ExportPackage("Packages/io.codeblaze.vloxyengine", "vloxyengine.unitypackage", ExportPackageOptions.Recurse);
@@ -28,6 +31,8 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
+            
+            ReportSummary(report.summary);
         }
 
         [MenuItem("Build/Windows/Release")]
@@ -35,7 +40,7 @@ namespace CodeBlaze.Editor.Build {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
                 "UNITY_POST_PROCESSING_STACK_V2", 
-                // "VLOXY_LOGGING",
+                "VLOXY_LOGGING",
             });
             
             var options = new BuildPlayerOptions {
@@ -47,6 +52,8 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
+            
+            ReportSummary(report.summary);
         }
         
         #endregion
@@ -69,6 +76,8 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
+            
+            ReportSummary(report.summary);
         }
 
         [MenuItem("Build/Mac/Release")]
@@ -76,7 +85,7 @@ namespace CodeBlaze.Editor.Build {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
                 "UNITY_POST_PROCESSING_STACK_V2", 
-                // "VLOXY_LOGGING",
+                "VLOXY_LOGGING",
             });
             
             var options = new BuildPlayerOptions {
@@ -88,6 +97,8 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
+            
+            ReportSummary(report.summary);
         }
         
         #endregion
@@ -110,6 +121,8 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
+            
+            ReportSummary(report.summary);
         }
 
         [MenuItem("Build/Android/Release")]
@@ -117,7 +130,7 @@ namespace CodeBlaze.Editor.Build {
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x);
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone,new [] {
                 "UNITY_POST_PROCESSING_STACK_V2", 
-                // "VLOXY_LOGGING",
+                "VLOXY_LOGGING",
             });
             
             var options = new BuildPlayerOptions {
@@ -129,9 +142,27 @@ namespace CodeBlaze.Editor.Build {
             };
 
             var report = BuildPipeline.BuildPlayer(options);
+
+            ReportSummary(report.summary);
         }
         
         #endregion
+
+        private static void ReportSummary(BuildSummary summary)
+        {
+            Console.WriteLine(
+                $"{Eol}" +
+                $"###########################{Eol}" +
+                $"#      Build results      #{Eol}" +
+                $"###########################{Eol}" +
+                $"{Eol}" +
+                $"Duration: {summary.totalTime.ToString()}{Eol}" +
+                $"Warnings: {summary.totalWarnings.ToString()}{Eol}" +
+                $"Errors: {summary.totalErrors.ToString()}{Eol}" +
+                $"Size: {summary.totalSize.ToString()} bytes{Eol}" +
+                $"{Eol}"
+            );
+        }
     }
 
 }
