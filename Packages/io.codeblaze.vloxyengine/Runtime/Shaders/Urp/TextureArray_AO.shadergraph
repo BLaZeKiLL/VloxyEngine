@@ -2305,8 +2305,8 @@
     "hlslDeclarationOverride": 0,
     "m_Hidden": false,
     "m_Value": {
-        "m_filter": 0,
-        "m_wrap": 2,
+        "m_filter": 2,
+        "m_wrap": 0,
         "m_anisotropic": 0
     }
 }
