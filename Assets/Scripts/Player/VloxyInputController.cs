@@ -22,6 +22,14 @@ namespace CodeBlaze.Vloxy.Demo.Player {
         }
         
         private void Update() {
+            if (Keyboard.current[Key.P].wasPressedThisFrame) {
+                if (_PlayerMap.enabled) {
+                    _PlayerMap.Disable();
+                } else {
+                    _PlayerMap.Enable();
+                }
+            }
+            
             CharacterInput();
         }
 
@@ -63,8 +71,8 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 #endif
             
 #if UNITY_EDITOR
-            Application.Quit();
-            UnityEditor.EditorApplication.isPlaying = false; 
+            // Application.Quit();
+            // UnityEditor.EditorApplication.isPlaying = false; 
 #endif
         }
         
