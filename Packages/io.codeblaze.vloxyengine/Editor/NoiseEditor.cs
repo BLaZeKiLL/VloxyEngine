@@ -54,12 +54,14 @@ namespace CodeBlaze.Editor {
             
             DrawDefaultInspector();
             
+            EditorGUILayout.Separator();
             EditorGUILayout.LabelField("Preview");
+            
             PreviewScale = Mathf.RoundToInt(EditorGUILayout.Slider("Scale", PreviewScale, 1f, 100f));
             
             if (EditorGUI.EndChangeCheck()) UpdatePreview();
             
-            
+            EditorGUILayout.Separator();
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.Label(Image);
