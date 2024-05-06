@@ -23,7 +23,7 @@ MonoBehaviour:
     UpdateDistance: 4
   Renderer:
     Materials:
-    - {fileID: 2100000, guid: 1add20ccd0265e742a7bd8cb069f72ad, type: 2}
+    - {fileID: 2100000, guid: 4adecf602abe1664ab5a0cb24b2ea23a, type: 2}
     - {fileID: 2100000, guid: b54e69d0b9330474e93faa67bc77f114, type: 2}
     CastShadows: 0
   Scheduler:
