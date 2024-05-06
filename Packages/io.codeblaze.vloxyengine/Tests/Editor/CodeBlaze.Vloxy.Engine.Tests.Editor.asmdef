@@ -1,0 +1,26 @@
+{
+    "name": "CodeBlaze.Vloxy.Engine.Tests.Editor",
+    "rootNamespace": "CodeBlaze.Vloxy.Engine.Tests.Editor",
+    "references": [
+        "Unity.Collections",
+        "Unity.Mathematics",
+        "UnityEditor.TestRunner",
+        "UnityEngine.TestRunner",
+        "CodeBlaze.Vloxy.Engine"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

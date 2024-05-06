@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de6253de127543aeb23d6596fc20fad2, type: 3}
+  m_Name: SampleWorldSettings
+  m_EditorClassIdentifier: 
+  Noise: {fileID: 11400000, guid: 04d404acab5ed4130bdca0f8706b64ed, type: 2}
+  Chunk:
+    DrawDistance: 6
+    ChunkSize:
+      x: 32
+      y: 32
+      z: 32
+    LoadDistance: 8
+    UpdateDistance: 4
+  Renderer:
+    Materials:
+    - {fileID: 2100000, guid: 4adecf602abe1664ab5a0cb24b2ea23a, type: 2}
+    - {fileID: 2100000, guid: b54e69d0b9330474e93faa67bc77f114, type: 2}
+    CastShadows: 0
+  Scheduler:
+    MeshingBatchSize: 8
+    StreamingBatchSize: 12
+    ColliderBatchSize: 8
+    TickRate: 1

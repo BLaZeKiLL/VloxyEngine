@@ -42,7 +42,7 @@
                     <ui:VisualElement name="ChunkPage" class="vloxy-display-none">
                         <ui:VisualElement style="flex-direction: row;">
                             <ui:Label text="Draw Distance" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 200px;" />
-                            <ui:SliderInt value="5" high-value="20" name="DrawDistance" style="flex-grow: 1;" />
+                            <ui:SliderInt value="6" high-value="20" name="DrawDistance" style="flex-grow: 1;" />
                         </ui:VisualElement>
                         <ui:VisualElement value="4" name="ChunkSize" style="flex-direction: row;">
                             <ui:Label text="Chunk Size" display-tooltip-when-elided="true" class="vloxy-text" style="min-width: 200px;" />
@@ -60,13 +60,13 @@
                             <ui:Toggle name="CastShadows" class="vloxy-text" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement name="SchedularPage" class="vloxy-display-none">
-                    </ui:VisualElement>
+                    <ui:VisualElement name="SchedularPage" class="vloxy-display-none" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="Footer" style="flex-direction: row; align-items: center;">
                 <ui:VisualElement style="flex-grow: 1; flex-shrink: 0;">
-                    <ui:Button text="Generate" display-tooltip-when-elided="true" name="Generate" class="vloxy-button" />
+                    <ui:Button text="Generate" display-tooltip-when-elided="true" name="Generate" class="vloxy-button vloxy-button-primary" />
+                    <ui:Button text="Quit" display-tooltip-when-elided="true" name="Quit" class="vloxy-button vloxy-button-danger" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-grow: 4; flex-shrink: 0; padding-left: 64px; padding-right: 64px;">
                     <ui:ProgressBar name="LoadingBar" style="visibility: hidden;" />

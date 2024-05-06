@@ -1,8 +1,7 @@
-﻿
-using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Data;
+﻿using CodeBlaze.Vloxy.Engine.Components;
 using CodeBlaze.Vloxy.Engine.Jobs;
-using CodeBlaze.Vloxy.Engine.Jobs.Data;
+using CodeBlaze.Vloxy.Engine.Jobs.Chunk;
+using CodeBlaze.Vloxy.Engine.Jobs.Collider;
 using CodeBlaze.Vloxy.Engine.Jobs.Mesh;
 using CodeBlaze.Vloxy.Engine.Noise;
 using CodeBlaze.Vloxy.Engine.Settings;
@@ -16,10 +15,9 @@ namespace CodeBlaze.Vloxy.Engine {
 
         public VloxySettings Settings { get; set; }
 
-        public virtual BurstFunctionPointers SetupBurstFunctionPointers() => new();
-        
-        public virtual NoiseProfile NoiseProfile() => new (new NoiseProfile.Settings {
+        internal virtual NoiseProfile NoiseProfile() => new (new NoiseProfile.Settings {
             Height = Settings.Noise.Height,
+            WaterLevel = Settings.Noise.WaterLevel,
             Seed = Settings.Noise.Seed,
             Scale = Settings.Noise.Scale,
             Lacunarity = Settings.Noise.Lacunarity,
@@ -27,40 +25,32 @@ namespace CodeBlaze.Vloxy.Engine {
             Octaves = Settings.Noise.Octaves,
         });
 
-        public virtual ChunkManager ChunkManager() => new(Settings);
+        internal virtual ChunkManager ChunkManager() => new(Settings);
 
-        public virtual ChunkBehaviourPool ChunkPool(Transform transform) => new(transform, Settings);
+        internal virtual ChunkPool ChunkPool(Transform transform) => new (transform, Settings);
 
-        public virtual VloxyScheduler VloxyScheduler(
+        internal virtual VloxyScheduler VloxyScheduler(
             MeshBuildScheduler meshBuildScheduler,
-            ChunkDataScheduler chunkDataScheduler
-        ) => new VloxyScheduler(meshBuildScheduler, chunkDataScheduler);
-        
-        public virtual MeshBuildScheduler MeshBuildScheduler(
-            ChunkState chunkState,
-            ChunkAccessor chunkAccessor,
-            ChunkBehaviourPool chunkBehaviourPool, 
-            BurstFunctionPointers burstFunctionPointers
-        ) => new(
-            Settings,
-            chunkState,
-            chunkAccessor,
-            chunkBehaviourPool,
-            burstFunctionPointers
-        );
+            ChunkScheduler ChunkScheduler,
+            ColliderBuildScheduler colliderBuildScheduler,
+            ChunkManager ChunkManager,
+            ChunkPool chunkPool
+        ) => new(Settings, meshBuildScheduler, ChunkScheduler, colliderBuildScheduler, ChunkManager, chunkPool);
 
-        public virtual ChunkDataScheduler ChunkDataScheduler(
-            ChunkState chunkState,
-            ChunkStore chunkStore,
-            NoiseProfile noiseProfile,
-            BurstFunctionPointers burstFunctionPointers
-        ) => new(
-            Settings,
-            chunkState,
-            chunkStore,
-            noiseProfile,
-            burstFunctionPointers
-        );
+        internal virtual ChunkScheduler ChunkDataScheduler(
+            ChunkManager ChunkManager,
+            NoiseProfile noiseProfile
+        ) => new(Settings, ChunkManager, noiseProfile);
+
+        internal virtual MeshBuildScheduler MeshBuildScheduler(
+            ChunkManager ChunkManager,
+            ChunkPool chunkPool
+        ) => new(Settings, ChunkManager, chunkPool);
+
+        internal virtual ColliderBuildScheduler ColliderBuildScheduler(
+            ChunkManager chunkManager,
+            ChunkPool chunkPool
+        ) => new(chunkManager, chunkPool);
 
     }
 

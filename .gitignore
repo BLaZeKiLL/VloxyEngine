@@ -504,3 +504,9 @@ MigrationBackup/
 .ionide/
 
 # End of https://www.toptal.com/developers/gitignore/api/unity,rider,visualstudio,visualstudiocode
+
+.DS_Store
+
+# I am not sure about the liscense of these shaders
+Assets/Plugins/WaterShaders/
+Assets/Plugins/WaterShaders.meta

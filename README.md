@@ -24,7 +24,7 @@
   </a>
 </p>
 
-Performance oriented voxel engine for unity. Latest release for the engine and sandbox application can be found [here](https://github.com/BLaZeKiLL/VloxyEngine/releases)
+Performance oriented voxel engine for Unity. Latest release for the engine and sandbox application can be found [here](https://github.com/BLaZeKiLL/VloxyEngine/releases).
 
 <img src="https://raw.githubusercontent.com/BLaZeKiLL/VloxyEngine/main/.github/assets/vloxy_engine.png">
 
@@ -40,9 +40,36 @@ Performance oriented voxel engine for unity. Latest release for the engine and s
 | Physics & Fluids                |      |
 | Networking                      |      |
 
-## Documentation & Devlogs
-Documentation can be found [here](https://blazekill.github.io/vloxy-docs/) and it's source code is hosted [here](https://github.com/BLaZeKiLL/vloxy-docs)
+## Demos
+Along with package releases a demo application showcasing the capabilities is also released for the following platforms
+- Windows
+- Android
 
-I'll try to create devlogs for the major features in development as well as some tutorials which you can fin on my [youtube](https://www.youtube.com/c/CodeBlazeX) or on the vloxy engine [blog](https://blazekill.github.io/vloxy-docs/blog)
+Head over to the [release page](https://github.com/BLaZeKiLL/VloxyEngine/releases) to check them out
+
+## Quick Start
+
+- Get started by installing **Vloxy Engine** using one of the following methods
+  - Unity Package latest can be found **[here](https://github.com/BLaZeKiLL/VloxyEngine/releases)**
+  - OpenUPM, more info can be found **[here](https://openupm.com/packages/io.codeblaze.vloxyengine/)**
+```bash title="OpenUPM Install Command"
+openupm add io.codeblaze.vloxyengine
+```
+
+> While UPM is supported via OpenUPM, it is still recommended to add **Vloxy Engine** directly to the project as a package.
+> With source access you would get the maximum control and freedom to tune the engine to your use case.
 
 
+- Make sure the following dependencies are installed, they should be installed **automatically** regardless of the way you install **Vloxy Engine**
+  - [Unity Maths](https://docs.unity3d.com/Packages/com.unity.mathematics@1.2/manual/index.html)
+  - [Unity Burst](https://docs.unity3d.com/Packages/com.unity.burst@1.7/manual/index.html)
+  - [Unity Collections](https://docs.unity3d.com/Packages/com.unity.collections@1.2/manual/index.html)
+
+- After the package is imported you can open up one of the sample scene or import one of the world prefabs into your current scene.
+In case you go the prefabs route, make sure to set the focus parameter on the world object around which the world would be generated.
+
+
+## Documentation & Dev-logs
+Documentation can be found [here](https://blazekill.github.io/vloxy-docs/), and it's source code is hosted [here](https://github.com/BLaZeKiLL/vloxy-docs)
+
+I'll try to create devlogs for the major features in development as well as some tutorials which you can find on my [YouTube](https://www.youtube.com/c/CodeBlazeX) or on the Vloxy Engine website [blog](https://blazekill.github.io/vloxy-docs/blog).

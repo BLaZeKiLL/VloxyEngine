@@ -1,12 +1,12 @@
 ﻿using CodeBlaze.Vloxy.Engine.Data;
-
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 
 namespace CodeBlaze.Vloxy.Engine.Mesher {
 
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     public static class GreedyMesher {
 
         [BurstCompile]
@@ -14,36 +14,75 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
 
             public readonly int Block;
 
+            internal readonly byte MeshIndex;
             internal readonly sbyte Normal;
             internal readonly int4 AO;
 
-            public Mask(int block, sbyte normal, int4 ao) {
+            public Mask(int block, byte meshIndex, sbyte normal, int4 ao) {
+                MeshIndex = meshIndex;
                 Block = block;
                 Normal = normal;
                 AO = ao;
             }
 
         }
+        
+        [BurstCompile]
+        private static bool CompareMask(Mask m1, Mask m2) {
+            return
+                m1.MeshIndex == m2.MeshIndex &&
+                m1.Block == m2.Block &&
+                m1.Normal == m2.Normal &&
+                m1.AO[0] == m2.AO[0] &&
+                m1.AO[1] == m2.AO[1] &&
+                m1.AO[2] == m2.AO[2] &&
+                m1.AO[3] == m2.AO[3];
+        }
+        
+        [BurstCompile]
+        private static int GetUV0Index(
+            int block,
+            int3 normal
+        ) {
+            return block switch {
+                (int) Block.GRASS when normal.y is 1 => 15,
+                (int) Block.GRASS when normal.y is -1 => 52,
+                (int) Block.GRASS => 43,
+                (int) Block.DIRT => 52,
+                (int) Block.STONE => 39,
+                (int) Block.SAND => 57,
+                _ => 0
+            };
+        }
+
+        [BurstCompile]
+        private static byte GetMeshIndex(int block) {
+            return block switch {
+                (int) Block.AIR => 2,
+                (int) Block.WATER => 1,
+                _ => 0
+            };
+        }
 
         [BurstCompile]
         internal static MeshBuffer GenerateMesh(
-            ChunkAccessor accessor, int3 pos, int3 size,
-            FunctionPointer<MeshOverrides.VertexOverride> vertexOverride
-            ) {
+            ChunkAccessor accessor, int3 pos, int3 size
+        ) {
             var mesh = new MeshBuffer {
                 VertexBuffer = new NativeList<Vertex>(Allocator.Temp),
-                IndexBuffer = new NativeList<int>(Allocator.Temp)
+                IndexBuffer0 = new NativeList<int>(Allocator.Temp),
+                IndexBuffer1 = new NativeList<int>(Allocator.Temp)
             };
 
-            int vertex_count = 0;
+            var vertex_count = 0;
 
-            for (int direction = 0; direction < 3; direction++) {
-                int axis1 = (direction + 1) % 3;
-                int axis2 = (direction + 2) % 3;
+            for (var direction = 0; direction < 3; direction++) {
+                var axis1 = (direction + 1) % 3;
+                var axis2 = (direction + 2) % 3;
 
-                int mainAxisLimit = size[direction];
-                int axis1Limit = size[axis1];
-                int axis2Limit = size[axis2];
+                var mainAxisLimit = size[direction];
+                var axis1Limit = size[axis1];
+                var axis2Limit = size[axis2];
 
                 var deltaAxis1 = int3.zero;
                 var deltaAxis2 = int3.zero;
@@ -64,15 +103,15 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                             var currentBlock = accessor.GetBlockInChunk(pos, chunkItr);
                             var compareBlock = accessor.GetBlockInChunk(pos, chunkItr + directionMask);
 
-                            var currentBlockOpaque = currentBlock != 0;
-                            var compareBlockOpaque = compareBlock != 0;
+                            var currentMeshIndex = GetMeshIndex(currentBlock);
+                            var compareMeshIndex = GetMeshIndex(compareBlock);
 
-                            if (currentBlockOpaque == compareBlockOpaque) {
-                                normalMask[n++] = default;
-                            } else if (currentBlockOpaque) {
-                                normalMask[n++] = new Mask(currentBlock, 1, ComputeAOMask(accessor, pos, chunkItr + directionMask, axis1, axis2));
+                            if (currentMeshIndex == compareMeshIndex) {
+                                normalMask[n++] = default; // Air with Air or Water with Water or Solid with Solid, no face in this case
+                            } else if (currentMeshIndex < compareMeshIndex) {
+                                normalMask[n++] = new Mask(currentBlock, currentMeshIndex, 1, ComputeAOMask(accessor, pos, chunkItr + directionMask, axis1, axis2));
                             } else {
-                                normalMask[n++] = new Mask(compareBlock, -1, ComputeAOMask(accessor, pos, chunkItr, axis1, axis2));
+                                normalMask[n++] = new Mask(compareBlock, compareMeshIndex, -1, ComputeAOMask(accessor, pos, chunkItr, axis1, axis2));
                             }
                         }
                     }
@@ -80,8 +119,8 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                     ++chunkItr[direction];
                     n = 0;
 
-                    for (int j = 0; j < axis2Limit; j++) {
-                        for (int i = 0; i < axis1Limit;) {
+                    for (var j = 0; j < axis2Limit; j++) {
+                        for (var i = 0; i < axis1Limit;) {
                             if (normalMask[n].Normal != 0) { // Create Quad
                                 var currentMask = normalMask[n];
                                 chunkItr[axis1] = i;
@@ -99,11 +138,11 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                                 // greedy meshing will attempt to expand this quad out to CHUNK_SIZE x 5, but will stop if it reaches a hole in the mask
 
                                 int height;
-                                bool done = false;
+                                var done = false;
 
                                 for (height = 1; j + height < axis2Limit; height++) {
                                     // Check each block next to this quad
-                                    for (int k = 0; k < width; ++k) {
+                                    for (var k = 0; k < width; ++k) {
                                         if (CompareMask(normalMask[n + k + height * axis1Limit], currentMask)) continue;
 
                                         done = true;
@@ -119,25 +158,22 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                                 deltaAxis2[axis2] = height;
 
                                 // create quad
-                                CreateQuad(
+                                vertex_count += CreateQuad(
                                     mesh, vertex_count, currentMask, directionMask,
                                     width, height,
                                     chunkItr,
                                     chunkItr + deltaAxis1,
                                     chunkItr + deltaAxis2,
-                                    chunkItr + deltaAxis1 + deltaAxis2,
-                                    vertexOverride
+                                    chunkItr + deltaAxis1 + deltaAxis2
                                 );
-
-                                vertex_count += 4;
 
                                 // reset delta's
                                 deltaAxis1 = int3.zero;
                                 deltaAxis2 = int3.zero;
 
                                 // Clear this part of the mask, so we don't add duplicate faces
-                                for (int l = 0; l < height; ++l)
-                                    for (int k = 0; k < width; ++k)
+                                for (var l = 0; l < height; ++l)
+                                    for (var k = 0; k < width; ++k)
                                         normalMask[n + k + l * axis1Limit] = default;
 
                                 // update loop vars
@@ -158,33 +194,45 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         }
 
         [BurstCompile]
-        private static void CreateQuad(
+        private static int CreateQuad(
             MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
-            int width, int height, int3 v1, int3 v2, int3 v3, int3 v4, 
-            FunctionPointer<MeshOverrides.VertexOverride> vertexOverride
-            ) {
+            int width, int height, int3 v1, int3 v2, int3 v3, int3 v4
+        ) {
+            return mask.MeshIndex switch {
+                0 => CreateQuadMesh0(mesh, vertex_count, mask, directionMask, width, height, v1, v2, v3, v4),
+                1 => CreateQuadMesh1(mesh, vertex_count, mask, directionMask, width, height, v1, v2, v3, v4),
+                _ => 0
+            };
+        }
+        
+        [BurstCompile]
+        private static int CreateQuadMesh0(
+            MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
+            int width, int height, float3 v1, float3 v2, float3 v3, float3 v4
+        ) {
             var normal = directionMask * mask.Normal;
 
             // Main UV
-            float2 uv1, uv2, uv3, uv4;
+            float3 uv1, uv2, uv3, uv4;
+            var uvz = GetUV0Index(mask.Block, normal);
 
             if (normal.x is 1 or -1) {
-                uv1 = new float2(0, 0);
-                uv2 = new float2(0, width);
-                uv3 = new float2(height, 0);
-                uv4 = new float2(height, width);
+                uv1 = new float3(0, 0, uvz);
+                uv2 = new float3(0, width, uvz);
+                uv3 = new float3(height, 0, uvz);
+                uv4 = new float3(height, width, uvz);
             } else {
-                uv1 = new float2(0, 0);
-                uv2 = new float2(width, 0);
-                uv3 = new float2(0, height);
-                uv4 = new float2(width, height);
+                uv1 = new float3(0, 0, uvz);
+                uv2 = new float3(width, 0, uvz);
+                uv3 = new float3(0, height, uvz);
+                uv4 = new float3(width, height, uvz);
             }
-            
+
             // 1 Bottom Left
             var vertex1 = new Vertex {
                 Position = v1,
                 Normal = normal,
-                UV0 = new float3(uv1, 0),
+                UV0 = uv1,
                 UV1 = new float2(0, 0),
                 UV2 = mask.AO
             };
@@ -193,7 +241,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             var vertex2 = new Vertex {
                 Position = v2,
                 Normal = normal,
-                UV0 = new float3(uv2, 0),
+                UV0 = uv2,
                 UV1 = new float2(0, 1),
                 UV2 = mask.AO
             };
@@ -202,7 +250,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             var vertex3 = new Vertex {
                 Position = v3,
                 Normal = normal,
-                UV0 = new float3(uv3, 0),
+                UV0 = uv3,
                 UV1 = new float2(1, 0),
                 UV2 = mask.AO
             };
@@ -211,44 +259,193 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             var vertex4 = new Vertex {
                 Position = v4,
                 Normal = normal,
-                UV0 = new float3(uv4, 0),
+                UV0 = uv4,
                 UV1 = new float2(1, 1),
                 UV2 = mask.AO
             };
-
-            if (vertexOverride.IsCreated) vertexOverride.Invoke(mask.Block, ref normal, ref vertex1, ref vertex2, ref vertex3, ref vertex4);
-
+            
             mesh.VertexBuffer.Add(vertex1);
             mesh.VertexBuffer.Add(vertex2);
             mesh.VertexBuffer.Add(vertex3);
             mesh.VertexBuffer.Add(vertex4);
 
-            if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) { // + -
-                mesh.IndexBuffer.Add(vertex_count); // 0 0
-                mesh.IndexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
-                mesh.IndexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
-                mesh.IndexBuffer.Add(vertex_count + 3); // 3 3
-                mesh.IndexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
-                mesh.IndexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
-            } else { // + -
-                mesh.IndexBuffer.Add(vertex_count + 1); // 1 1
-                mesh.IndexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
-                mesh.IndexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
-                mesh.IndexBuffer.Add(vertex_count + 2); // 2 2
-                mesh.IndexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
-                mesh.IndexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
-            }
-        }
+            var indexBuffer = mesh.IndexBuffer0;
 
-        [BurstCompile] // TODO : Figure out generic compare mask (Burst Function Pointers)
-        private static bool CompareMask(Mask m1, Mask m2) {
-            return
-                m1.Block == m2.Block &&
-                m1.Normal == m2.Normal &&
-                m1.AO[0] == m2.AO[0] &&
-                m1.AO[1] == m2.AO[1] &&
-                m1.AO[2] == m2.AO[2] &&
-                m1.AO[3] == m2.AO[3];
+            if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) { // + -
+                indexBuffer.Add(vertex_count); // 0 0
+                indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
+                indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+                
+                indexBuffer.Add(vertex_count + 3); // 3 3
+                indexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
+                indexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+            } else { // + -
+                indexBuffer.Add(vertex_count + 1); // 1 1
+                indexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
+                indexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+                
+                indexBuffer.Add(vertex_count + 2); // 2 2
+                indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
+                indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+            }
+
+            return 4;
+        }
+        
+        [BurstCompile]
+        private static int CreateQuadMesh1(
+            MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
+            int width, int height, float3 v1, float3 v2, float3 v3, float3 v4
+        ) {
+            var normal = directionMask * mask.Normal;
+
+            // Main UV
+            float3 uv1, uv2, uv3, uv4;
+
+            if (normal.x is 1 or -1) {
+                uv1 = new float3(0, 0, 0);
+                uv2 = new float3(0, width, 0);
+                uv3 = new float3(height, 0, 0);
+                uv4 = new float3(height, width, 0);
+            } else {
+                uv1 = new float3(0, 0, 0);
+                uv2 = new float3(width, 0, 0);
+                uv3 = new float3(0, height, 0);
+                uv4 = new float3(width, height, 0);
+            }
+
+            if (normal.y == 1) {
+                v1.y -= 0.25f;
+                v2.y -= 0.25f;
+                v3.y -= 0.25f;
+                v4.y -= 0.25f;
+            }
+            
+            // 1 Bottom Left
+            var vertex1 = new Vertex {
+                Position = v1,
+                Normal = normal,
+                UV0 = uv1,
+                UV1 = new float2(0, 0),
+                UV2 = mask.AO
+            };
+
+            // 2 Top Left
+            var vertex2 = new Vertex {
+                Position = v2,
+                Normal = normal,
+                UV0 = uv2,
+                UV1 = new float2(0, 1),
+                UV2 = mask.AO
+            };
+
+            // 3 Bottom Right
+            var vertex3 = new Vertex {
+                Position = v3,
+                Normal = normal,
+                UV0 = uv3,
+                UV1 = new float2(1, 0),
+                UV2 = mask.AO
+            };
+
+            // 4 Top Right
+            var vertex4 = new Vertex {
+                Position = v4,
+                Normal = normal,
+                UV0 = uv4,
+                UV1 = new float2(1, 1),
+                UV2 = mask.AO
+            };
+            
+            mesh.VertexBuffer.Add(vertex1);
+            mesh.VertexBuffer.Add(vertex2);
+            mesh.VertexBuffer.Add(vertex3);
+            mesh.VertexBuffer.Add(vertex4);
+
+            var indexBuffer = mesh.IndexBuffer1;
+
+            if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) { // + -
+                indexBuffer.Add(vertex_count); // 0 0
+                indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
+                indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+                indexBuffer.Add(vertex_count + 3); // 3 3
+                indexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
+                indexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+            } else { // + -
+                indexBuffer.Add(vertex_count + 1); // 1 1
+                indexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
+                indexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+                indexBuffer.Add(vertex_count + 2); // 2 2
+                indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
+                indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+            }
+            
+            if ((normal != new int3(0, 1, 0)).AndReduce()) return 4;
+
+            normal *= -1;
+            
+            // 1 Bottom Left
+            var vertex5 = new Vertex {
+                Position = v1,
+                Normal = normal,
+                UV0 = uv1,
+                UV1 = new float2(0, 0),
+                UV2 = mask.AO
+            };
+
+            // 2 Top Left
+            var vertex6 = new Vertex {
+                Position = v2,
+                Normal = normal,
+                UV0 = uv2,
+                UV1 = new float2(0, 1),
+                UV2 = mask.AO
+            };
+
+            // 3 Bottom Right
+            var vertex7 = new Vertex {
+                Position = v3,
+                Normal = normal,
+                UV0 = uv3,
+                UV1 = new float2(1, 0),
+                UV2 = mask.AO
+            };
+
+            // 4 Top Right
+            var vertex8 = new Vertex {
+                Position = v4,
+                Normal = normal,
+                UV0 = uv4,
+                UV1 = new float2(1, 1),
+                UV2 = mask.AO
+            };
+            
+            mesh.VertexBuffer.Add(vertex5);
+            mesh.VertexBuffer.Add(vertex6);
+            mesh.VertexBuffer.Add(vertex7);
+            mesh.VertexBuffer.Add(vertex8);
+
+            vertex_count += 4;
+            
+            if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) { // + -
+                indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+                indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
+                indexBuffer.Add(vertex_count); // 0 0
+                
+                indexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+                indexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
+                indexBuffer.Add(vertex_count + 3); // 3 3
+            } else { // + -
+                indexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+                indexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
+                indexBuffer.Add(vertex_count + 1); // 1 1
+                
+                indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+                indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
+                indexBuffer.Add(vertex_count + 2); // 2 2
+            }
+
+            return 8;
         }
 
         [BurstCompile]
@@ -277,15 +474,15 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
             RTC[axis1] += 1;
             RTC[axis2] += 1;
 
-            var LO = accessor.GetBlockInChunk(pos, L) != 0 ? 1 : 0;
-            var RO = accessor.GetBlockInChunk(pos, R) != 0 ? 1 : 0;
-            var BO = accessor.GetBlockInChunk(pos, B) != 0 ? 1 : 0;
-            var TO = accessor.GetBlockInChunk(pos, T) != 0 ? 1 : 0;
+            var LO = GetMeshIndex(accessor.GetBlockInChunk(pos, L)) == 0 ? 1 : 0;
+            var RO = GetMeshIndex(accessor.GetBlockInChunk(pos, R)) == 0 ? 1 : 0;
+            var BO = GetMeshIndex(accessor.GetBlockInChunk(pos, B)) == 0 ? 1 : 0;
+            var TO = GetMeshIndex(accessor.GetBlockInChunk(pos, T)) == 0 ? 1 : 0;
 
-            var LBCO = accessor.GetBlockInChunk(pos, LBC) != 0 ? 1 : 0;
-            var RBCO = accessor.GetBlockInChunk(pos, RBC) != 0 ? 1 : 0;
-            var LTCO = accessor.GetBlockInChunk(pos, LTC) != 0 ? 1 : 0;
-            var RTCO = accessor.GetBlockInChunk(pos, RTC) != 0 ? 1 : 0;
+            var LBCO = GetMeshIndex(accessor.GetBlockInChunk(pos, LBC)) == 0 ? 1 : 0;
+            var RBCO = GetMeshIndex(accessor.GetBlockInChunk(pos, RBC)) == 0 ? 1 : 0;
+            var LTCO = GetMeshIndex(accessor.GetBlockInChunk(pos, LTC)) == 0 ? 1 : 0;
+            var RTCO = GetMeshIndex(accessor.GetBlockInChunk(pos, RTC)) == 0 ? 1 : 0;
 
             return new int4(
                 ComputeAO(LO, BO, LBCO),
