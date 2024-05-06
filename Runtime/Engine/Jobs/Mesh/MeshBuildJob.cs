@@ -1,5 +1,4 @@
-﻿using CodeBlaze.Vloxy.Engine.Components;
-using CodeBlaze.Vloxy.Engine.Data;
+﻿using CodeBlaze.Vloxy.Engine.Data;
 using CodeBlaze.Vloxy.Engine.Mesher;
 
 using Unity.Burst;
@@ -15,7 +14,6 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
     internal struct MeshBuildJob : IJobParallelFor {
 
         [ReadOnly] public int3 ChunkSize;
-        [ReadOnly] public BurstFunctionPointers BurstFunctionPointers;
         [ReadOnly] public NativeArray<VertexAttributeDescriptor> VertexParams;
 
         [ReadOnly] public ChunkAccessor Accessor;
@@ -26,29 +24,41 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Mesh {
         public UnityEngine.Mesh.MeshDataArray MeshDataArray;
 
         public void Execute(int index) {
-            var vertexOverride = BurstFunctionPointers.VertexOverridePointer;
-            
             var mesh = MeshDataArray[index];
             var position = Jobs[index];
 
-            var buffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize, vertexOverride);
-            var vertex_count = buffer.VertexBuffer.Length;
-            var index_count = buffer.IndexBuffer.Length;
-
-            var descriptor = new SubMeshDescriptor(0, index_count);
+            var meshBuffer = GreedyMesher.GenerateMesh(Accessor, position, ChunkSize);
             
-            mesh.SetVertexBufferParams(vertex_count, VertexParams);
-            mesh.SetIndexBufferParams(index_count, IndexFormat.UInt32);
+            // Vertex Buffer
+            var vertexCount = meshBuffer.VertexBuffer.Length;
 
-            mesh.GetVertexData<Vertex>().CopyFrom(buffer.VertexBuffer);
-            mesh.GetIndexData<int>().CopyFrom(buffer.IndexBuffer);
+            mesh.SetVertexBufferParams(vertexCount, VertexParams);
+            mesh.GetVertexData<Vertex>().CopyFrom(meshBuffer.VertexBuffer.AsArray());
 
-            mesh.subMeshCount = 1;
-            mesh.SetSubMesh(0, descriptor, MeshUpdateFlags.DontRecalculateBounds);
+            // Index Buffer
+            var index0Count = meshBuffer.IndexBuffer0.Length;
+            var index1Count = meshBuffer.IndexBuffer1.Length;
+            
+            mesh.SetIndexBufferParams(index0Count + index1Count, IndexFormat.UInt32);
 
+            var indexBuffer = mesh.GetIndexData<int>();
+            
+            NativeArray<int>.Copy(meshBuffer.IndexBuffer0.AsArray(), 0, indexBuffer, 0, index0Count);
+            if (index1Count > 1)
+                NativeArray<int>.Copy(meshBuffer.IndexBuffer1.AsArray(), 0, indexBuffer, index0Count, index1Count);
+
+            // Sub Mesh
+            mesh.subMeshCount = 2;
+            
+            var descriptor0 = new SubMeshDescriptor(0, index0Count);
+            var descriptor1 = new SubMeshDescriptor(index0Count, index1Count);
+            
+            mesh.SetSubMesh(0, descriptor0, MeshUpdateFlags.DontRecalculateBounds);
+            mesh.SetSubMesh(1, descriptor1, MeshUpdateFlags.DontRecalculateBounds);
+            
             Results.TryAdd(position, index);
 
-            buffer.Dispose();
+            meshBuffer.Dispose();
         }
 
     }
