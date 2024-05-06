@@ -7,20 +7,22 @@ using UnityEngine.SceneManagement;
 namespace CodeBlaze.Vloxy.Demo.Player {
 
     public class VloxyInputController : MonoBehaviour {
-        
+
+        [SerializeField] private Transform _FaceTransform;
+
         private VloxyInput.PlayerActions _PlayerMap;
 
         private VloxyCharacterInteractions _CharacterInteractions;
         private VloxyCharacterController _CharacterController;
         private VloxyCameraController _CameraController;
-        
+
         private void Awake() {
             _CharacterInteractions = GetComponent<VloxyCharacterInteractions>();
-            
+
             _CharacterController = GetComponentInChildren<VloxyCharacterController>();
             _CameraController = GetComponentInChildren<VloxyCameraController>();
         }
-        
+
         private void Update() {
             if (Keyboard.current[Key.P].wasPressedThisFrame) {
                 if (_PlayerMap.enabled) {
@@ -29,7 +31,12 @@ namespace CodeBlaze.Vloxy.Demo.Player {
                     _PlayerMap.Enable();
                 }
             }
-            
+
+            // TODO : This prints warnings for the first few frames, as the chunk isn't loaded
+            PostProcessingManager.Current.UpdateMode(
+                WorldAPI.Current.World.ChunkManager.GetBlock(Vector3Int.FloorToInt(_FaceTransform.position))
+            );
+
             CharacterInput();
         }
 
@@ -39,14 +46,14 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 
         private void OnEnable() {
             _PlayerMap = GameManager.Current.InputMaps.Player;
-            
+
             _PlayerMap.Enable();
-            
+
             _PlayerMap.Toggle.performed += ToggleOnPerformed;
             _PlayerMap.Quit.performed += QuitOnPerformed;
             _PlayerMap.BreakBlock.performed += BreakBlockOnPerformed;
             _PlayerMap.PlaceBlock.performed += PlaceBlockOnPerformed;
-            
+
             Cursor.lockState = CursorLockMode.Locked;
         }
 
@@ -69,24 +76,24 @@ namespace CodeBlaze.Vloxy.Demo.Player {
 #if !UNITY_EDITOR
             SceneManager.LoadScene(0);
 #endif
-            
+
 #if UNITY_EDITOR
             // Application.Quit();
             // UnityEditor.EditorApplication.isPlaying = false; 
 #endif
         }
-        
+
         private void BreakBlockOnPerformed(InputAction.CallbackContext obj) {
             _CharacterInteractions.BreakBlock();
         }
-        
+
         private void PlaceBlockOnPerformed(InputAction.CallbackContext obj) {
             _CharacterInteractions.PlaceBlock();
         }
-        
+
         private void CharacterInput() {
             if (!_PlayerMap.enabled) return;
-            
+
             var move = _PlayerMap.Move.ReadValue<Vector2>();
 
             var input = new VloxyCharacterController.Input {
