@@ -32,6 +32,7 @@ namespace CodeBlaze.Vloxy.Demo.Player {
                 }
             }
 
+            // TODO : This prints warnings for the first few frames, as the chunk isn't loaded
             PostProcessingManager.Current.UpdateMode(
                 WorldAPI.Current.World.ChunkManager.GetBlock(Vector3Int.FloorToInt(_FaceTransform.position))
             );
