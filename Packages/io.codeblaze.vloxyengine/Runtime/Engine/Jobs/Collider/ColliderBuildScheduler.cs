@@ -59,8 +59,17 @@ namespace CodeBlaze.Vloxy.Engine.Jobs.Collider {
                 _ChunkManager.ReCollideChunk(position);
                 
                 if (behaviour.Mesh.vertexCount <= 0) continue;
+
+                var triangles = behaviour.Mesh.GetTriangles(0);
                 
-                behaviour.Collider.sharedMesh = behaviour.Mesh;
+                if (triangles.Length <= 0) continue;
+                // TODO : probably expensive mesh copy
+                var mesh = new UnityEngine.Mesh();
+
+                mesh.vertices = behaviour.Mesh.vertices;
+                mesh.triangles = triangles;
+                
+                behaviour.Collider.sharedMesh = mesh;
             }
             
             _Jobs.Clear();

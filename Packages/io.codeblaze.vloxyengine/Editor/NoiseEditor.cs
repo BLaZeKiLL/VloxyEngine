@@ -17,11 +17,9 @@ namespace CodeBlaze.Editor {
 
         private void OnEnable() {
             Image = new Texture2D(256, 256);
-            
-            UpdatePreview();
         }
         
-        private void UpdatePreview() {
+        private void GeneratePreview() {
             var settings = (NoiseSettings) target;
 
             NoiseProfile = new NoiseProfile(new NoiseProfile.Settings {
@@ -54,17 +52,20 @@ namespace CodeBlaze.Editor {
             
             DrawDefaultInspector();
             
+            EditorGUILayout.Separator();
             EditorGUILayout.LabelField("Preview");
+            
             PreviewScale = Mathf.RoundToInt(EditorGUILayout.Slider("Scale", PreviewScale, 1f, 100f));
             
-            if (EditorGUI.EndChangeCheck()) UpdatePreview();
-            
+            EditorGUILayout.Separator();
             
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.Label(Image);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
+            
+            if (GUILayout.Button( "Update Preview")) GeneratePreview();
         }
 
     }

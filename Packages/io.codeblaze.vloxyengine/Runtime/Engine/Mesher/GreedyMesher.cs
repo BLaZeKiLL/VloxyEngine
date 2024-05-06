@@ -1,5 +1,5 @@
 ﻿using CodeBlaze.Vloxy.Engine.Data;
-
+using CodeBlaze.Vloxy.Engine.Utils.Extensions;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -158,7 +158,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                                 deltaAxis2[axis2] = height;
 
                                 // create quad
-                                CreateQuad(
+                                vertex_count += CreateQuad(
                                     mesh, vertex_count, currentMask, directionMask,
                                     width, height,
                                     chunkItr,
@@ -166,8 +166,6 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                                     chunkItr + deltaAxis2,
                                     chunkItr + deltaAxis1 + deltaAxis2
                                 );
-
-                                vertex_count += 4;
 
                                 // reset delta's
                                 deltaAxis1 = int3.zero;
@@ -196,20 +194,19 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
         }
 
         [BurstCompile]
-        private static void CreateQuad(
+        private static int CreateQuad(
             MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
             int width, int height, int3 v1, int3 v2, int3 v3, int3 v4
         ) {
-            switch (mask.MeshIndex) {
-                case 0: CreateQuad0(mesh, vertex_count, mask, directionMask, width, height, v1, v2, v3, v4);
-                    break;
-                case 1: CreateQuad1(mesh, vertex_count, mask, directionMask, width, height, v1, v2, v3, v4);
-                    break;
-            }
+            return mask.MeshIndex switch {
+                0 => CreateQuadMesh0(mesh, vertex_count, mask, directionMask, width, height, v1, v2, v3, v4),
+                1 => CreateQuadMesh1(mesh, vertex_count, mask, directionMask, width, height, v1, v2, v3, v4),
+                _ => 0
+            };
         }
         
         [BurstCompile]
-        private static void CreateQuad0(
+        private static int CreateQuadMesh0(
             MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
             int width, int height, float3 v1, float3 v2, float3 v3, float3 v4
         ) {
@@ -278,6 +275,7 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 indexBuffer.Add(vertex_count); // 0 0
                 indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
                 indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+                
                 indexBuffer.Add(vertex_count + 3); // 3 3
                 indexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
                 indexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
@@ -285,14 +283,17 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 indexBuffer.Add(vertex_count + 1); // 1 1
                 indexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
                 indexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+                
                 indexBuffer.Add(vertex_count + 2); // 2 2
                 indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
                 indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
             }
+
+            return 4;
         }
         
         [BurstCompile]
-        private static void CreateQuad1(
+        private static int CreateQuadMesh1(
             MeshBuffer mesh, int vertex_count, Mask mask, int3 directionMask, 
             int width, int height, float3 v1, float3 v2, float3 v3, float3 v4
         ) {
@@ -378,6 +379,73 @@ namespace CodeBlaze.Vloxy.Engine.Mesher {
                 indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
                 indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
             }
+            
+            if ((normal != new int3(0, 1, 0)).AndReduce()) return 4;
+
+            normal *= -1;
+            
+            // 1 Bottom Left
+            var vertex5 = new Vertex {
+                Position = v1,
+                Normal = normal,
+                UV0 = uv1,
+                UV1 = new float2(0, 0),
+                UV2 = mask.AO
+            };
+
+            // 2 Top Left
+            var vertex6 = new Vertex {
+                Position = v2,
+                Normal = normal,
+                UV0 = uv2,
+                UV1 = new float2(0, 1),
+                UV2 = mask.AO
+            };
+
+            // 3 Bottom Right
+            var vertex7 = new Vertex {
+                Position = v3,
+                Normal = normal,
+                UV0 = uv3,
+                UV1 = new float2(1, 0),
+                UV2 = mask.AO
+            };
+
+            // 4 Top Right
+            var vertex8 = new Vertex {
+                Position = v4,
+                Normal = normal,
+                UV0 = uv4,
+                UV1 = new float2(1, 1),
+                UV2 = mask.AO
+            };
+            
+            mesh.VertexBuffer.Add(vertex5);
+            mesh.VertexBuffer.Add(vertex6);
+            mesh.VertexBuffer.Add(vertex7);
+            mesh.VertexBuffer.Add(vertex8);
+
+            vertex_count += 4;
+            
+            if (mask.AO[0] + mask.AO[3] > mask.AO[1] + mask.AO[2]) { // + -
+                indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+                indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
+                indexBuffer.Add(vertex_count); // 0 0
+                
+                indexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+                indexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
+                indexBuffer.Add(vertex_count + 3); // 3 3
+            } else { // + -
+                indexBuffer.Add(vertex_count + 1 - mask.Normal); // 0 2
+                indexBuffer.Add(vertex_count + 1 + mask.Normal); // 2 0
+                indexBuffer.Add(vertex_count + 1); // 1 1
+                
+                indexBuffer.Add(vertex_count + 2 + mask.Normal); // 3 1
+                indexBuffer.Add(vertex_count + 2 - mask.Normal); // 1 3
+                indexBuffer.Add(vertex_count + 2); // 2 2
+            }
+
+            return 8;
         }
 
         [BurstCompile]

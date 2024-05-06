@@ -4507,6 +4507,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 385efbb587b84105b268631c62e8988f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _FaceTransform: {fileID: 373691837}
 --- !u!4 &652638165
 Transform:
   m_ObjectHideFlags: 0
@@ -6230,6 +6231,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1773566604}
+  - component: {fileID: 1773566605}
   - component: {fileID: 1773566603}
   m_Layer: 0
   m_Name: PostProcessing
@@ -6270,6 +6272,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1773566605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1773566602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2cfb4bc5c534b03b209443e5573ac32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isPersistant: 0
+  _main: {fileID: 11400000, guid: 4b9cedcad8dd7c44a81de7c9c9be6b54, type: 2}
+  _underwater: {fileID: 11400000, guid: 62f8d741270724075bf722d16dec5162, type: 2}
 --- !u!114 &1780912054
 MonoBehaviour:
   m_ObjectHideFlags: 0
