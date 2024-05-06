@@ -44,6 +44,20 @@ namespace CodeBlaze.Vloxy.Engine.Components {
 
         #region API
 
+        public Block GetBlock(Vector3Int position) {
+            var chunk_pos = VloxyUtils.GetChunkCoords(position);
+            var block_pos = VloxyUtils.GetBlockIndex(position);
+            
+            if (!_Chunks.ContainsKey(chunk_pos)) {
+                VloxyLogger.Warn<ChunkManager>($"Chunk : {chunk_pos} not loaded");
+                return Block.ERROR;
+            }
+            
+            var chunk = _Chunks[chunk_pos];
+
+            return (Block) chunk.GetBlock(block_pos);
+        }
+        
         /// <summary>
         /// Set a block at a position
         /// </summary>

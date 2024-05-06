@@ -55,7 +55,6 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
         }
         
         public struct Settings {
-
             public int Height;
             public int WaterLevel;
             public int Seed;
@@ -63,7 +62,6 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
             public float Persistance;
             public float Lacunarity;
             public int Octaves;
-
         }
 
     }
@@ -71,11 +69,9 @@ namespace CodeBlaze.Vloxy.Engine.Noise {
     [BurstCompile]
     [StructLayout(LayoutKind.Sequential)]
     public struct NoiseValue {
-
         public int3 Position;
         public int WaterLevel;
         public int Height;
-
     }
 
 }
