@@ -26,6 +26,8 @@
 
 Performance oriented voxel engine for Unity. Latest release for the engine and sandbox application can be found [here](https://github.com/BLaZeKiLL/VloxyEngine/releases).
 
+<img src="https://raw.githubusercontent.com/BLaZeKiLL/VloxyEngine/main/.github/assets/vloxy_engine_2.png">
+
 <img src="https://raw.githubusercontent.com/BLaZeKiLL/VloxyEngine/main/.github/assets/vloxy_engine.png">
 
 ## Goals
@@ -37,7 +39,7 @@ Performance oriented voxel engine for Unity. Latest release for the engine and s
 | Serialization                   |      |
 | Streaming & Infinite generation |  ✔   |
 | Noise Generation System         |      |
-| Physics & Fluids                |      |
+| Physics & Fluids                |  *   |
 | Networking                      |      |
 
 ## Demos
