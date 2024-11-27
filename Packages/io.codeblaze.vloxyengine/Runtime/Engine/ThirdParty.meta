@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Packages/io.codeblaze.vloxyengine/Runtime/Engine/ThirdParty.meta
 guid: 1816aefb47f2345d5a0fbe809113749e
-========
-guid: 231709ba6c4921145827117abe9e0d78
->>>>>>>> main:Packages/io.codeblaze.vloxyengine/Samples.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
